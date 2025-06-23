@@ -41,13 +41,15 @@ class DepartamentoController extends Controller
     public function store(Request $request)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'institucion_id' => 'required|exists:instituciones,id',
+            'departamento' => 'required|string|max:255',
+            'encargado_departamento' => 'required|string|max:45',
+            'idInstitucion' => 'required|exists:instituciones,id',
         ]);
 
         $departamento = new Departamento();
-        $departamento->nombre = $request->nombre;
-        $departamento->institucion_id = $request->institucion_id;
+        $departamento->departamento = $request->departamento;
+        $departamento->encargado_departamento = $request->encargado_departamento;
+        $departamento->idInstitucion = $request->idInstitucion;
         $departamento->save();
 
         return redirect()->back()->with('success', 'Departamento creado exitosamente.');
@@ -77,13 +79,15 @@ class DepartamentoController extends Controller
     public function update(Request $request, string $id)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'institucion_id' => 'required|exists:instituciones,id',
+            'departamento' => 'required|string|max:255',
+            'encargado_departamento' => 'required|string|max:45',
+            'idInstitucion' => 'required|exists:instituciones,id',
         ]);
 
         $departamento = Departamento::find($id);
-        $departamento->nombre = $request->nombre;
-        $departamento->institucion_id = $request->institucion_id;
+        $departamento->departamento = $request->departamento;
+        $departamento->encargado_departamento = $request->encargado_departamento;
+        $departamento->idInstitucion = $request->idInstitucion;
         $departamento->save();
 
         return redirect()->back()->with('success', 'Departamento actualizado correctamente.');

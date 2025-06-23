@@ -1,4 +1,9 @@
 <x-app-layout>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
@@ -46,11 +51,11 @@
                             @foreach ($instituciones as $institucion)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->nombre }}</td>
+                                    {{ $institucion->nombre_institucion }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->tipo }}</td>
+                                    {{ $institucion->tipo_institucion }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->encargado }}</td>
+                                    {{ $institucion->encargado_proyecto }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div x-data="{ editModalOpen: false }" class="inline-block">
                                         <button @click="editModalOpen = true"

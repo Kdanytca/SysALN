@@ -3,43 +3,33 @@
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
-        <input type="text" name="nombre" id="nombre"
+        <input type="text" name="nombre_usuario" id="nombre_usuario"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Correo Electronico</label>
-        <input type="email" name="email" id="email"
+        <input type="email" name="correo" id="correo"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-        <input type="password" name="password" id="password"
+        <input type="password" name="contraseña" id="contraseña"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Institución</label>
-        <select name="institucion_id" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="">Seleccione una institución</option>
-            @foreach ($instituciones as $institucion)
-            <option value="{{ $institucion->id }}">{{ $institucion->nombre }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Departamento</label>
-        <select name="departamento_id" required
+        <select name="idDepartamento" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
             <option value="">Seleccione un departamento</option>
             @foreach ($departamentos as $departamento)
-            <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
+            <option value="{{ $departamento->id }}">{{ $departamento->departamento }}</option>
             @endforeach
         </select>
     </div>
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Departamento</label>
-        <select name="tipo" required
+        <label class="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
+        <select name="tipo_usuario" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
             <option value="administrador">Administrador</option>
             <option value="colaborador">Colaborador</option>

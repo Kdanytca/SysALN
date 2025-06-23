@@ -14,10 +14,9 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        $usuarios = Usuario::with(['instituciones', 'departamentos'])->get();
-        $instituciones = Institucion::all();
+        $usuarios = Usuario::with(['departamentos'])->get();
         $departamentos = Departamento::all();
-        return view('usuarios.index', compact('usuarios', 'instituciones', 'departamentos'));
+        return view('usuarios.index', compact('usuarios', 'departamentos'));
     }
 
     /**
@@ -25,9 +24,8 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        $instituciones = Institucion::all();
         $departamentos = Departamento::all();
-        return view('usuarios.create', compact('instituciones', 'departamentos'));
+        return view('usuarios.create', compact('departamentos'));
     }
 
     /**
@@ -36,21 +34,19 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:usuarios,email',
-            'password' => 'required|string|min:8', // Asegúrate de que el campo 'password_confirmation' esté presente en el formulario
-            'institucion_id' => 'required|exists:instituciones,id',
-            'departamento_id' => 'required|exists:departamentos,id',
-            'tipo' => 'required',
+            'nombre_usuario' => 'required|string|max:255',
+            'correo' => 'required',
+            'contraseña' => 'required|string|min:8',
+            'idDepartamento' => 'required|exists:departamentos,id',
+            'tipo_usuario' => 'required',
         ]);
 
         $usuario = new Usuario();
-        $usuario->nombre = $request->nombre;
-        $usuario->email = $request->email;
-        $usuario->password = bcrypt($request->password); // Asegúrate de que el campo 'password' esté presente en el formulario
-        $usuario->institucion_id = $request->institucion_id;
-        $usuario->departamento_id = $request->departamento_id;
-        $usuario->tipo = $request->tipo;
+        $usuario->nombre_usuario = $request->nombre_usuario;
+        $usuario->correo = $request->correo;
+        $usuario->contraseña = bcrypt($request->contraseña);
+        $usuario->idDepartamento = $request->idDepartamento;
+        $usuario->tipo_usuario = $request->tipo_usuario;
         
         $usuario->save();
 
@@ -71,9 +67,8 @@ class UsuarioController extends Controller
     public function edit($id)
     {
         $usuario = Usuario::find($id);
-        $instituciones = Institucion::all();
         $departamentos = Departamento::all();
-        return view('usuarios.edit', ['usuario' => $usuario], compact('instituciones', 'departamentos'));
+        return view('usuarios.edit', ['usuario' => $usuario], compact('departamentos'));
     }
 
     /**
@@ -82,24 +77,22 @@ class UsuarioController extends Controller
     public function update(Request $request, string $id)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
-            'password' => 'nullable|string|min:8', // Asegúrate de que el campo 'password_confirmation' esté presente en el formulario
-            'institucion_id' => 'required|exists:instituciones,id',
+            'nombre_usuario' => 'required|string|max:255',
+            'correo' => 'required|email|max:255|unique:usuarios,email,' . $id,
+            'contraseña' => 'nullable|string|min:8',
             'departamento_id' => 'required|exists:departamentos,id',
-            'tipo' => 'required',
+            'tipo_usuario' => 'required',
         ]);
 
         $usuario = Usuario::find($id);
-        $usuario->nombre = $request->nombre;
-        $usuario->email = $request->email;
+        $usuario->nombre_usuario = $request->nombre_usuario;
+        $usuario->correo = $request->correo;
         if ($request->filled('password')) {
-            $usuario->password = bcrypt($request->password); // Actualiza la contraseña solo si se proporciona una nueva
+            $usuario->contraseña = bcrypt($request->contraseña);
         }
-        $usuario->institucion_id = $request->institucion_id;
-        $usuario->departamento_id = $request->departamento_id;
-        $usuario->tipo = $request->tipo;
-        $usuario->remember_token = $request->has('remember') ? $request->remember : null; // Manejo del token de recordatorio
+        $usuario->idDepartamento = $request->idDepartamento;
+        $usuario->tipo_usuario = $request->tipo_usuario;
+        $usuario->remember_token = $request->has('remember') ? $request->remember : null;
         $usuario->save();
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');

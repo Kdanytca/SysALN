@@ -8,7 +8,7 @@ class Departamento extends Model
 {
     public function instituciones()
     {
-        return $this->belongsTo(Institucion::class, 'institucion_id');
+        return $this->belongsTo(Institucion::class, 'idInstitucion');
     }
 
 }

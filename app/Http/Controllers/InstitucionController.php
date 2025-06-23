@@ -30,15 +30,15 @@ class InstitucionController extends Controller
     public function store(Request $request)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'tipo' => 'required|string|max:255',
-            'encargado' => 'required|string|max:255',
+            'nombre_institucion' => 'required|string|max:255',
+            'tipo_institucion' => 'required|string|max:255',
+            'encargado_proyecto' => 'required|string|max:255',
         ]);
 
         $institucion = new Institucion();
-        $institucion->nombre = $request->nombre;
-        $institucion->tipo = $request->tipo;
-        $institucion->encargado = $request->encargado;
+        $institucion->nombre_institucion = $request->nombre_institucion;
+        $institucion->tipo_institucion = $request->tipo_institucion;
+        $institucion->encargado_proyecto = $request->encargado_proyecto;
         $institucion->save();
 
         return redirect()->route('instituciones.index')->with('success', 'Institución registrada correctamente.');
@@ -67,15 +67,15 @@ class InstitucionController extends Controller
     public function update(Request $request, string $id)
     {
         request()->validate([
-            'nombre' => 'required|string|max:255',
-            'tipo' => 'required|string|max:255',
-            'encargado' => 'required|string|max:255',
+            'nombre_institucion' => 'required|string|max:255',
+            'tipo_institucion' => 'required|string|max:255',
+            'encargado_proyecto' => 'required|string|max:255',
         ]);
 
         $institucion = Institucion::find($id);
-        $institucion->nombre = $request->nombre;
-        $institucion->tipo = $request->tipo;
-        $institucion->encargado = $request->encargado;
+        $institucion->nombre_institucion = $request->nombre_institucion;
+        $institucion->tipo_institucion = $request->tipo_institucion;
+        $institucion->encargado_proyecto = $request->encargado_proyecto;
         $institucion->save();
 
         return redirect()->route('instituciones.index')->with('success', 'Institución actualizada correctamente.');

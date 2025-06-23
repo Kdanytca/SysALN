@@ -6,22 +6,29 @@
 
     <!-- <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Institución</label>
-        <select name="institucion_id" required
+        <select name="idInstitucion" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="{{ $departamento->institucion_id}}">{{ $departamento->instituciones->nombre}}</option>
+            <option value="{{ $departamento->idInstitucion}}">{{ $departamento->instituciones->nombre}}</option>
             @foreach ($instituciones as $institucion)
                 <option value="{{ $institucion->id }}">{{ $institucion->nombre }}</option>
             @endforeach
         </select>
     </div> -->
 
-    <input type="hidden" name="institucion_id" value="{{ $institucion->id }}">
+    <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
     
     <div class="mb-4">
-        <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre del Departamento</label>
-        <input type="text" name="nombre" id="nombre"
+        <label for="departamento" class="block text-sm font-medium text-gray-700">Nombre del Departamento</label>
+        <input type="text" name="departamento" id="departamento"
                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200"
-               value="{{ $departamento->nombre }}" required>
+               value="{{ $departamento->departamento }}" required>
+    </div>
+
+    <div class="mb-4">
+        <label for="encargado_departamento" class="block text-sm font-medium text-gray-700">Encargado del Departamento</label>
+        <input type="text" name="encargado_departamento" id="encargado_departamento"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200"
+               value="{{ $departamento->encargado_departamento }}" required>
     </div>
 
     <div class="flex justify-end">

@@ -43,9 +43,6 @@
                                     Correo</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Institucion</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Departamento</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -57,15 +54,13 @@
                             @foreach ($usuarios as $usuario)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $usuario->nombre }}</td>
+                                    {{ $usuario->nombre_usuario }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $usuario->email }}</td>
+                                    {{ $usuario->correo }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $usuario->instituciones->nombre }}</td>
+                                    {{ $usuario->departamentos->departamento }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $usuario->departamentos->nombre }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $usuario->tipo }}</td>
+                                    {{ $usuario->tipo_usuario }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div x-data="{ editModalOpen: false }" class="inline-block">
                                         <button @click="editModalOpen = true"

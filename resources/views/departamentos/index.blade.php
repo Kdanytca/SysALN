@@ -1,10 +1,15 @@
 <x-app-layout>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
 
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Lista de Departamentos de {{ $institucion->nombre }}</h1>
+                    <h1 class="text-2xl font-bold">Lista de Departamentos de {{ $institucion->nombre_institucion }}</h1>
 
                     <!-- Botón para agregar un nuevo registro -->
                     <div x-data="{ modalOpen: false }">
@@ -36,9 +41,9 @@
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Institucion Perteneciente</th>
-                                <!-- <th
+                                <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Encargado del Departamento</th> -->
+                                    Encargado del Departamento</th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
@@ -46,11 +51,11 @@
                             @foreach ($departamentos as $departamento)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $departamento->nombre }}</td>
+                                    {{ $departamento->departamento }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $departamento->instituciones->nombre }}</td>
-                                <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $departamento->encargado }}</td> -->
+                                    {{ $departamento->instituciones->nombre_institucion }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ $departamento->encargado_departamento }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div x-data="{ editModalOpen: false }" class="inline-block">
                                         <button @click="editModalOpen = true"

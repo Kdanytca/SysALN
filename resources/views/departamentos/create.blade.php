@@ -15,7 +15,7 @@
 
     <!-- <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Institución</label>
-        <select name="institucion_id" required
+        <select name="idInstitucion" required disabled
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
             <option value="">Seleccione una institución</option>
             @foreach ($instituciones as $institucion)
@@ -24,11 +24,17 @@
         </select>
     </div> -->
 
-    <input type="hidden" name="institucion_id" value="{{ $institucion->id }}">
+    <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Nombre del Departamento</label>
-        <input type="text" name="nombre" id="nombre"
+        <input type="text" name="departamento" id="departamento"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+    </div>
+
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700">Encargado del Departamento</label>
+        <input type="text" name="encargado_departamento" id="encargado_departamento"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 

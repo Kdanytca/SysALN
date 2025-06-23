@@ -14,19 +14,19 @@
     @csrf
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Nombre</label>
-        <input type="text" name="nombre" id="nombre"
+        <input type="text" name="nombre_institucion" id="nombre_institucion"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Tipo</label>
-        <input type="text" name="tipo" id="tipo"
+        <label class="block text-sm font-medium text-gray-700">Tipo de Institucion</label>
+        <input type="text" name="tipo_institucion" id="tipo_institucion"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Encargado</label>
-        <input type="text" name="encargado" id="encargado"
+        <label class="block text-sm font-medium text-gray-700">Encargado del Proyecto</label>
+        <input type="text" name="encargado_proyecto" id="encargado_proyecto"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 

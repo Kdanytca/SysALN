@@ -10,6 +10,6 @@ class Institucion extends Model
 
     public function departamentos()
     {
-        return $this->hasMany(Departamento::class, 'institucion_id');
+        return $this->hasMany(Departamento::class, 'idInstitucion');
     }
 }
