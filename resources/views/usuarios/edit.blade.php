@@ -17,51 +17,39 @@
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
-        <input type="text" name="nombre" id="nombre" value="{{ $usuario->nombre}}"
+        <input type="text" name="nombre_usuario" id="nombre_usuario" value="{{ $usuario->nombre_usuario}}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Correo Electronico</label>
-        <input type="email" name="email" id="email" value="{{ $usuario->email}}"
+        <input type="email" name="correo" id="correo" value="{{ $usuario->correo}}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-        <input type="password" name="password" id="password" value=""
+        <input type="password" name="contraseña" id="contraseña" value=""
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Institución</label>
-        <select name="institucion_id" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="{{ $usuario->institucion_id}}">{{ $usuario->instituciones->nombre}}</option>
-            @foreach ($instituciones as $institucion)
-            <option value="{{ $institucion->id }}">{{ $institucion->nombre }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Departamento</label>
-        <select name="departamento_id" required
+        <select name="idDepartamento" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="{{ $usuario->departamento_id}}">{{ $usuario->departamentos->nombre}}</option>
+            <option value="{{ $usuario->idDepartamento}}">{{ $usuario->departamentos->departamento}}</option>
             @foreach ($departamentos as $departamento)
-            <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
+            <option value="{{ $departamento->id }}">{{ $departamento->departamento }}</option>
             @endforeach
         </select>
     </div>
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
-        <select name="tipo" required
+        <select name="tipo_usuario" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="Administrador" {{ $usuario->tipo == 'Administrador' ? 'selected' : '' }}>Administrador
+            <option value="Administrador" {{ $usuario->tipo_usuario == 'Administrador' ? 'selected' : '' }}>Administrador
             </option>
-            <option value="Colaborador" {{ $usuario->tipo == 'Colaborador' ? 'selected' : '' }}>Colaborador</option>
+            <option value="Colaborador" {{ $usuario->tipo_usuario == 'Colaborador' ? 'selected' : '' }}>Colaborador</option>
         </select>
     </div>
-
-
 
     <div class="flex justify-end">
         <button type="button" @click="editModalOpen = false"

@@ -24,7 +24,7 @@
                             <div @click.away="modalOpen = false"
                                 class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                 <h2 class="text-lg font-semibold mb-4">Registrar Nuevo Departamento</h2>
-                                @include('departamentos.create', ['instituciones' => $instituciones])
+                                @include('departamentos.create', ['instituciones' => $instituciones, 'institucion' => $institucion])
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $departamento->departamento }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $departamento->instituciones->nombre_institucion }}</td>
+                                    {{ $departamento->institucion->nombre_institucion }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $departamento->encargado_departamento }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

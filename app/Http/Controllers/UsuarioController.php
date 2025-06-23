@@ -14,7 +14,7 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        $usuarios = Usuario::with(['departamentos'])->get();
+        $usuarios = Usuario::with(['departamento'])->get();
         $departamentos = Departamento::all();
         return view('usuarios.index', compact('usuarios', 'departamentos'));
     }
@@ -35,7 +35,7 @@ class UsuarioController extends Controller
     {
         request()->validate([
             'nombre_usuario' => 'required|string|max:255',
-            'correo' => 'required',
+            'correo' => 'required|email|max:255|unique:usuarios,correo',
             'contraseña' => 'required|string|min:8',
             'idDepartamento' => 'required|exists:departamentos,id',
             'tipo_usuario' => 'required',
@@ -78,16 +78,16 @@ class UsuarioController extends Controller
     {
         request()->validate([
             'nombre_usuario' => 'required|string|max:255',
-            'correo' => 'required|email|max:255|unique:usuarios,email,' . $id,
+            'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id,
             'contraseña' => 'nullable|string|min:8',
-            'departamento_id' => 'required|exists:departamentos,id',
+            'idDepartamento' => 'required|exists:departamentos,id',
             'tipo_usuario' => 'required',
         ]);
 
         $usuario = Usuario::find($id);
         $usuario->nombre_usuario = $request->nombre_usuario;
         $usuario->correo = $request->correo;
-        if ($request->filled('password')) {
+        if ($request->filled('contraseña')) {
             $usuario->contraseña = bcrypt($request->contraseña);
         }
         $usuario->idDepartamento = $request->idDepartamento;

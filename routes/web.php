@@ -32,6 +32,8 @@ Route::resource('instituciones', InstitucionController::class);
 Route::resource('departamentos', DepartamentoController::class);
 Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
     ->name('institucion.departamentos');
+// Route::get('departamentos/institucion/{institucion}', [DepartamentoController::class, 'indexPorInstitucion'])->name('departamentos.indexPorInstitucion');
+
 
 //Usuarios
 Route::resource('usuarios', UsuarioController::class)->middleware('auth');

@@ -1,28 +1,15 @@
-<!-- Validación de errores -->
-@if ($errors->any())
-<div class="mb-4">
-    <ul class="list-disc list-inside text-sm text-red-600">
-        @foreach ($errors->all() as $error)
-        <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-</div>
-@endif
-
-<!-- Formulario -->
 <form method="POST" action="{{ route('departamentos.store') }}">
-    @csrf
-
-    <!-- <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Institución</label>
-        <select name="idInstitucion" required disabled
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="">Seleccione una institución</option>
-            @foreach ($instituciones as $institucion)
-                <option value="{{ $institucion->id }}">{{ $institucion->nombre }}</option>
+    @if ($errors->any())
+    <div class="mb-4">
+        <ul class="list-disc list-inside text-sm text-red-600">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
             @endforeach
-        </select>
-    </div> -->
+        </ul>
+    </div>
+    @endif
+
+    @csrf
 
     <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
 

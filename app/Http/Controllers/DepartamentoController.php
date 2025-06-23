@@ -13,14 +13,15 @@ class DepartamentoController extends Controller
      */
     public function index()
     {
-        $departamentos = Departamento::with('instituciones')->get();
+        $departamentos = Departamento::with('institucion')->get();
         $instituciones = Institucion::all();
+        
         return view('departamentos.index',compact('departamentos', 'instituciones'));
     }
 
     public function indexPorInstitucion(Institucion $institucion)
     {
-        $departamentos = $institucion->departamentos()->with('instituciones')->get();
+        $departamentos = $institucion->departamentos()->with('institucion')->get();
         $instituciones = Institucion::all();
 
         return view('departamentos.index', compact('departamentos', 'institucion', 'instituciones'));
@@ -70,7 +71,7 @@ class DepartamentoController extends Controller
     {
         $departamento = Departamento::find($id);
         $instituciones = Institucion::all();
-        return view('departamentos.edit', ['departamento' => $departamento], compact('instituciones'));
+        return view('departamentos.edit', compact('departamento', 'instituciones'));
     }
 
     /**
