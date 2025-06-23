@@ -102,10 +102,6 @@ class DepartamentoController extends Controller
         $departamento = Departamento::findOrFail($id);
         $departamento->delete();
 
-<<<<<<< HEAD
         return redirect()->back()->with('success', 'Departamento eliminado correctamente.');
-=======
-        return redirect()->route('departamentos.index')->with('success', 'Departamento eliminado correctamente.');
->>>>>>> c45b260 (creacion vistas de instituciones, departamentos y sus componentes)
     }
 }
