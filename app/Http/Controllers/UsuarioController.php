@@ -16,6 +16,7 @@ class UsuarioController extends Controller
     {
         $usuarios = Usuario::with(['departamento'])->get();
         $departamentos = Departamento::all();
+
         return view('usuarios.index', compact('usuarios', 'departamentos'));
     }
 
@@ -69,6 +70,7 @@ class UsuarioController extends Controller
         $usuario = Usuario::find($id);
         $departamentos = Departamento::all();
         return view('usuarios.edit', ['usuario' => $usuario], compact('departamentos'));
+
     }
 
     /**
@@ -93,6 +95,7 @@ class UsuarioController extends Controller
         $usuario->idDepartamento = $request->idDepartamento;
         $usuario->tipo_usuario = $request->tipo_usuario;
         $usuario->remember_token = $request->has('remember') ? $request->remember : null;
+
         $usuario->save();
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');

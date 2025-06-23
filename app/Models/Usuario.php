@@ -11,14 +11,8 @@ class Usuario extends Model
         return $this->belongsTo(Departamento::class, 'idDepartamento');
     }
 
-    public function planesEstrategicos()
-    {
-        return $this->hasMany(PlanEstrategico::class, 'idUsuario');
-    }
-
     public function actividades()
     {
         return $this->hasMany(Actividad::class, 'idUsuario');
     }
-
 }
