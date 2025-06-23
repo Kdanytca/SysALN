@@ -35,7 +35,7 @@
         <label class="block text-sm font-medium text-gray-700">Departamento</label>
         <select name="idDepartamento" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
-            <option value="{{ $usuario->idDepartamento}}">{{ $usuario->departamentos->departamento}}</option>
+            <option value="{{ $usuario->idDepartamento}}">{{ $usuario->departamento->departamento}}</option>
             @foreach ($departamentos as $departamento)
             <option value="{{ $departamento->id }}">{{ $departamento->departamento }}</option>
             @endforeach

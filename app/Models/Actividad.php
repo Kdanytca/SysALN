@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Actividad extends Model
 {
+    protected $table = 'actividades';
+
     public function meta()
     {
         return $this->belongsTo(Metas::class, 'idMetas');

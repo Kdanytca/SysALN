@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\InstitucionController;
 use App\Http\Controllers\DepartamentoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\MetaController;
+use App\Http\Controllers\ActividadController;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -25,15 +27,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__ . '/auth.php';
 
-//Institucion
+// Institucion
 Route::resource('instituciones', InstitucionController::class);
 
-//Departamento
+// Departamento
 Route::resource('departamentos', DepartamentoController::class);
 Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
     ->name('institucion.departamentos');
 // Route::get('departamentos/institucion/{institucion}', [DepartamentoController::class, 'indexPorInstitucion'])->name('departamentos.indexPorInstitucion');
 
 
-//Usuarios
+// Usuarios
 Route::resource('usuarios', UsuarioController::class)->middleware('auth');
+
+// Metas
+Route::resource('metas', MetaController::class);
+
+// Actividades
+Route::resource('actividades', ActividadController::class);
