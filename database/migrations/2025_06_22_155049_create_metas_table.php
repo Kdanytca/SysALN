@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('actividades', 255);
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->string('comentarios', 255);
+            $table->string('comentario', 255);
             $table->timestamps();
         });
     }

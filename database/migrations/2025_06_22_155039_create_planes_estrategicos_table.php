@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('ejes_estrategicos', 255);
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->string('indicador', 255);
-            $table->string('responsable', 255);
+            $table->string('indicador', 45);
+            $table->string('responsable', 45);
             $table->timestamps();
         });
     }

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idDepartamento')->constrained('departamentos')->onDelete('cascade');
-            $table->string('nombre_usuario', 55);
-            $table->string('contraseña', 25);
-            $table->string('tipo_usuario', 55);
+            $table->string('nombre_usuario', 45);
+            $table->string('contraseña', 45);
+            $table->string('tipo_usuario', 45);
             $table->string('correo', 45);
             $table->rememberToken();
             $table->timestamps();
