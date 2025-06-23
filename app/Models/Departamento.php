@@ -16,9 +16,4 @@ class Departamento extends Model
         return $this->hasMany(Usuario::class, 'idDepartamento');
     }
 
-    public function planesEstrategicos()
-    {
-        return $this->hasMany(PlanEstrategico::class, 'idDepartamento');
-    }
-
 }
