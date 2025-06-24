@@ -27,19 +27,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__ . '/auth.php';
 
-// Institucion
-Route::resource('instituciones', InstitucionController::class);
+Route::middleware(['auth', 'verified'])->group(function(){
+    // Institucion
+    Route::resource('instituciones', InstitucionController::class);
+    
+    // Departamento
+    Route::resource('departamentos', DepartamentoController::class);
+    Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
+        ->name('institucion.departamentos');
+    
+    // Usuarios
+    Route::resource('usuarios', UsuarioController::class);
+    
+    // Metas
+    Route::resource('metas', MetaController::class);
+    
+    // Actividades
+    Route::resource('actividades', ActividadController::class);
 
-// Departamento
-Route::resource('departamentos', DepartamentoController::class);
-Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
-    ->name('institucion.departamentos');
-
-// Usuarios
-Route::resource('usuarios', UsuarioController::class)->middleware('auth');
-
-// Metas
-Route::resource('metas', MetaController::class);
-
-// Actividades
-Route::resource('actividades', ActividadController::class);
+});
