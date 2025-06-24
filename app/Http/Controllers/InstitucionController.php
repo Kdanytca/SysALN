@@ -80,6 +80,7 @@ class InstitucionController extends Controller
 
         return redirect()->route('instituciones.index')->with('success', 'Institución actualizada correctamente.');
     }
+    
 
     /**
      * Remove the specified resource from storage.
