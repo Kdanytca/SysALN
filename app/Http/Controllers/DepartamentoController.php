@@ -15,8 +15,8 @@ class DepartamentoController extends Controller
     {
         $departamentos = Departamento::with('institucion')->get();
         $instituciones = Institucion::all();
-        
-        return view('departamentos.index',compact('departamentos', 'instituciones'));
+
+        return view('departamentos.index', compact('departamentos', 'instituciones'));
     }
 
     public function indexPorInstitucion(Institucion $institucion)
@@ -55,6 +55,13 @@ class DepartamentoController extends Controller
 
         return redirect()->back()->with('success', 'Departamento creado exitosamente.');
     }
+    //mostrando todos los departamentos
+    public function todos()
+    {
+        $departamentos = Departamento::with('institucion')->get(); // si tienes relación con Institución
+        return view('departamentos.index_general', compact('departamentos'));
+    }
+
 
     /**
      * Display the specified resource.

@@ -49,89 +49,99 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($instituciones as $institucion)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->nombre_institucion }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->tipo_institucion }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $institucion->encargado_proyecto }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div x-data="{ editModalOpen: false }" class="inline-block">
-                                        <button @click="editModalOpen = true"
-                                            class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                            Editar
-                                        </button>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $institucion->nombre_institucion }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $institucion->tipo_institucion }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $institucion->encargado_proyecto }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div x-data="{ editModalOpen: false }" class="inline-block">
+                                            <button @click="editModalOpen = true"
+                                                class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                                Editar
+                                            </button>
 
-                                        <!-- Modal de edición -->
-                                        <div x-show="editModalOpen"
-                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                            x-cloak>
-                                            <div @click.away="editModalOpen = false"
-                                                class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                                                <h2 class="text-lg font-semibold mb-4">Editar Institución</h2>
+                                            <!-- Modal de edición -->
+                                            <div x-show="editModalOpen"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                x-cloak>
+                                                <div @click.away="editModalOpen = false"
+                                                    class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                                                    <h2 class="text-lg font-semibold mb-4">Editar Institución</h2>
 
-                                                @include('instituciones.edit', [
-                                                'action' => route('instituciones.update', $institucion->id),
-                                                'isEdit' => true,
-                                                'institucion' => $institucion,
-                                                ])
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Eliminar -->
-                                    <div x-data="{ confirmDelete: false }" class="inline-block">
-                                        <!-- Botón que abre el modal -->
-                                        <button @click="confirmDelete = true" class="text-red-600 hover:text-red-900">
-                                            Eliminar
-                                        </button>
-
-                                        <!-- Modal de confirmación -->
-                                        <div x-show="confirmDelete"
-                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                            x-cloak>
-                                            <div @click.away="confirmDelete = false"
-                                                class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                    eliminación</h2>
-                                                <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar esta
-                                                    institución?</p>
-
-                                                <div class="flex justify-end space-x-3">
-                                                    <button @click="confirmDelete = false"
-                                                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                        Cancelar
-                                                    </button>
-
-                                                    <form method="POST"
-                                                        action="{{ route('instituciones.destroy', $institucion->id) }}">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                                                            Eliminar
-                                                        </button>
-                                                    </form>
+                                                    @include('instituciones.edit', [
+                                                        'action' => route(
+                                                            'instituciones.update',
+                                                            $institucion->id),
+                                                        'isEdit' => true,
+                                                        'institucion' => $institucion,
+                                                    ])
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <a href="{{ route('institucion.departamentos', $institucion->id) }}"
-                                        class="text-blue-600 hover:text-blue-800 mr-3">
-                                        Ver Departamentos
-                                    </a>
+                                        <!-- Eliminar -->
+                                        <div x-data="{ confirmDelete: false }" class="inline-block">
+                                            <!-- Botón que abre el modal -->
+                                            <button @click="confirmDelete = true"
+                                                class="text-red-600 hover:text-red-900">
+                                                Eliminar
+                                            </button>
 
-                                </td>
-                            </tr>
+                                            <!-- Modal de confirmación -->
+                                            <div x-show="confirmDelete"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                x-cloak>
+                                                <div @click.away="confirmDelete = false"
+                                                    class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                        eliminación</h2>
+                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
+                                                        esta
+                                                        institución?</p>
+
+                                                    <div class="flex justify-end space-x-3">
+                                                        <button @click="confirmDelete = false"
+                                                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                            Cancelar
+                                                        </button>
+
+                                                        <form method="POST"
+                                                            action="{{ route('instituciones.destroy', $institucion->id) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                                                Eliminar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <a href="{{ route('institucion.departamentos', $institucion->id) }}"
+                                            class="text-blue-600 hover:text-blue-800 mr-3">
+                                            Ver Departamentos
+                                        </a>
+                                        <a href="{{ route('planes.create', $institucion->id) }}"
+                                            class="text-green-600 hover:text-green-800 mr-3">
+                                            Crear Plan Estratégico
+                                        </a>
+
+
+                                    </td>
+                                </tr>
                             @endforeach
 
-                            @if($instituciones->isEmpty())
-                            <tr>
-                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No hay instituciones
-                                    registradas.</td>
-                            </tr>
+                            @if ($instituciones->isEmpty())
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No hay
+                                        instituciones
+                                        registradas.</td>
+                                </tr>
                             @endif
                         </tbody>
                     </table>

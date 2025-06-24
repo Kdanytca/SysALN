@@ -16,4 +16,9 @@ class Usuario extends Model
         return $this->hasMany(Actividad::class, 'idUsuario');
     }
 
+    public function planesEstrategicos()
+    {
+        return $this->hasMany(PlanEstrategico::class, 'idUsuario');
+    }
 }
+
