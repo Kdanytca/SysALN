@@ -3,6 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\InstitucionController;
+use App\Http\Controllers\DepartamentoController;
+use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\MetaController;
+use App\Http\Controllers\ActividadController;
 
 
 Route::get('/', function () {
@@ -48,3 +53,20 @@ Route::get('/plan', function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// Institucion
+Route::resource('instituciones', InstitucionController::class);
+
+// Departamento
+Route::resource('departamentos', DepartamentoController::class);
+Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
+    ->name('institucion.departamentos');
+
+// Usuarios
+Route::resource('usuarios', UsuarioController::class)->middleware('auth');
+
+// Metas
+Route::resource('metas', MetaController::class);
+
+// Actividades
+Route::resource('actividades', ActividadController::class);

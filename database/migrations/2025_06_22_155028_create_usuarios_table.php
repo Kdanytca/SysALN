@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('idDepartamento')->constrained('departamentos')->onDelete('cascade');
             $table->string('nombre_usuario', 45);
-            $table->string('contraseña', 45);
+            $table->string('contraseña', 255);
             $table->string('tipo_usuario', 45);
             $table->string('correo', 45);
             $table->rememberToken();
