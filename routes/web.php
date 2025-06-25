@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function(){
     // Actividades
     Route::resource('actividades', ActividadController::class);
 
+    //obtener usuarios por departamento
+    Route::get('/departamentos/{id}/usuarios-disponibles', [App\Http\Controllers\UsuarioController::class, 'usuariosPorDepartamento']);
+
     // Planes Estratégicos
     Route::get('/instituciones/{id}/planes/create', [PlanEstrategicoController::class, 'create'])->name('planes.create');
     Route::post('/planes', [PlanEstrategicoController::class, 'store'])->name('planes.store');

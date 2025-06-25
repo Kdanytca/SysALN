@@ -33,7 +33,7 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
+        $request->validate([
             'nombre_usuario' => 'required|string|max:255',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
             'contraseña' => 'required|string|min:8',
@@ -47,11 +47,29 @@ class UsuarioController extends Controller
         $usuario->contraseña = bcrypt($request->contraseña);
         $usuario->idDepartamento = $request->idDepartamento;
         $usuario->tipo_usuario = $request->tipo_usuario;
-        
         $usuario->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'usuario' => $usuario,
+            ], 200);
+        }
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario registrado correctamente.');
     }
+    //optener usuarios por departamento
+    public function usuariosPorDepartamento($id)
+    {
+        $usuarios = Usuario::where('idDepartamento', $id)
+            ->whereDoesntHave('planesEstrategicos') // opcional por si no se quiere repetir responsables
+            ->get();
+
+        return response()->json($usuarios);
+    }
+
+
+
 
     /**
      * Display the specified resource.
