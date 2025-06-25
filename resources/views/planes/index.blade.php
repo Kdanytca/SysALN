@@ -54,11 +54,13 @@
         ejes_estrategicos: @json($plan->ejes_estrategicos),
         fecha_inicio: @json($plan->fecha_inicio),
         fecha_fin: @json($plan->fecha_fin),
+        idInstitucion: {{ $plan->departamento->idInstitucion ?? 'null' }},
         idDepartamento: {{ $plan->idDepartamento }},
         idUsuario: {{ $plan->idUsuario }}
     })'>
                                 Editar
                             </button>
+
 
 
                             <form action="{{ route('planes.destroy', $plan->id) }}" method="POST" class="inline"
@@ -82,6 +84,7 @@
 
     <!-- Modal -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+        <input type="hidden" name="origen" value="planes_index">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative">
             <button class="absolute top-2 right-2 text-gray-600 hover:text-red-600"
                 onclick="document.getElementById('modal').classList.add('hidden')">
@@ -142,13 +145,14 @@
 
                 <div class="mb-4">
                     <label for="responsable" class="block font-medium">Responsable</label>
-                    <select name="responsable" class="w-full border rounded px-3 py-2" required>
+                    <select name="responsable" id="responsable" class="w-full border rounded px-3 py-2" required>
                         <option value="">Seleccione un responsable</option>
-                        @foreach ($usuarios as $u)
-                            <option value="{{ $u->id }}">{{ $u->nombre_usuario }}</option>
-                        @endforeach
                     </select>
+                    <div id="mensajeNoUsuarios" class="text-red-600 font-semibold mt-2" style="display: none;">
+                        No hay usuarios disponibles.
+                    </div>
                 </div>
+
 
                 <div class="text-right">
                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -159,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Script para abrir el modal de creación -->
     <script>
         function openEditModal(plan) {
             const modal = document.getElementById('modal');
@@ -169,37 +174,32 @@
             form.reset();
             form.action = action;
 
-            // Eliminar _method si ya existe
             if (methodInput) methodInput.remove();
 
-            // Agregar campo _method para PUT
             const hiddenMethod = document.createElement('input');
             hiddenMethod.type = 'hidden';
             hiddenMethod.name = '_method';
             hiddenMethod.value = 'PUT';
             form.appendChild(hiddenMethod);
 
-            // Rellenar campos
             document.getElementById('plan_id').value = plan.id;
             form.nombre_plan_estrategico.value = plan.nombre_plan_estrategico;
             form.ejes_estrategicos.value = plan.ejes_estrategicos;
             form.fecha_inicio.value = plan.fecha_inicio;
             form.fecha_fin.value = plan.fecha_fin;
-            form.idDepartamento.value = plan.idDepartamento;
+
+            // Seleccionar institución
+            form.institucion.value = plan.idInstitucion;
+
+            // Filtrar departamentos según institución seleccionada
+            filtrarDepartamentos();
+
+            // Espera un momento para asegurarse que departamentos se cargaron (opcional, pero recomendable)
+            setTimeout(() => {
+                form.idDepartamento.value = plan.idDepartamento;
+            }, 100);
+
             form.responsable.value = plan.idUsuario;
-
-            modal.classList.remove('hidden');
-        }
-
-        function openCreateModal() {
-            const modal = document.getElementById('modal');
-            const form = modal.querySelector('form');
-            form.reset();
-            form.action = "{{ route('planes.store') }}";
-
-            // Eliminar _method si existe
-            const methodInput = form.querySelector('input[name="_method"]');
-            if (methodInput) methodInput.remove();
 
             modal.classList.remove('hidden');
         }
@@ -226,6 +226,60 @@
                 });
             }
         }
+    </script>
+    <!-- Script para abrir el modal de creación -->
+    <script>
+        function openCreateModal() {
+            const modal = document.getElementById('modal');
+            const form = modal.querySelector('form');
+
+            // Limpiar valores del formulario
+            form.reset();
+            form.action = "{{ route('planes.store') }}";
+
+            // Quitar campo oculto _method si existe (por si vienes de editar)
+            const methodInput = form.querySelector('input[name="_method"]');
+            if (methodInput) methodInput.remove();
+
+            // Asegurarte que el modal esté visible
+            modal.classList.remove('hidden');
+        }
+    </script>
+    <!-- Scrip para filtrar usuarios por departamento -->
+    <script>
+        document.getElementById('idDepartamento').addEventListener('change', async function() {
+            const departamentoId = this.value;
+            const select = document.getElementById('responsable');
+            const mensaje = document.getElementById('mensajeNoUsuarios');
+
+            // Limpiar select actual
+            select.innerHTML = '<option value="">Seleccione un usuario</option>';
+
+            if (!departamentoId) {
+                mensaje.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/departamentos/${departamentoId}/usuarios-disponibles`);
+                const usuarios = await response.json();
+
+                if (usuarios.length === 0) {
+                    mensaje.style.display = 'block';
+                } else {
+                    mensaje.style.display = 'none';
+                    usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.id;
+                        option.textContent = usuario.nombre_usuario;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (err) {
+                console.error("Error cargando usuarios:", err);
+                mensaje.style.display = 'block';
+            }
+        });
     </script>
 
 </x-app-layout>

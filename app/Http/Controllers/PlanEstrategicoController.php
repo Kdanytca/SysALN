@@ -16,6 +16,7 @@ class PlanEstrategicoController extends Controller
      */
     public function create($id)
     {
+        $departamentos = Departamento::all();
         $institucion = Institucion::with('departamentos')->findOrFail($id);
 
         // Obtener IDs de los departamentos de esa institución
@@ -26,9 +27,9 @@ class PlanEstrategicoController extends Controller
             ->whereDoesntHave('planesEstrategicos') // usuario no está en ningún plan
             ->get();
 
-        return view('planes.create', compact('institucion', 'usuariosDisponibles'));
+        return view('planes.create', compact('institucion', 'usuariosDisponibles', 'departamentos'));
     }
-    
+
     public function index()
     {
         $instituciones = Institucion::with('departamentos')->get();
@@ -55,23 +56,29 @@ class PlanEstrategicoController extends Controller
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'indicador' => 'nullable|string|max:45',
-            'responsable' => 'required|exists:usuarios,id', // valida que sea id de usuario válido
+            'responsable' => 'required|exists:usuarios,id',
         ]);
 
         PlanEstrategico::create([
             'idDepartamento' => $request->idDepartamento,
-            'idUsuario' => $request->responsable, // este es el responsable, por id
+            'idUsuario' => $request->responsable,
             'nombre_plan_estrategico' => $request->nombre_plan_estrategico,
             'metas' => $request->metas ?? '',
             'ejes_estrategicos' => $request->ejes_estrategicos,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'indicador' => '', // para calcular después
-            'creado_por' => Auth::id(), // aquí el id del usuario autenticado que crea el plan
+            'indicador' => '',
+            'creado_por' => Auth::id(),
         ]);
+
+        // Redirección según el origen del formulario
+        if ($request->origen === 'planes_index') {
+            return redirect()->route('planes.index')->with('success', 'Plan Estratégico creado correctamente.');
+        }
 
         return redirect()->route('instituciones.index')->with('success', 'Plan Estratégico creado correctamente.');
     }
+
 
     //eliminar
     public function destroy($id)

@@ -53,6 +53,8 @@ Route::get('/planes', [PlanEstrategicoController::class, 'index'])->name('planes
 Route::delete('/planes/{id}', [PlanEstrategicoController::class, 'destroy'])->name('planes.destroy');
 //Actualizar un plan estratégico
 Route::put('/planes/{id}', [PlanEstrategicoController::class, 'update'])->name('planes.update');
+//obtener usuarios por departamento
+Route::get('/departamentos/{id}/usuarios-disponibles', [App\Http\Controllers\UsuarioController::class, 'usuariosPorDepartamento']);
 
 
 require __DIR__ . '/auth.php';
