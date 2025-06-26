@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Meta;
+use App\Models\PlanEstrategico;
 use Illuminate\Http\Request;
 
 class MetaController extends Controller
@@ -12,8 +13,18 @@ class MetaController extends Controller
      */
     public function index()
     {
-        $metas = Meta::get();
-        return view('metas.index', compact('metas'));
+        $metas = Meta::with('planEstrategico')->get();
+        $planes = PlanEstrategico::all();
+
+        return view('metas.index', compact('metas', 'planes'));
+    }
+
+    public function indexPorPlan(PlanEstrategico $plan)
+    {
+        $metas = $plan->metas()->with('planEstrategico')->get();
+        $planes = PlanEstrategico::all();
+
+        return view('metas.index', compact('metas', 'plan', 'planes'));
     }
 
     /**
@@ -21,7 +32,8 @@ class MetaController extends Controller
      */
     public function create()
     {
-        //
+        $planes = PlanEstrategico::all();
+        return view('metas.create', compact('planes'));
     }
 
     /**
@@ -29,15 +41,29 @@ class MetaController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        request()->validate([
+            'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
+            'usuario_responsable' => 'required|string|max:255',
+            'nombre_meta' => 'required|string|max:255',
+            'ejes_estrategicos' => 'required|string|max:255',
+            'actividades' => 'nullable|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'comentario' => 'nullable|string|max:255',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Meta $meta)
-    {
-        //
+        $meta = new Meta();
+        $meta->idPlanEstrategico = $request->idPlanEstrategico;
+        $meta->usuario_responsable = $request->usuario_responsable;
+        $meta->nombre_meta = $request->nombre_meta;
+        $meta->ejes_estrategicos = $request->ejes_estrategicos;
+        $meta->actividades = $request->actividades;
+        $meta->fecha_inicio = $request->fecha_inicio;
+        $meta->fecha_fin = $request->fecha_fin;
+        $meta->comentario = $request->comentario;
+        $meta->save();
+
+        return redirect()->back()->with('success', 'Meta creada exitosamente.');
     }
 
     /**
@@ -45,7 +71,9 @@ class MetaController extends Controller
      */
     public function edit(Meta $meta)
     {
-        //
+        $meta = Meta::findOrFail($meta->id);
+        $planes = PlanEstrategico::all();
+        return view('metas.edit', compact('meta', 'planes'));
     }
 
     /**
@@ -53,7 +81,20 @@ class MetaController extends Controller
      */
     public function update(Request $request, Meta $meta)
     {
-        //
+        request()->validate([
+            'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
+            'usuario_responsable' => 'required|string|max:255',
+            'nombre_meta' => 'required|string|max:255',
+            'ejes_estrategicos' => 'required|string|max:255',
+            'actividades' => 'nullable|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'comentario' => 'nullable|string|max:255',
+        ]);
+
+        $meta->update($request->all());
+
+        return redirect()->back()->with('success', 'Meta actualizada exitosamente.');
     }
 
     /**
@@ -61,6 +102,9 @@ class MetaController extends Controller
      */
     public function destroy(Meta $meta)
     {
-        //
+        $meta = Meta::findOrFail($meta->id);
+        $meta->delete();
+
+        return redirect()->back()->with('success', 'Meta eliminada exitosamente.');
     }
 }

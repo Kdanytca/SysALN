@@ -15,7 +15,7 @@
                     <div x-data="{ modalOpen: false }">
                         <button @click="modalOpen = true"
                             class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                            Agregar Nueva Meta
+                            Agregar Nueva Actividad
                         </button>
 
                         <!-- Modal -->
@@ -23,7 +23,7 @@
                             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                             <div @click.away="modalOpen = false"
                                 class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                                <h2 class="text-lg font-semibold mb-4">Registrar Nueva Meta</h2>
+                                <h2 class="text-lg font-semibold mb-4">Registrar Nueva Actividad</h2>
                                 @include('actividades.create')
                             </div>
                         </div>
@@ -37,10 +37,10 @@
                             <tr>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nombre de la Meta</th>
+                                    Meta</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Usuario Responsable</th>
+                                    Usuario</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Nombre de la Actividad</th>
@@ -66,7 +66,7 @@
                             @foreach ($actividades as $actividad)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $actividad->idMeta }}</td>
+                                    {{ $actividad->meta->nombre_meta }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $actividad->idUsuario }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

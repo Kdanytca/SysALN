@@ -6,9 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Meta extends Model
 {
+    protected $fillable = [
+        'idPlanEstrategico',
+        'usuario_responsable',
+        'nombre_meta',
+        'ejes_estrategicos',
+        'actividades',
+        'fecha_inicio',
+        'fecha_fin',
+        'comentario',
+    ];
+
+    public function planEstrategico()
+    {
+        return $this->belongsTo(PlanEstrategico::class, 'idPlanEstrategico');
+    }
+    
     public function actividades()
     {
-        return $this->hasMany(Actividades::class, 'idMetas');
+        return $this->hasMany(Actividad::class, 'idMetas');
     }
 
 }

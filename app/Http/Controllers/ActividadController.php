@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actividad;
+use App\Models\Meta;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 
 class ActividadController extends Controller
@@ -12,8 +14,18 @@ class ActividadController extends Controller
      */
     public function index()
     {
-        $actividades = Actividad::get();
-        return view('actividades.index', compact('actividades'));
+        $actividades = Actividad::with('meta', 'usuario')->get();
+        $metas = Meta::all();
+        $usuarios = Usuario::all();
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios'));
+    }
+
+    public function indexPorMeta(Meta $meta)
+    {
+        $actividades = $meta->actividades()->with('meta')->get();
+        $metas = Meta::all();
+        $usuarios = Usuario::all();
+        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios'));
     }
 
     /**
@@ -21,7 +33,9 @@ class ActividadController extends Controller
      */
     public function create()
     {
-        //
+        $metas = Meta::all();
+        $usuarios = Usuario::all();
+        return view('actividades.create', compact('metas', 'usuarios'));
     }
 
     /**
@@ -29,7 +43,20 @@ class ActividadController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'idMetas' => 'required|exists:metas,id',
+            'idUsuario' => 'required|exists:usuarios,id',
+            'nombre_actividad' => 'required|string|max:255',
+            'objetivos' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
+            'resultados_esperados' => 'required|string|max:255',
+            'unidad_encargada' => 'required|string|max:255',
+        ]);
+
+        Actividad::create($validated);
+
+        return redirect()->back()->with('success', 'Actividad creada exitosamente.');
     }
 
     /**
@@ -45,7 +72,10 @@ class ActividadController extends Controller
      */
     public function edit(Actividad $actividad)
     {
-        //
+        $actividad = Actividad::find($actividad->id);
+        $metas = Meta::all();
+        $usuarios = Usuario::all();
+        return view('actividades.edit', compact('actividad', 'metas', 'usuarios'));
     }
 
     /**
@@ -53,7 +83,20 @@ class ActividadController extends Controller
      */
     public function update(Request $request, Actividad $actividad)
     {
-        //
+        $validated = $request->validate([
+            'idMetas' => 'required|exists:metas,id',
+            'idUsuario' => 'required|exists:usuarios,id',
+            'nombre_actividad' => 'required|string|max:255',
+            'objetivos' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
+            'resultados_esperados' => 'required|string|max:255',
+            'unidad_encargada' => 'required|string|max:255',
+        ]);
+
+        $actividad->update($validated);
+
+        return redirect()->back()->with('success', 'Actividad actualizada exitosamente.');
     }
 
     /**
@@ -61,6 +104,8 @@ class ActividadController extends Controller
      */
     public function destroy(Actividad $actividad)
     {
-        //
+        $actividad = Actividad::findOrFail($actividad->id);
+        $actividad->delete();
+        return redirect()->back()->with('success', 'Actividad eliminada exitosamente.');
     }
 }

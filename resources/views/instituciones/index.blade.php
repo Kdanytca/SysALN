@@ -19,8 +19,9 @@
                         </button>
 
                         <!-- Modal -->
-                        <div x-show="modalOpen" <input type="hidden" name="origen" value="instituciones_show">
-                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                        <div x-show="modalOpen" 
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                        <input type="hidden" name="origen" value="instituciones_show">
                             <div @click.away="modalOpen = false"
                                 class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                 <h2 class="text-lg font-semibold mb-4">Registrar Nueva Institución</h2>

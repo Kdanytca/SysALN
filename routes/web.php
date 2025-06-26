@@ -41,12 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function(){
     
     // Metas
     Route::resource('metas', MetaController::class);
+    Route::get('/planes/{plan}/metas', [MetaController::class, 'indexPorPlan'])->name('plan.metas');
     
     // Actividades
     Route::resource('actividades', ActividadController::class);
-
-    //obtener usuarios por departamento
-    Route::get('/departamentos/{id}/usuarios-disponibles', [App\Http\Controllers\UsuarioController::class, 'usuariosPorDepartamento']);
+    Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
 
     // Planes Estratégicos
     Route::get('/instituciones/{id}/planes/create', [PlanEstrategicoController::class, 'create'])->name('planes.create');
@@ -56,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::delete('/planes/{id}', [PlanEstrategicoController::class, 'destroy'])->name('planes.destroy');
     //Actualizar un plan estratégico
     Route::put('/planes/{id}', [PlanEstrategicoController::class, 'update'])->name('planes.update');
+    //obtener usuarios por departamento
+    Route::get('/departamentos/{id}/usuarios-disponibles', [App\Http\Controllers\UsuarioController::class, 'usuariosPorDepartamento']);
 });
 
 require __DIR__ . '/auth.php';

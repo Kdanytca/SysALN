@@ -9,7 +9,7 @@
             <div class="p-6 bg-white border-b border-gray-200">
 
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Lista de Metas</h1>
+                    <h1 class="text-2xl font-bold">Lista de Metas de {{ $plan->nombre_plan_estrategico }}</h1>
 
                     <!-- Botón para agregar un nuevo registro -->
                     <div x-data="{ modalOpen: false }">
@@ -66,7 +66,7 @@
                             @foreach ($metas as $meta)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $meta->idPlanEstrategico }}</td>
+                                    {{ $meta->planEstrategico->nombre_plan_estrategico }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $meta->usuario_responsable }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -142,6 +142,11 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <a href="{{ route('meta.actividades', $meta->id) }}"
+                                        class="text-blue-600 hover:text-blue-800 mr-3">
+                                        Actividades
+                                    </a>
 
                                 </td>
                             </tr>

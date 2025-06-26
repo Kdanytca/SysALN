@@ -8,9 +8,20 @@ class Actividad extends Model
 {
     protected $table = 'actividades';
 
+    protected $fillable = [
+        'idMetas',
+        'idUsuario',
+        'nombre_actividad',
+        'objetivos',
+        'fecha_inicio',
+        'fecha_fin',
+        'resultados_esperados',
+        'unidad_encargada',
+    ];
+
     public function meta()
     {
-        return $this->belongsTo(Metas::class, 'idMetas');
+        return $this->belongsTo(Meta::class, 'idMetas');
     }
 
     public function usuario()
