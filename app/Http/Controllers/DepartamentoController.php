@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class DepartamentoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Muestra la lista de departamentos
     public function index()
     {
         $departamentos = Departamento::with('institucion')->get();
@@ -19,6 +17,7 @@ class DepartamentoController extends Controller
         return view('departamentos.index', compact('departamentos', 'instituciones'));
     }
 
+    // Muestra la lista de departamentos filtrados por institución
     public function indexPorInstitucion(Institucion $institucion)
     {
         $departamentos = $institucion->departamentos()->with('institucion')->get();
@@ -27,18 +26,13 @@ class DepartamentoController extends Controller
         return view('departamentos.index', compact('departamentos', 'institucion', 'instituciones'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Se encarga de crear un nuevo departamento
     public function create()
     {
         $instituciones = Institucion::all();
         return view('departamentos.create', compact('instituciones'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         request()->validate([
@@ -55,6 +49,7 @@ class DepartamentoController extends Controller
 
         return redirect()->back()->with('success', 'Departamento creado exitosamente.');
     }
+
     //mostrando todos los departamentos
     public function todos()
     {
@@ -62,18 +57,7 @@ class DepartamentoController extends Controller
         return view('departamentos.index_general', compact('departamentos'));
     }
 
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Departamento $departamento)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Se encarga de editar un departamento
     public function edit(string $id)
     {
         $departamento = Departamento::find($id);
@@ -81,9 +65,6 @@ class DepartamentoController extends Controller
         return view('departamentos.edit', compact('departamento', 'instituciones'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         request()->validate([
@@ -101,9 +82,7 @@ class DepartamentoController extends Controller
         return redirect()->back()->with('success', 'Departamento actualizado correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Elimina un departamento
     public function destroy(string $id)
     {
         $departamento = Departamento::findOrFail($id);

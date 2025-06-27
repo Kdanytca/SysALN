@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idDepartamento')->constrained('departamentos')->onDelete('cascade');
-            $table->string('nombre_usuario', 45);
+            $table->string('nombre_usuario', 255)->unique();
             $table->string('contraseña', 255);
-            $table->string('tipo_usuario', 45);
-            $table->string('correo', 45);
+            $table->string('tipo_usuario', 255);
+            $table->string('correo', 255)->unique();
             $table->rememberToken();
             $table->timestamps();
         });

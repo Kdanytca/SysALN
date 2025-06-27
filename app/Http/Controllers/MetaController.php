@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class MetaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Muestra la lista de metas
     public function index()
     {
         $metas = Meta::with('planEstrategico')->get();
@@ -19,6 +17,7 @@ class MetaController extends Controller
         return view('metas.index', compact('metas', 'planes'));
     }
 
+    // Muestra la lista de metas filtradas por plan estratégico
     public function indexPorPlan(PlanEstrategico $plan)
     {
         $metas = $plan->metas()->with('planEstrategico')->get();
@@ -27,18 +26,13 @@ class MetaController extends Controller
         return view('metas.index', compact('metas', 'plan', 'planes'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Se encarga de crear una nueva meta
     public function create()
     {
         $planes = PlanEstrategico::all();
         return view('metas.create', compact('planes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         request()->validate([
@@ -66,9 +60,7 @@ class MetaController extends Controller
         return redirect()->back()->with('success', 'Meta creada exitosamente.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Se encarga de editar una meta
     public function edit(Meta $meta)
     {
         $meta = Meta::findOrFail($meta->id);
@@ -76,9 +68,6 @@ class MetaController extends Controller
         return view('metas.edit', compact('meta', 'planes'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Meta $meta)
     {
         request()->validate([
@@ -97,9 +86,7 @@ class MetaController extends Controller
         return redirect()->back()->with('success', 'Meta actualizada exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Elimina una meta
     public function destroy(Meta $meta)
     {
         $meta = Meta::findOrFail($meta->id);

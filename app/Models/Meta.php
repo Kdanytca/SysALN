@@ -17,6 +17,7 @@ class Meta extends Model
         'comentario',
     ];
 
+    // Relaciones
     public function planEstrategico()
     {
         return $this->belongsTo(PlanEstrategico::class, 'idPlanEstrategico');

@@ -14,12 +14,14 @@
     <input type="hidden" name="idMetas" value="{{ $meta->id }}">
 
     <div class="mb-4">
-        <label for="idUsuario" class="block text-sm font-medium text-gray-700"></label>
         <select name="idUsuario" id="idUsuario" required
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
             <option value="">Seleccione una Usuario</option>
             @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->id }}">{{ $usuario->nombre_usuario }}</option>
+                <option value="{{ $usuario->id }}"
+                    data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
+                    {{ $usuario->nombre_usuario }}
+                </option>
             @endforeach
         </select>
     </div>
@@ -56,8 +58,19 @@
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Unidad Encargada</label>
-        <input type="text" name="unidad_encargada" id="unidad_encargada"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+        <select id="unidad_encargada_display" disabled
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+            <option value="">Seleccione un departamento</option>
+            @foreach($departamentos as $departamento)
+                <option value="{{ $departamento->departamento }}"
+                    {{ old('unidad_encargada', $actividad->unidad_encargada ?? '') == $departamento->departamento ? 'selected' : '' }}>
+                    {{ $departamento->departamento }}
+                </option>
+            @endforeach
+        </select>
+        <!-- Campo oculto para enviar el valor al backend -->
+        <input type="hidden" name="unidad_encargada" id="unidad_encargada"
+            value="{{ old('unidad_encargada', $actividad->unidad_encargada ?? '') }}">
     </div>
 
     <div class="flex justify-end">
@@ -70,3 +83,21 @@
         </button>
     </div>
 </form>
+
+<script>
+    document.getElementById('idUsuario').addEventListener('change', function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const departamento = selectedOption.getAttribute('data-departamento');
+
+        if (departamento) {
+            // Mostrar visualmente
+            const selectDepartamento = document.getElementById('unidad_encargada_display');
+            for (let option of selectDepartamento.options) {
+                option.selected = option.value === departamento;
+            }
+
+            // Enviar valor oculto
+            document.getElementById('unidad_encargada').value = departamento;
+        }
+    });
+</script>

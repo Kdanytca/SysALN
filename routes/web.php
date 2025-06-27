@@ -27,8 +27,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function(){
     // Institucion
-    Route::resource('instituciones', InstitucionController::class);
-    
+    Route::resource('instituciones', InstitucionController::class)->only([
+        'index', 'store','update', 'destroy'
+    ]);
+    Route::get('instituciones/create', fn () => abort(404));
+    Route::get('instituciones/edit', fn () => abort(404));
+
     // Departamento
     Route::resource('departamentos', DepartamentoController::class);
     Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])

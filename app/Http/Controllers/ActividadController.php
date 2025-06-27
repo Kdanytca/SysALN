@@ -5,45 +5,43 @@ namespace App\Http\Controllers;
 use App\Models\Actividad;
 use App\Models\Meta;
 use App\Models\Usuario;
+use App\models\Departamento;
 use Illuminate\Http\Request;
 
 class ActividadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Muestra la lista de actividades en el index
     public function index()
     {
         $actividades = Actividad::with('meta', 'usuario')->get();
         $metas = Meta::all();
         $usuarios = Usuario::all();
-        return view('actividades.index', compact('actividades', 'metas', 'usuarios'));
+        $departamentos = Departamento::all();
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos'));
     }
 
+    // Muestra la lista de actividades filtradas por meta
     public function indexPorMeta(Meta $meta)
     {
         $actividades = $meta->actividades()->with('meta')->get();
         $metas = Meta::all();
         $usuarios = Usuario::all();
-        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios'));
+        $departamentos = Departamento::all();
+        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Se encarga de crear una nueva actividad
     public function create()
     {
         $metas = Meta::all();
         $usuarios = Usuario::all();
-        return view('actividades.create', compact('metas', 'usuarios'));
+        $departamentos = Departamento::all();
+        return view('actividades.create', compact('metas', 'usuarios', 'departamentos'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idUsuario' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string|max:255',
@@ -54,36 +52,34 @@ class ActividadController extends Controller
             'unidad_encargada' => 'required|string|max:255',
         ]);
 
-        Actividad::create($validated);
+        Actividad::create([
+            'idMetas' => $request->idMetas,
+            'idUsuario' => $request->idUsuario,
+            'nombre_actividad' => $request->nombre_actividad,
+            'objetivos' => $request->objetivos,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'resultados_esperados' => $request->resultados_esperados,
+            'unidad_encargada' => $request->unidad_encargada,
+        ]);
 
         return redirect()->back()->with('success', 'Actividad creada exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Actividad $actividad)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // se encarga de editar una actividad
     public function edit(Actividad $actividad)
     {
         $actividad = Actividad::find($actividad->id);
         $metas = Meta::all();
         $usuarios = Usuario::all();
-        return view('actividades.edit', compact('actividad', 'metas', 'usuarios'));
+        $usuarios = Usuario::with('departamento')->get();
+        $departamentos = Departamento::all();
+        return view('actividades.edit', compact('actividad', 'metas', 'usuarios', 'departamentos'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Actividad $actividad)
+    public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
+        $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idUsuario' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string|max:255',
@@ -94,17 +90,25 @@ class ActividadController extends Controller
             'unidad_encargada' => 'required|string|max:255',
         ]);
 
-        $actividad->update($validated);
+        $actividad = Actividad::find($id);
+        $actividad->update([
+            'idMetas' => $request->idMetas,
+            'idUsuario' => $request->idUsuario,
+            'nombre_actividad' => $request->nombre_actividad,
+            'objetivos' => $request->objetivos,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'resultados_esperados' => $request->resultados_esperados,
+            'unidad_encargada' => $request->unidad_encargada,
+        ]);
 
         return redirect()->back()->with('success', 'Actividad actualizada exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Actividad $actividad)
+    // Elimina una actividad
+    public function destroy(string $id)
     {
-        $actividad = Actividad::findOrFail($actividad->id);
+        $actividad = Actividad::findOrFail($id);
         $actividad->delete();
         return redirect()->back()->with('success', 'Actividad eliminada exitosamente.');
     }

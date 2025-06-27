@@ -9,9 +9,7 @@ use App\Models\Departamento;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Muestra la lista de usuarios
     public function index()
     {
         $usuarios = Usuario::with(['departamento'])->get();
@@ -19,22 +17,17 @@ class UsuarioController extends Controller
         return view('usuarios.index', compact('usuarios', 'departamentos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Se encarga de crear un nuevo usuario
     public function create()
     {
         $departamentos = Departamento::all();
         return view('usuarios.create', compact('departamentos'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_usuario' => 'required|string|max:255',
+            'nombre_usuario' => 'required|string|max:255|unique:usuarios,nombre_usuario',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
             'contraseña' => 'required|string|min:8',
             'idDepartamento' => 'required|exists:departamentos,id',
@@ -58,6 +51,7 @@ class UsuarioController extends Controller
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario registrado correctamente.');
     }
+
     //optener usuarios por departamento
     public function usuariosPorDepartamento($id)
     {
@@ -68,20 +62,7 @@ class UsuarioController extends Controller
         return response()->json($usuarios);
     }
 
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Usuario $usuario)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Se encarga de editar un usuario
     public function edit($id)
     {
         $usuario = Usuario::find($id);
@@ -89,9 +70,6 @@ class UsuarioController extends Controller
         return view('usuarios.edit', ['usuario' => $usuario], compact('departamentos'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         request()->validate([
@@ -113,12 +91,17 @@ class UsuarioController extends Controller
         $usuario->remember_token = $request->has('remember') ? $request->remember : null;
         $usuario->save();
 
+        // Obtener el nombre del nuevo departamento
+        $nuevoDepartamento = $usuario->departamento->departamento;
+
+        // Actualizar todas las actividades del usuario con el nuevo nombre del departamento
+        \App\Models\Actividad::where('idUsuario', $usuario->id)
+            ->update(['unidad_encargada' => $nuevoDepartamento]);
+
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Elimina un usuario
     public function destroy(string $id)
     {
         $usuario = Usuario::findOrFail($id);

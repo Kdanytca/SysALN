@@ -9,7 +9,7 @@
             <div class="p-6 bg-white border-b border-gray-200">
 
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Lista de Metas de {{ $plan->nombre_plan_estrategico }}</h1>
+                    <h1 class="text-2xl font-bold">Lista de Metas del Plan Estrategico: "{{ $plan->nombre_plan_estrategico }}"</h1>
 
                     <!-- Botón para agregar un nuevo registro -->
                     <div x-data="{ modalOpen: false }">
@@ -37,9 +37,6 @@
                             <tr>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Plan Estrategico</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Usuario Responsable</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -65,8 +62,6 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($metas as $meta)
                             <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $meta->planEstrategico->nombre_plan_estrategico }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $meta->usuario_responsable }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

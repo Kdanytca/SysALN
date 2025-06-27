@@ -73,9 +73,7 @@
                                                     <h2 class="text-lg font-semibold mb-4">Editar Institución</h2>
 
                                                     @include('instituciones.edit', [
-                                                        'action' => route(
-                                                            'instituciones.update',
-                                                            $institucion->id),
+                                                        'action' => route('instituciones.update', $institucion->id),
                                                         'isEdit' => true,
                                                         'institucion' => $institucion,
                                                     ])
@@ -100,8 +98,7 @@
                                                     <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
                                                         eliminación</h2>
                                                     <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        esta
-                                                        institución?</p>
+                                                        esta institución?</p>
 
                                                     <div class="flex justify-end space-x-3">
                                                         <button @click="confirmDelete = false"
@@ -140,8 +137,7 @@
                             @if ($instituciones->isEmpty())
                                 <tr>
                                     <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No hay
-                                        instituciones
-                                        registradas.</td>
+                                        instituciones registradas.</td>
                                 </tr>
                             @endif
                         </tbody>

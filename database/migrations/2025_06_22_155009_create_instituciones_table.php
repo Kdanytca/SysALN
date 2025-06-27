@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre_institucion', 255);
             $table->string('tipo_institucion', 255);
-            $table->string('encargado_proyecto', 45);
+            $table->string('encargado_proyecto', 255);
             $table->timestamps();
         });
     }

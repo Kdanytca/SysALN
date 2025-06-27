@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Usuario extends Model
 {
+    protected $fillable = [
+        'idDepartamento',
+        'nombre_usuario',
+        'contraseña',
+        'tipo_usuario',
+        'correo',
+    ];
+
+    // Relaciones
     public function departamento()
     {
         return $this->belongsTo(Departamento::class, 'idDepartamento');

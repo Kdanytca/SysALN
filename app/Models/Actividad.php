@@ -19,6 +19,7 @@ class Actividad extends Model
         'unidad_encargada',
     ];
 
+    // Relaciones
     public function meta()
     {
         return $this->belongsTo(Meta::class, 'idMetas');

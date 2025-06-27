@@ -9,7 +9,7 @@
             <div class="p-6 bg-white border-b border-gray-200">
 
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">Lista de Actividades</h1>
+                    <h1 class="text-2xl font-bold">Lista de Actividades de la Meta: "{{ $meta->nombre_meta }}"</h1>
 
                     <!-- Botón para agregar un nuevo registro -->
                     <div x-data="{ modalOpen: false }">
@@ -24,20 +24,37 @@
                             <div @click.away="modalOpen = false"
                                 class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                 <h2 class="text-lg font-semibold mb-4">Registrar Nueva Actividad</h2>
-                                @include('actividades.create')
+                                @include('actividades.create', [
+                                    'departamentos' => $departamentos,
+                                    'metas' => $metas,
+                                    'usuarios' => $usuarios
+                                ])
                             </div>
                         </div>
                     </div>
                 </div>
+
+                @if (session('success'))
+                    <div class="mb-4 text-green-600">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-4">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li class="text-red-600">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
                 <!-- Tabla de actividades -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Meta</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Usuario</th>
@@ -66,9 +83,7 @@
                             @foreach ($actividades as $actividad)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $actividad->meta->nombre_meta }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $actividad->idUsuario }}</td>
+                                    {{ $actividad->usuario->nombre_usuario }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $actividad->nombre_actividad }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -97,9 +112,10 @@
                                                 <h2 class="text-lg font-semibold mb-4">Editar Meta</h2>
 
                                                 @include('actividades.edit', [
-                                                'action' => route('actividades.update', $actividad->id),
-                                                'isEdit' => true,
-                                                'actividad' => $actividad,
+                                                    'action' => route('actividades.update', $actividad->id),
+                                                    'isEdit' => true,
+                                                    'actividad' => $actividad,
+                                                    'departamentos' => $departamentos
                                                 ])
                                             </div>
                                         </div>

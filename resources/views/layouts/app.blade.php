@@ -46,7 +46,7 @@
                     </a>
                     <a href="{{ route('usuarios.index') }}"
                         class="hover:text-gray-300 {{ request()->routeIs('usuarios.*') ? 'underline' : '' }}">
-                        <i class="bi bi-people"></i> Usiarios
+                        <i class="bi bi-people"></i> Usuarios
                     </a>
                     <a href="{{ route('departamentos.index') }}"
                         class="hover:text-gray-300 {{ request()->routeIs('departamentos.*') ? 'underline' : '' }}">
