@@ -11,7 +11,7 @@ class Meta extends Model
         'usuario_responsable',
         'nombre_meta',
         'ejes_estrategicos',
-        'actividades',
+        'nombre_actividades',
         'fecha_inicio',
         'fecha_fin',
         'comentario',
@@ -22,10 +22,9 @@ class Meta extends Model
     {
         return $this->belongsTo(PlanEstrategico::class, 'idPlanEstrategico');
     }
-    
+
     public function actividades()
     {
         return $this->hasMany(Actividad::class, 'idMetas');
     }
-
 }

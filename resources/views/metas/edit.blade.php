@@ -32,7 +32,7 @@
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Actividades</label>
-        <input type="text" name="actividades" id="actividades" value="{{ $meta->actividades }}"
+        <input type="text" name="nombre_actividades" id="nombre_actividades" value="{{ $meta->nombre_actividades }}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
     </div>
 

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->foreignId('idUsuario')->constrained('usuarios')->onDelete('cascade');
 
             $table->string('nombre_plan_estrategico', 255);
-            $table->string('metas', 255);
             $table->string('ejes_estrategicos', 255);
             $table->date('fecha_inicio');
             $table->date('fecha_fin');

@@ -10,6 +10,8 @@ use App\Http\Controllers\MetaController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\PlanEstrategicoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SeguimientoActividadController;
+use App\Http\Controllers\ResultadoController;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -25,13 +27,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'verified'])->group(function(){
+Route::middleware(['auth', 'verified'])->group(function () {
     // Institucion
     Route::resource('instituciones', InstitucionController::class)->only([
-        'index', 'store','update', 'destroy'
+        'index',
+        'store',
+        'update',
+        'destroy'
     ]);
-    Route::get('instituciones/create', fn () => abort(404));
-    Route::get('instituciones/edit', fn () => abort(404));
+    Route::get('instituciones/create', fn() => abort(404));
+    Route::get('instituciones/edit', fn() => abort(404));
 
     // Departamento
     Route::resource('departamentos', DepartamentoController::class);
@@ -40,19 +45,28 @@ Route::middleware(['auth', 'verified'])->group(function(){
     // Para mostrar todos los departamentos
     Route::get('/departamentos', [DepartamentoController::class, 'todos'])->name('departamentos.index');
 
-    // Usuarios
+    // usuarios
+    Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
     Route::resource('usuarios', UsuarioController::class);
-    
+
+
     // Metas
     Route::resource('metas', MetaController::class);
     Route::get('/planes/{plan}/metas', [MetaController::class, 'indexPorPlan'])->name('plan.metas');
-    
+
     // Actividades
     Route::resource('actividades', ActividadController::class);
     Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
+    //seguimiento de actividades
+    Route::get('/actividades/{actividad}/seguimientos', [\App\Http\Controllers\SeguimientoActividadController::class, 'listarPorActividad']);
+    Route::delete('/seguimientos/{seguimiento}', [\App\Http\Controllers\SeguimientoActividadController::class, 'destroy'])->name('seguimientos.destroy');
+    //resumen de actividades por meta
+    Route::get('/metas/{meta}/resumen-seguimientos', [SeguimientoActividadController::class, 'resumenPorMeta'])->name('meta.resumen_seguimientos');
+
+
+
 
     // Planes Estratégicos
-    Route::get('/instituciones/{id}/planes/create', [PlanEstrategicoController::class, 'create'])->name('planes.create');
     Route::post('/planes', [PlanEstrategicoController::class, 'store'])->name('planes.store');
     Route::get('/planes', [PlanEstrategicoController::class, 'index'])->name('planes.index');
     //eliminar un plan estratégico
@@ -61,6 +75,25 @@ Route::middleware(['auth', 'verified'])->group(function(){
     Route::put('/planes/{id}', [PlanEstrategicoController::class, 'update'])->name('planes.update');
     //obtener usuarios por departamento
     Route::get('/departamentos/{id}/usuarios-disponibles', [App\Http\Controllers\UsuarioController::class, 'usuariosPorDepartamento']);
+    //mostrar planes por institución
+    Route::get('/instituciones/{id}/planes', [App\Http\Controllers\PlanEstrategicoController::class, 'planesPorInstitucion'])->name('institucion.planes');
+    //mostrar planes globales
+    Route::get('/planes/todos', [PlanEstrategicoController::class, 'indexGlobal'])->name('planes.global');
+
+    // Mostrar resultados registrados
+    Route::get('/planes/{id}/reporte', [ResultadoController::class, 'verReporte'])->name('planes.reporte');
+
+
+
+
+
+    // Seguimiento de Actividades
+    Route::get('/seguimientos', [SeguimientoActividadController::class, 'index'])->name('seguimientos.index');
+    Route::get('/seguimientos/create', [SeguimientoActividadController::class, 'create'])->name('seguimientos.create');
+    Route::post('/seguimientos', [SeguimientoActividadController::class, 'store'])->name('seguimientos.store');
+    Route::get('/seguimientos/{seguimiento}', [SeguimientoActividadController::class, 'show']);
+    Route::put('/seguimientos/{id}', [SeguimientoActividadController::class, 'update'])->name('seguimientos.update');
+
 });
 
 require __DIR__ . '/auth.php';

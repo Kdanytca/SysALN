@@ -34,7 +34,7 @@ class MetaController extends Controller
             'usuario_responsable' => 'required|string|max:255',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|string|max:255',
-            'actividades' => 'nullable|string|max:255',
+            'nombre_actividades' => 'nullable|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',
@@ -45,7 +45,7 @@ class MetaController extends Controller
         $meta->usuario_responsable = $request->usuario_responsable;
         $meta->nombre_meta = $request->nombre_meta;
         $meta->ejes_estrategicos = $request->ejes_estrategicos;
-        $meta->actividades = $request->actividades;
+        $meta->nombre_actividades= $request->nombre_actividades;
         $meta->fecha_inicio = $request->fecha_inicio;
         $meta->fecha_fin = $request->fecha_fin;
         $meta->comentario = $request->comentario;
@@ -62,7 +62,7 @@ class MetaController extends Controller
             'usuario_responsable' => 'required|string|max:255',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|string|max:255',
-            'actividades' => 'nullable|string|max:255',
+            'nombre_actividades' => 'nullable|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',

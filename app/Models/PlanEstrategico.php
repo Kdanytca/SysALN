@@ -14,7 +14,6 @@ class PlanEstrategico extends Model
         'idDepartamento',
         'idUsuario',
         'nombre_plan_estrategico',
-        'metas',
         'ejes_estrategicos',
         'fecha_inicio',
         'fecha_fin',

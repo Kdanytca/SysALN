@@ -96,4 +96,10 @@ class UsuarioController extends Controller
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado correctamente.');
     }
+    // Muestra un usuario en formato JSON
+    public function showJson($id)
+    {
+        $usuario = Usuario::findOrFail($id);
+        return response()->json($usuario);
+    }
 }

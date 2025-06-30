@@ -3,6 +3,7 @@
         display: none !important;
     }
 </style>
+<input type="hidden" name="origen" value="instituciones_show">
 <x-app-layout>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -19,9 +20,10 @@
                         </button>
 
                         <!-- Modal -->
-                        <div x-show="modalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                            <input type="hidden" name="origen" value="instituciones_show">
-                            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                        <div x-show="modalOpen"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                            <div @click.away="modalOpen = false"
+                                class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                 <h2 class="text-lg font-semibold mb-4">Registrar Nueva Institución</h2>
                                 @include('instituciones.create')
                             </div>
@@ -67,7 +69,9 @@
                                                 <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                                     <h2 class="text-lg font-semibold mb-4">Editar Institución</h2>
                                                     @include('instituciones.edit', [
-                                                        'action' => route('instituciones.update', $institucion->id),
+                                                        'action' => route(
+                                                            'instituciones.update',
+                                                            $institucion->id),
                                                         'isEdit' => true,
                                                         'institucion' => $institucion,
                                                     ])
@@ -112,9 +116,9 @@
                                             class="text-blue-600 hover:text-blue-800 mr-3">
                                             Ver Departamentos
                                         </a>
-                                        <a href="{{ route('planes.create', $institucion->id) }}"
-                                            class="text-green-600 hover:text-green-800 mr-3">
-                                            Crear Plan Estratégico
+                                        <a href="{{ route('institucion.planes', $institucion->id) }}"
+                                            class="text-teal-600 hover:text-teal-800 mr-3">
+                                            Ver Planes Estratégicos
                                         </a>
                                         
                                     </td>

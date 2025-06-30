@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('seguimiento_actividades', function (Blueprint $table) {
             $table->id();
             $table->date('periodo_consultar');
+            $table->text('observaciones')->nullable();
+            $table->enum('estado', ['pendiente', 'en progreso', 'finalizado'])->default('pendiente');
+            $table->string('documento')->nullable(); // Ruta al archivo (si lo quieres)
             $table->foreignId('idActividades')->constrained('actividades');
             $table->timestamps();
         });
