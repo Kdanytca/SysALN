@@ -1,285 +1,101 @@
-<x-app-layout>
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-semibold">Planes Estratégicos</h1>
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.tailwindcss.min.css">
+@endpush
 
-            <button onclick="openCreateModal()"
-                class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                + Nuevo Plan
-            </button>
-        </div>
-
-        <!-- Tabla -->
-        <table class="min-w-full divide-y divide-gray-200 bg-white shadow rounded-lg">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre Plan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Departamento</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Responsable</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Inicio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Fin</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Indicador</th>
-                    <th class="px-6 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                @forelse ($planes as $plan)
-                    <tr>
-                        <td class="px-6 py-4">{{ $plan->nombre_plan_estrategico }}</td>
-                        <td class="px-6 py-4">{{ $plan->departamento->departamento ?? 'N/A' }}</td>
-                        <td class="px-6 py-4">{{ $plan->responsable->nombre_usuario ?? 'Sin responsable' }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}</td>
-                        <td class="px-6 py-4">{{ \Carbon\Carbon::parse($plan->fecha_fin)->format('d-m-Y') }}</td>
-                        <td class="px-6 py-4 text-center">
-                            @php
-                                $color = match ($plan->indicador) {
-                                    'rojo' => 'bg-red-500',
-                                    'amarillo' => 'bg-yellow-400',
-                                    'verde' => 'bg-green-500',
-                                    default => 'bg-gray-300',
-                                };
-                            @endphp
-                            <span class="inline-block w-5 h-5 rounded-full {{ $color }}"
-                                title="{{ ucfirst($plan->indicador) }}"></span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right space-x-2">
-                            <a href="{{ route('plan.metas', $plan->id) }}"
-                                class="text-blue-600 hover:text-blue-900 font-semibold">
-                                Metas
-                            </a>
-                            <button class="text-yellow-600 hover:text-yellow-800 font-semibold"
-                                onclick='openEditModal({
-        id: {{ $plan->id }},
-        nombre_plan_estrategico: @json($plan->nombre_plan_estrategico),
-        ejes_estrategicos: @json($plan->ejes_estrategicos),
-        fecha_inicio: @json($plan->fecha_inicio),
-        fecha_fin: @json($plan->fecha_fin),
-        idInstitucion: {{ $plan->departamento->idInstitucion ?? 'null' }},
-        idDepartamento: {{ $plan->idDepartamento }},
-        idUsuario: {{ $plan->idUsuario }}
-    })'>
-                                Editar
-                            </button>
-
-
-
-                            <form action="{{ route('planes.destroy', $plan->id) }}" method="POST" class="inline"
-                                onsubmit="return confirm('¿Estás seguro de eliminar este plan?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-800 font-semibold">
-                                    Eliminar
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay planes registrados.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
-        <input type="hidden" name="origen" value="planes_index">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative">
-            <button class="absolute top-2 right-2 text-gray-600 hover:text-red-600"
-                onclick="document.getElementById('modal').classList.add('hidden')">
-                ✕
-            </button>
-
-            <h2 class="text-xl font-bold mb-4">Nuevo Plan Estratégico</h2>
-
-            <form method="POST" action="{{ route('planes.store') }}">
-                @csrf
-                <input type="hidden" name="plan_id" id="plan_id">
-
-                <!-- Institución -->
-                <div class="mb-4">
-                    <label for="institucion" class="block font-medium">Institución</label>
-                    <select id="institucion" class="w-full border rounded px-3 py-2" onchange="filtrarDepartamentos()"
-                        required>
-                        <option value="">Seleccione una institución</option>
-                        @foreach ($instituciones as $inst)
-                            <option value="{{ $inst->id }}">{{ $inst->nombre_institucion }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Departamento -->
-                <div class="mb-4">
-                    <label for="idDepartamento" class="block font-medium">Departamento</label>
-                    <select name="idDepartamento" id="idDepartamento" class="w-full border rounded px-3 py-2" required>
-                        <option value="">Seleccione un departamento</option>
-                        <!-- Se llenará dinámicamente -->
-                    </select>
-                </div>
-
-
-                <!-- Nombre -->
-                <div class="mb-4">
-                    <label for="nombre_plan_estrategico" class="block font-medium">Nombre del Plan</label>
-                    <input type="text" name="nombre_plan_estrategico" class="w-full border rounded px-3 py-2"
-                        required>
-                </div>
-
-                <!-- Ejes -->
-                <div class="mb-4">
-                    <label for="ejes_estrategicos" class="block font-medium">Ejes Estratégicos</label>
-                    <input type="text" name="ejes_estrategicos" class="w-full border rounded px-3 py-2" required>
-                </div>
-
-                <div class="flex gap-4 mb-4">
-                    <div class="w-1/2">
-                        <label for="fecha_inicio" class="block font-medium">Inicio</label>
-                        <input type="date" name="fecha_inicio" class="w-full border rounded px-3 py-2" required>
-                    </div>
-                    <div class="w-1/2">
-                        <label for="fecha_fin" class="block font-medium">Fin</label>
-                        <input type="date" name="fecha_fin" class="w-full border rounded px-3 py-2" required>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="responsable" class="block font-medium">Responsable</label>
-                    <select name="responsable" id="responsable" class="w-full border rounded px-3 py-2" required>
-                        <option value="">Seleccione un responsable</option>
-                    </select>
-                    <div id="mensajeNoUsuarios" class="text-red-600 font-semibold mt-2" style="display: none;">
-                        No hay usuarios disponibles.
-                    </div>
-                </div>
-
-
-                <div class="text-right">
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Guardar Plan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Script para abrir el modal de creación -->
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.tailwindcss.min.js"></script>
     <script>
-        function openEditModal(plan) {
-            const modal = document.getElementById('modal');
-            const form = modal.querySelector('form');
-            const methodInput = form.querySelector('input[name="_method"]');
-            const action = `/planes/${plan.id}`;
-
-            form.reset();
-            form.action = action;
-
-            if (methodInput) methodInput.remove();
-
-            const hiddenMethod = document.createElement('input');
-            hiddenMethod.type = 'hidden';
-            hiddenMethod.name = '_method';
-            hiddenMethod.value = 'PUT';
-            form.appendChild(hiddenMethod);
-
-            document.getElementById('plan_id').value = plan.id;
-            form.nombre_plan_estrategico.value = plan.nombre_plan_estrategico;
-            form.ejes_estrategicos.value = plan.ejes_estrategicos;
-            form.fecha_inicio.value = plan.fecha_inicio;
-            form.fecha_fin.value = plan.fecha_fin;
-
-            // Seleccionar institución
-            form.institucion.value = plan.idInstitucion;
-
-            // Filtrar departamentos según institución seleccionada
-            filtrarDepartamentos();
-
-            // Espera un momento para asegurarse que departamentos se cargaron (opcional, pero recomendable)
-            setTimeout(() => {
-                form.idDepartamento.value = plan.idDepartamento;
-            }, 100);
-
-            form.responsable.value = plan.idUsuario;
-
-            modal.classList.remove('hidden');
-        }
-    </script>
-    <script>
-        const instituciones = @json($instituciones);
-
-        function filtrarDepartamentos() {
-            const institucionId = document.getElementById('institucion').value;
-            const departamentoSelect = document.getElementById('idDepartamento');
-
-            // Limpia los options actuales
-            departamentoSelect.innerHTML = '<option value="">Seleccione un departamento</option>';
-
-            if (institucionId === '') return;
-
-            const institucion = instituciones.find(i => i.id == institucionId);
-            if (institucion && institucion.departamentos.length > 0) {
-                institucion.departamentos.forEach(dep => {
-                    const option = document.createElement('option');
-                    option.value = dep.id;
-                    option.textContent = dep.departamento;
-                    departamentoSelect.appendChild(option);
-                });
-            }
-        }
-    </script>
-    <!-- Script para abrir el modal de creación -->
-    <script>
-        function openCreateModal() {
-            const modal = document.getElementById('modal');
-            const form = modal.querySelector('form');
-
-            // Limpiar valores del formulario
-            form.reset();
-            form.action = "{{ route('planes.store') }}";
-
-            // Quitar campo oculto _method si existe (por si vienes de editar)
-            const methodInput = form.querySelector('input[name="_method"]');
-            if (methodInput) methodInput.remove();
-
-            // Asegurarte que el modal esté visible
-            modal.classList.remove('hidden');
-        }
-    </script>
-    <!-- Scrip para filtrar usuarios por departamento -->
-    <script>
-        document.getElementById('idDepartamento').addEventListener('change', async function() {
-            const departamentoId = this.value;
-            const select = document.getElementById('responsable');
-            const mensaje = document.getElementById('mensajeNoUsuarios');
-
-            // Limpiar select actual
-            select.innerHTML = '<option value="">Seleccione un usuario</option>';
-
-            if (!departamentoId) {
-                mensaje.style.display = 'block';
-                return;
-            }
-
-            try {
-                const response = await fetch(`/departamentos/${departamentoId}/usuarios-disponibles`);
-                const usuarios = await response.json();
-
-                if (usuarios.length === 0) {
-                    mensaje.style.display = 'block';
-                } else {
-                    mensaje.style.display = 'none';
-                    usuarios.forEach(usuario => {
-                        const option = document.createElement('option');
-                        option.value = usuario.id;
-                        option.textContent = usuario.nombre_usuario;
-                        select.appendChild(option);
-                    });
+        $(document).ready(function() {
+            $('#tablaPlanes').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
                 }
-            } catch (err) {
-                console.error("Error cargando usuarios:", err);
-                mensaje.style.display = 'block';
-            }
+            });
         });
     </script>
+@endpush
 
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Todos los Planes Estratégicos
+        </h2>
+    </x-slot>
+
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow border border-gray-200 sm:rounded-lg p-6">
+                <table id="tablaPlanes" class="min-w-full text-sm text-gray-800">
+                    <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Institución</th>
+                            <th class="px-4 py-3 text-left">Departamento</th>
+                            <th class="px-4 py-3 text-left">Plan</th>
+                            <th class="px-4 py-3 text-left">Ejes Estratégicos</th>
+                            <th class="px-4 py-3 text-left">Inicio</th>
+                            <th class="px-4 py-3 text-left">Fin</th>
+                            <th class="px-4 py-3 text-left">Responsable</th>
+                            <th class="px-4 py-3 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($planes as $plan)
+                            <tr class="hover:bg-indigo-50 transition">
+                                <td class="px-4 py-2">{{ $plan->departamento->institucion->nombre_institucion }}</td>
+                                <td class="px-4 py-2">{{ $plan->departamento->departamento }}</td>
+                                <td class="px-4 py-2 font-semibold text-gray-900">
+                                    {{ $plan->nombre_plan_estrategico }}
+                                </td>
+                                <td class="px-4 py-2">
+                                    @foreach (explode(',', $plan->ejes_estrategicos) as $eje)
+                                        <span
+                                            class="inline-block bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-xs font-medium mr-1 mb-1">
+                                            {{ trim($eje) }}
+                                        </span>
+                                    @endforeach
+                                </td>
+                                <td class="px-4 py-2 text-gray-600">
+                                    {{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}
+                                </td>
+                                <td class="px-4 py-2 text-gray-600">
+                                    {{ \Carbon\Carbon::parse($plan->fecha_fin)->format('d-m-Y') }}
+                                </td>
+                                <td class="px-4 py-2">
+                                    {{ $plan->responsable->nombre_usuario ?? '—' }}
+                                </td>
+                                <td class="px-4 py-2">
+                                    <div class="flex space-x-2">
+                                        <a href="{{ route('plan.metas', $plan->id) }}"
+                                            class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-md text-xs hover:bg-indigo-200 transition shadow-sm">
+                                            Metas
+                                        </a>
+
+                                        <a href="{{ route('planes.reporte', $plan->id) }}"
+                                            class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-md text-xs hover:bg-indigo-200 transition shadow-sm">
+                                            Ver Reporte
+                                        </a>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Botón Volver estilizado -->
+                <div class="mt-8">
+                    <a href="{{ route('instituciones.index') }}"
+                        class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200 text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Volver a instituciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

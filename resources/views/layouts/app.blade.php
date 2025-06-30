@@ -19,7 +19,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="flex flex-col min-h-screen font-sans antialiased bg-gray-100">
     <!-- NAVBAR -->
     <nav class="bg-gray-800 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,9 +68,68 @@
     @endisset
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main>
+    <main class="flex-grow">
         {{ $slot }}
     </main>
+
+
+    <footer class="bg-gray-800 text-gray-100 text-sm py-6 px-8">
+        <div
+            class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0">
+
+            <!-- Izquierda -->
+            <div class="md:w-1/3 text-left flex flex-col items-start space-y-2">
+                <a href="https://virtual3.itca.edu.sv/?redirect=0" class="inline-block bg-white p-1 rounded">
+                    <img src="{{ asset('img/logoITCA.png') }}" alt="Logo ITCA"
+                        class="h-12 w-auto filter brightness-110 contrast-125" />
+                </a>
+
+                <p class="leading-relaxed text-gray-300 text-sm">
+                    En la Escuela Especializada en Ingeniería ITCA-FEPADE estamos comprometidos con la calidad
+                    académica, la
+                    empresarialidad y la pertinencia de nuestra oferta educativa.
+                </p>
+            </div>
+
+
+
+            <!-- Centro -->
+            <div class="md:w-1/3 text-center space-y-1">
+                <a href="#" class="block hover:underline">Moodle community</a>
+                <a href="#" class="block hover:underline">Moodle free support</a>
+                <a href="#" class="block hover:underline">Moodle Docs</a>
+                <a href="#" class="block hover:underline">Moodle.com</a>
+            </div>
+
+            <!-- Derecha -->
+            <div class="md:w-1/3 text-right space-y-2">
+                <div class="flex justify-end space-x-4 mb-2">
+                    <!-- Íconos minimalistas -->
+                    <a href="https://www.facebook.com/profile.php?id=100064701425306" target="_blank"
+                        aria-label="Facebook" class="text-gray-300 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.733 0-1.325.592-1.325 1.325v21.351c0 .732.592 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.894-4.788 4.66-4.788 1.325 0 2.466.099 2.797.143v3.243l-1.918.001c-1.505 0-1.797.715-1.797 1.763v2.311h3.59l-.467 3.622h-3.123V24h6.116c.73 0 1.322-.592 1.322-1.324V1.325c0-.733-.592-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+                    <a href="https://x.com/itcafepade" target="_blank" aria-label="Twitter"
+                        class="text-gray-300 hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M24 4.557a9.83 9.83 0 01-2.828.775 4.932 4.932 0 002.165-2.724 9.867 9.867 0 01-3.127 1.195 4.917 4.917 0 00-8.38 4.482A13.957 13.957 0 011.671 3.15a4.917 4.917 0 001.523 6.555 4.897 4.897 0 01-2.228-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.935 4.935 0 01-2.224.085 4.918 4.918 0 004.588 3.417A9.867 9.867 0 010 19.54a13.94 13.94 0 007.548 2.209c9.142 0 14.307-7.721 13.995-14.646A9.936 9.936 0 0024 4.557z" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="text-gray-400 leading-relaxed">
+                    <p>CARRETERA A SANTA TECLA KM. 11, LA LIBERTAD, EL SALVADOR C.A</p>
+                    <p>TEL. (503) 2132-7400. FAX (503) 2132-7406</p>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+
 </body>
 
 </html>

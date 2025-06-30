@@ -69,7 +69,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $meta->ejes_estrategicos }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $meta->actividades }}</td>
+                                    {{ $meta->nombre_actividades}}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $meta->fecha_inicio }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

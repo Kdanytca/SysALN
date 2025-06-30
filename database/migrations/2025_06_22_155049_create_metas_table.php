@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('usuario_responsable');
             $table->string('nombre_meta', 255);
             $table->string('ejes_estrategicos', 255);
-            $table->string('actividades', 255);
+            $table->string('nombre_actividades', 255)->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->string('comentario', 255);

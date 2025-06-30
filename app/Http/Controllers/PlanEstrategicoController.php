@@ -14,22 +14,6 @@ class PlanEstrategicoController extends Controller
     /**
      * Mostrar formulario de creación de Plan Estratégico.
      */
-    public function create($id)
-    {
-        $departamentos = Departamento::all();
-        $institucion = Institucion::with('departamentos')->findOrFail($id);
-
-        // Obtener IDs de los departamentos de esa institución
-        $departamentoIds = $institucion->departamentos->pluck('id');
-
-        // Filtrar usuarios que pertenezcan a esos departamentos y que no estén ya asignados a un plan
-        $usuariosDisponibles = Usuario::whereIn('idDepartamento', $departamentoIds)
-            ->whereDoesntHave('planesEstrategicos') // usuario no está en ningún plan
-            ->get();
-
-        return view('planes.create', compact('institucion', 'usuariosDisponibles', 'departamentos'));
-    }
-
     public function index()
     {
         $instituciones = Institucion::with('departamentos')->get();
@@ -39,7 +23,25 @@ class PlanEstrategicoController extends Controller
 
         return view('planes.index', compact('planes', 'departamentos', 'usuarios', 'instituciones'));
     }
+    /**
+     * Mostrar los planes estratégicos de una institución específica.
+     */
+    // PlanController.php
+    public function planesPorInstitucion($id)
+    {
+        $institucion = Institucion::with('departamentos')->findOrFail($id);
 
+        $planes = PlanEstrategico::whereHas('departamento', function ($q) use ($id) {
+            $q->where('idInstitucion', $id);
+        })->with(['departamento', 'responsable'])->get();
+
+        // Obtener usuarios de los departamentos de esa institución
+        $usuariosDisponibles = Usuario::whereHas('departamento', function ($q) use ($id) {
+            $q->where('idInstitucion', $id);
+        })->get();
+
+        return view('planes.por_institucion', compact('institucion', 'planes', 'usuariosDisponibles'));
+    }
 
 
 
@@ -52,7 +54,8 @@ class PlanEstrategicoController extends Controller
             'idDepartamento' => 'required|exists:departamentos,id',
             'nombre_plan_estrategico' => 'required|string|max:255',
             'metas' => 'nullable|string|max:255',
-            'ejes_estrategicos' => 'required|string|max:255',
+            'ejes_estrategicos' => 'required|array|min:1',
+            'ejes_estrategicos.*' => 'required|string|max:100',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'indicador' => 'nullable|string|max:45',
@@ -64,19 +67,16 @@ class PlanEstrategicoController extends Controller
             'idUsuario' => $request->responsable,
             'nombre_plan_estrategico' => $request->nombre_plan_estrategico,
             'metas' => $request->metas ?? '',
-            'ejes_estrategicos' => $request->ejes_estrategicos,
+            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'indicador' => '',
             'creado_por' => Auth::id(),
         ]);
 
-        // Redirección según el origen del formulario
-        if ($request->origen === 'planes_index') {
-            return redirect()->route('planes.index')->with('success', 'Plan Estratégico creado correctamente.');
-        }
-
-        return redirect()->route('instituciones.index')->with('success', 'Plan Estratégico creado correctamente.');
+        return redirect()->route('institucion.planes', [
+            'id' => $request->institucion_id
+        ]);
     }
 
 
@@ -84,17 +84,22 @@ class PlanEstrategicoController extends Controller
     public function destroy($id)
     {
         $plan = PlanEstrategico::findOrFail($id);
+        $institucion_id = $plan->departamento->idInstitucion;
         $plan->delete();
 
-        return redirect()->route('planes.index')->with('success', 'Plan eliminado correctamente.');
+        return redirect()->route('institucion.planes', [
+            'id' => $institucion_id
+        ])->with('success', 'Plan eliminado.');
     }
+
     //actualizar
     public function update(Request $request, $id)
     {
         $request->validate([
             'idDepartamento' => 'required|exists:departamentos,id',
             'nombre_plan_estrategico' => 'required|string|max:255',
-            'ejes_estrategicos' => 'required|string',
+            'ejes_estrategicos' => 'required|array|min:1',
+            'ejes_estrategicos.*' => 'required|string|max:100',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'responsable' => 'required|exists:usuarios,id',
@@ -104,12 +109,27 @@ class PlanEstrategicoController extends Controller
         $plan->update([
             'idDepartamento' => $request->idDepartamento,
             'nombre_plan_estrategico' => $request->nombre_plan_estrategico,
-            'ejes_estrategicos' => $request->ejes_estrategicos,
+            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'idUsuario' => $request->responsable,
         ]);
 
-        return redirect()->route('planes.index')->with('success', 'Plan actualizado correctamente');
+        $institucion_id = $plan->departamento->idInstitucion;
+        
+        return redirect()->route('institucion.planes', [
+            'id' => $institucion_id
+        ])->with('success', 'Plan actualizado correctamente');
+    }
+
+    //Ver planes globales
+    public function indexGlobal()
+    {
+        $planes = PlanEstrategico::with([
+            'departamento.institucion',
+            'responsable'
+        ])->get();
+
+        return view('planes.index', compact('planes'));
     }
 }

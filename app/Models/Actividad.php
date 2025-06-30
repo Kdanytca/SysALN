@@ -29,5 +29,8 @@ class Actividad extends Model
     {
         return $this->belongsTo(Usuario::class, 'idUsuario');
     }
-
+    public function seguimientos()
+    {
+        return $this->hasMany(SeguimientoActividad::class, 'idActividades');
+    }
 }
