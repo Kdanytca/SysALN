@@ -1,9 +1,9 @@
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
 <x-app-layout>
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
@@ -19,11 +19,9 @@
                         </button>
 
                         <!-- Modal -->
-                        <div x-show="modalOpen" 
-                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                        <input type="hidden" name="origen" value="instituciones_show">
-                            <div @click.away="modalOpen = false"
-                                class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                        <div x-show="modalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                            <input type="hidden" name="origen" value="instituciones_show">
+                            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                 <h2 class="text-lg font-semibold mb-4">Registrar Nueva Institución</h2>
                                 @include('instituciones.create')
                             </div>
@@ -65,13 +63,9 @@
                                             </button>
 
                                             <!-- Modal de edición -->
-                                            <div x-show="editModalOpen"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div @click.away="editModalOpen = false"
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                                            <div x-show="editModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
                                                     <h2 class="text-lg font-semibold mb-4">Editar Institución</h2>
-
                                                     @include('instituciones.edit', [
                                                         'action' => route('instituciones.update', $institucion->id),
                                                         'isEdit' => true,
@@ -90,16 +84,10 @@
                                             </button>
 
                                             <!-- Modal de confirmación -->
-                                            <div x-show="confirmDelete"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div @click.away="confirmDelete = false"
-                                                    class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                        eliminación</h2>
-                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        esta institución?</p>
-
+                                            <div x-show="confirmDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar eliminación</h2>
+                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar esta institución?</p>
                                                     <div class="flex justify-end space-x-3">
                                                         <button @click="confirmDelete = false"
                                                             class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
@@ -128,8 +116,7 @@
                                             class="text-green-600 hover:text-green-800 mr-3">
                                             Crear Plan Estratégico
                                         </a>
-
-
+                                        
                                     </td>
                                 </tr>
                             @endforeach

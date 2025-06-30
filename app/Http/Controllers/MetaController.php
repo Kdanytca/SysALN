@@ -27,12 +27,6 @@ class MetaController extends Controller
     }
 
     // Se encarga de crear una nueva meta
-    public function create()
-    {
-        $planes = PlanEstrategico::all();
-        return view('metas.create', compact('planes'));
-    }
-
     public function store(Request $request)
     {
         request()->validate([
@@ -61,13 +55,6 @@ class MetaController extends Controller
     }
 
     // Se encarga de editar una meta
-    public function edit(Meta $meta)
-    {
-        $meta = Meta::findOrFail($meta->id);
-        $planes = PlanEstrategico::all();
-        return view('metas.edit', compact('meta', 'planes'));
-    }
-
     public function update(Request $request, Meta $meta)
     {
         request()->validate([

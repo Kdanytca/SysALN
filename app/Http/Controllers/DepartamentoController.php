@@ -27,12 +27,6 @@ class DepartamentoController extends Controller
     }
 
     // Se encarga de crear un nuevo departamento
-    public function create()
-    {
-        $instituciones = Institucion::all();
-        return view('departamentos.create', compact('instituciones'));
-    }
-
     public function store(Request $request)
     {
         request()->validate([
@@ -58,13 +52,6 @@ class DepartamentoController extends Controller
     }
 
     // Se encarga de editar un departamento
-    public function edit(string $id)
-    {
-        $departamento = Departamento::find($id);
-        $instituciones = Institucion::all();
-        return view('departamentos.edit', compact('departamento', 'instituciones'));
-    }
-
     public function update(Request $request, string $id)
     {
         request()->validate([

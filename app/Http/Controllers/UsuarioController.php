@@ -18,12 +18,6 @@ class UsuarioController extends Controller
     }
 
     // Se encarga de crear un nuevo usuario
-    public function create()
-    {
-        $departamentos = Departamento::all();
-        return view('usuarios.create', compact('departamentos'));
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -63,13 +57,6 @@ class UsuarioController extends Controller
     }
 
     // Se encarga de editar un usuario
-    public function edit($id)
-    {
-        $usuario = Usuario::find($id);
-        $departamentos = Departamento::all();
-        return view('usuarios.edit', ['usuario' => $usuario], compact('departamentos'));
-    }
-
     public function update(Request $request, string $id)
     {
         request()->validate([
