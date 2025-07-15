@@ -14,15 +14,15 @@
     <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Nombre del Departamento</label>
+        <label class="block font-medium">Nombre del Departamento</label>
         <input type="text" name="departamento" id="departamento"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Encargado del Departamento</label>
+        <label class="block font-medium">Encargado del Departamento</label>
         <input type="text" name="encargado_departamento" id="encargado_departamento"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="flex justify-end">
@@ -30,7 +30,7 @@
             class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
             Cancelar
         </button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Guardar
         </button>
     </div>

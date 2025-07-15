@@ -9,9 +9,9 @@ class Usuario extends Model
     protected $fillable = [
         'idDepartamento',
         'nombre_usuario',
-        'contraseña',
+        'password',
         'tipo_usuario',
-        'correo',
+        'email',
     ];
 
     // Relaciones

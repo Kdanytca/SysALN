@@ -23,6 +23,7 @@ class ActividadController extends Controller
     // Muestra la lista de actividades filtradas por meta
     public function indexPorMeta(Meta $meta)
     {
+        $meta->load('planEstrategico');
         $actividades = $meta->actividades()->with('meta')->get();
         $metas = Meta::all();
         $usuarios = Usuario::all();

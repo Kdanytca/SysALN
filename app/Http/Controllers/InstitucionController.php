@@ -17,17 +17,17 @@ class InstitucionController extends Controller
     // Se encarga de crear una nueva institución
     public function store(Request $request)
     {
-        request()->validate([
+        $request->validate([
             'nombre_institucion' => 'required|string|max:255',
             'tipo_institucion' => 'required|string|max:255',
             'encargado_proyecto' => 'required|string|max:255',
         ]);
 
-        $institucion = new Institucion();
-        $institucion->nombre_institucion = $request->nombre_institucion;
-        $institucion->tipo_institucion = $request->tipo_institucion;
-        $institucion->encargado_proyecto = $request->encargado_proyecto;
-        $institucion->save();
+        Institucion::create([
+            'nombre_institucion' => $request->nombre_institucion,
+            'tipo_institucion' => $request->tipo_institucion,
+            'encargado_proyecto' => $request->encargado_proyecto,
+        ]);
 
         return redirect()->route('instituciones.index')->with('success', 'Institución registrada correctamente.');
     }
@@ -42,10 +42,11 @@ class InstitucionController extends Controller
         ]);
 
         $institucion = Institucion::find($id);
-        $institucion->nombre_institucion = $request->nombre_institucion;
-        $institucion->tipo_institucion = $request->tipo_institucion;
-        $institucion->encargado_proyecto = $request->encargado_proyecto;
-        $institucion->save();
+        $institucion->update([
+            'nombre_institucion' => $request->nombre_institucion,
+            'tipo_institucion' => $request->tipo_institucion,
+            'encargado_proyecto' => $request->encargado_proyecto,
+        ]);
 
         return redirect()->route('instituciones.index')->with('success', 'Institución actualizada correctamente.');
     }

@@ -11,25 +11,25 @@
     @csrf
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Nombre del Usuario</label>
+        <label class="block font-medium">Nombre del Usuario</label>
         <input type="text" name="nombre_usuario" id="nombre_usuario"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Correo Electronico</label>
-        <input type="email" name="correo" id="correo"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+        <label class="block font-medium">Correo Electronico</label>
+        <input type="email" name="email" id="email"
+            class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-        <input type="password" name="contraseña" id="contraseña"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+        <label class="block font-medium">Contraseña</label>
+        <input type="password" name="password" id="password"
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Departamento</label>
-        <select name="idDepartamento" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+        <label class="block font-medium">Departamento</label>
+        <select name="idDepartamento"
+            class="w-full border rounded px-3 py-2">
             <option value="">Seleccione un departamento</option>
             @foreach ($departamentos as $departamento)
             <option value="{{ $departamento->id }}">{{ $departamento->departamento }}</option>
@@ -37,9 +37,9 @@
         </select>
     </div>
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
+        <label class="block font-medium">Tipo de Usuario</label>
         <select name="tipo_usuario" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+            class="w-full border rounded px-3 py-2">
             <option value="Administrador">Administrador</option>
             <option value="Colaborador">Colaborador</option>
         </select>
@@ -50,7 +50,7 @@
             class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
             Cancelar
         </button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Guardar
         </button>
     </div>

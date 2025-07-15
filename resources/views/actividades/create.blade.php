@@ -15,7 +15,7 @@
 
     <div class="mb-4">
         <select name="idUsuario" id="idUsuario" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+            class="w-full border rounded px-3 py-2">
             <option value="">Seleccione una Usuario</option>
             @foreach ($usuarios as $usuario)
                 <option value="{{ $usuario->id }}"
@@ -27,39 +27,41 @@
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Nombre Actividad</label>
+        <label class="block font-medium">Nombre Actividad</label>
         <input type="text" name="nombre_actividad" id="nombre_actividad"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
-    <div>
-        <label class="block text-sm font-medium text-gray-700">Objetivos</label>
+    <div class="mb-4">
+        <label class="block font-medium">Objetivos</label>
         <input type="text" name="objetivos" id="objetivos"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    <div class="flex gap-4 mb-4">
+        <div class="w-1/2">
+            <label class="block font-medium">Fecha de Inicio</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio"
+                class="w-full border rounded px-3 py-2" required>
+        </div>
+    
+        <div class="w-1/2">
+            <label class="block font-medium">Fecha de Fin</label>
+            <input type="date" name="fecha_fin" id="fecha_fin"
+                class="w-full border rounded px-3 py-2" required>
+        </div>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
-        <input type="date" name="fecha_inicio" id="fecha_inicio"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
-    </div>
-
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Fecha de Fin</label>
-        <input type="date" name="fecha_fin" id="fecha_fin"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
-    </div>
-
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Resultados Esperados</label>
+        <label class="block font-medium">Resultados Esperados</label>
         <input type="text" name="resultados_esperados" id="resultados_esperados"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200" required>
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Unidad Encargada</label>
+        <label class="block font-medium">Unidad Encargada</label>
         <select id="unidad_encargada_display" disabled
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-indigo-200">
+            class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
             <option value="">Seleccione un departamento</option>
             @foreach($departamentos as $departamento)
                 <option value="{{ $departamento->departamento }}"
@@ -78,7 +80,7 @@
             class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
             Cancelar
         </button>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Guardar
         </button>
     </div>

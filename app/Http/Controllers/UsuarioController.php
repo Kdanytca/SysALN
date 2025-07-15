@@ -22,19 +22,20 @@ class UsuarioController extends Controller
     {
         $request->validate([
             'nombre_usuario' => 'required|string|max:255|unique:usuarios,nombre_usuario',
-            'correo' => 'required|email|max:255|unique:usuarios,correo',
-            'contraseña' => 'required|string|min:8',
-            'idDepartamento' => 'required|exists:departamentos,id',
+            'email' => 'required|email|max:255|unique:usuarios,email',
+            'password' => 'required|string|min:8',
+            'idDepartamento' => 'nullable|exists:departamentos,id',
             'tipo_usuario' => 'required',
         ]);
 
-        $usuario = new Usuario();
-        $usuario->nombre_usuario = $request->nombre_usuario;
-        $usuario->correo = $request->correo;
-        $usuario->contraseña = bcrypt($request->contraseña);
-        $usuario->idDepartamento = $request->idDepartamento;
-        $usuario->tipo_usuario = $request->tipo_usuario;
-        $usuario->save();
+        Usuario::create([
+            'nombre_usuario' => $request->nombre_usuario,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'idDepartamento' => $request->idDepartamento,
+            'tipo_usuario' => $request->tipo_usuario,
+            'remember_token' => $request->has('remember') ? $request->remember : null,
+        ]);
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -61,25 +62,23 @@ class UsuarioController extends Controller
     {
         request()->validate([
             'nombre_usuario' => 'required|string|max:255',
-            'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id,
-            'contraseña' => 'nullable|string|min:8',
-            'idDepartamento' => 'required|exists:departamentos,id',
+            'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
+            'password' => 'nullable|string|min:8',
+            'idDepartamento' => 'nullable|exists:departamentos,id',
             'tipo_usuario' => 'required',
         ]);
 
         $usuario = Usuario::find($id);
-        $usuario->nombre_usuario = $request->nombre_usuario;
-        $usuario->correo = $request->correo;
-        if ($request->filled('contraseña')) {
-            $usuario->contraseña = bcrypt($request->contraseña);
-        }
-        $usuario->idDepartamento = $request->idDepartamento;
-        $usuario->tipo_usuario = $request->tipo_usuario;
-        $usuario->remember_token = $request->has('remember') ? $request->remember : null;
-        $usuario->save();
+        $usuario->update([
+            'nombre_usuario' => $request->nombre_usuario,
+            'email' => $request->email,
+            'password' => $request->password ? bcrypt($request->password) : $usuario->password,
+            'idDepartamento' => $request->idDepartamento,
+            'tipo_usuario' => $request->tipo_usuario,
+        ]);
 
         // Obtener el nombre del nuevo departamento
-        $nuevoDepartamento = $usuario->departamento->departamento;
+        $nuevoDepartamento = $usuario->departamento->departamento ?? 'Sin departamento';
 
         // Actualizar todas las actividades del usuario con el nuevo nombre del departamento
         \App\Models\Actividad::where('idUsuario', $usuario->id)

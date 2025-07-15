@@ -7,6 +7,7 @@ use App\Models\Usuario;
 use App\Models\Departamento;
 use App\Models\PlanEstrategico;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class PlanEstrategicoController extends Controller
@@ -116,6 +117,11 @@ class PlanEstrategicoController extends Controller
         ]);
 
         $institucion_id = $plan->departamento->idInstitucion;
+
+        // Actualizar los ejes en todas las metas relacionadas
+        DB::table('metas')
+            ->where('idPlanEstrategico', $plan->id)
+            ->update(['ejes_estrategicos' => $plan->ejes_estrategicos]);
         
         return redirect()->route('institucion.planes', [
             'id' => $institucion_id

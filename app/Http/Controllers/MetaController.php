@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Meta;
 use App\Models\PlanEstrategico;
+use App\Models\Usuario;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class MetaController extends Controller
@@ -13,43 +15,68 @@ class MetaController extends Controller
     {
         $metas = Meta::with('planEstrategico')->get();
         $planes = PlanEstrategico::all();
+        $usuarios = Usuario::all();
 
-        return view('metas.index', compact('metas', 'planes'));
+        return view('metas.index', compact('metas', 'planes', 'usuarios'));
     }
 
     // Muestra la lista de metas filtradas por plan estratégico
     public function indexPorPlan(PlanEstrategico $plan)
     {
+        $plan->load('departamento.institucion'); // Esto incluye la institución relacionada
         $metas = $plan->metas()->with('planEstrategico')->get();
         $planes = PlanEstrategico::all();
 
-        return view('metas.index', compact('metas', 'plan', 'planes'));
+        // Obtener solo los usuarios del mismo departamento del plan
+        $usuarios = Usuario::where('idDepartamento', $plan->idDepartamento)->get();
+
+        return view('metas.index', compact('metas', 'plan', 'planes', 'usuarios'));
+    }
+
+    // Filtra el usuario responsable
+    public function create($planId)
+    {
+        $plan = PlanEstrategico::findOrFail($planId);
+
+        // Obtener solo usuarios del mismo departamento del plan
+        $usuarios = Usuario::where('idDepartamento', $plan->idDepartamento)->get();
+
+        return view('metas.create', compact('plan', 'usuarios'));
     }
 
     // Se encarga de crear una nueva meta
     public function store(Request $request)
     {
-        request()->validate([
+        $plan = PlanEstrategico::findOrFail($request->idPlanEstrategico);
+
+        $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
-            'usuario_responsable' => 'required|string|max:255',
+            'usuario_responsable' => [
+                'required',
+                Rule::exists('usuarios', 'nombre_usuario')->where(function ($query) use ($plan) {
+                    return $query->where('idDepartamento', $plan->idDepartamento);
+                }),
+            ],
             'nombre_meta' => 'required|string|max:255',
-            'ejes_estrategicos' => 'required|string|max:255',
-            'nombre_actividades' => 'nullable|string|max:255',
+            'ejes_estrategicos' => 'required|array|min:1',
+            'ejes_estrategicos.*' => 'required|string|max:255',
+            'nombre_actividades' => 'required|array|min:1',
+            'nombre_actividades.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',
         ]);
 
-        $meta = new Meta();
-        $meta->idPlanEstrategico = $request->idPlanEstrategico;
-        $meta->usuario_responsable = $request->usuario_responsable;
-        $meta->nombre_meta = $request->nombre_meta;
-        $meta->ejes_estrategicos = $request->ejes_estrategicos;
-        $meta->nombre_actividades= $request->nombre_actividades;
-        $meta->fecha_inicio = $request->fecha_inicio;
-        $meta->fecha_fin = $request->fecha_fin;
-        $meta->comentario = $request->comentario;
-        $meta->save();
+        Meta::create([
+            'idPlanEstrategico' => $request->idPlanEstrategico,
+            'usuario_responsable' => $request->usuario_responsable,
+            'nombre_meta' => $request->nombre_meta,
+            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
+            'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'comentario' => $request->comentario,
+        ]);
 
         return redirect()->back()->with('success', 'Meta creada exitosamente.');
     }
@@ -57,18 +84,36 @@ class MetaController extends Controller
     // Se encarga de editar una meta
     public function update(Request $request, Meta $meta)
     {
-        request()->validate([
+        $plan = PlanEstrategico::findOrFail($request->idPlanEstrategico);
+
+        $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
-            'usuario_responsable' => 'required|string|max:255',
+            'usuario_responsable' => [
+                'required',
+                Rule::exists('usuarios', 'nombre_usuario')->where(function ($query) use ($plan) {
+                    return $query->where('idDepartamento', $plan->idDepartamento);
+                }),
+            ],
             'nombre_meta' => 'required|string|max:255',
-            'ejes_estrategicos' => 'required|string|max:255',
-            'nombre_actividades' => 'nullable|string|max:255',
+            'ejes_estrategicos' => 'required|array|min:1',
+            'ejes_estrategicos.*' => 'required|string|max:255',
+            'nombre_actividades' => 'required|array|min:1',
+            'nombre_actividades.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',
         ]);
 
-        $meta->update($request->all());
+        $meta->update([
+            'idPlanEstrategico' => $request->idPlanEstrategico,
+            'usuario_responsable' => $request->usuario_responsable,
+            'nombre_meta' => $request->nombre_meta,
+            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
+            'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'comentario' => $request->comentario,
+        ]);
 
         return redirect()->back()->with('success', 'Meta actualizada exitosamente.');
     }

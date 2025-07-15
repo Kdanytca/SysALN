@@ -49,11 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
     Route::resource('usuarios', UsuarioController::class);
 
-
     // Metas
     Route::resource('metas', MetaController::class);
     Route::get('/planes/{plan}/metas', [MetaController::class, 'indexPorPlan'])->name('plan.metas');
-
+    
     // Actividades
     Route::resource('actividades', ActividadController::class);
     Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
