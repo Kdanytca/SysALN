@@ -28,7 +28,22 @@
     <div class="mb-4">
         <label class="block font-medium">Contraseña</label>
         <input type="password" name="password" id="password" value=""
-            class="w-full border rounded px-3 py-2" required>
+            class="w-full border rounded px-3 py-2">
+    </div>
+    
+    <div class="mb-4">
+        <label class="block font-medium">Institución</label>
+        <select name="idInstitucion" class="w-full border rounded px-3 py-2">
+            <option value="" {{ is_null($usuario->idInstitucion) ? 'selected' : '' }}>
+                Sin institución
+            </option>
+            @foreach ($instituciones as $institucion)
+                <option value="{{ $institucion->id }}"
+                    {{ $usuario->idInstitucion == $institucion->id ? 'selected' : '' }}>
+                    {{ $institucion->nombre_institucion }}
+                </option>
+            @endforeach
+        </select>
     </div>
 
     <div class="mb-4">
@@ -51,11 +66,13 @@
 
     <div class="mb-4">
         <label class="block font-medium">Tipo de Usuario</label>
-        <select name="tipo_usuario" required
-            class="w-full border rounded px-3 py-2">
-            <option value="Administrador" {{ $usuario->tipo_usuario == 'Administrador' ? 'selected' : '' }}>Administrador
-            </option>
-            <option value="Colaborador" {{ $usuario->tipo_usuario == 'Colaborador' ? 'selected' : '' }}>Colaborador</option>
+        <select name="tipo_usuario" required class="w-full border rounded px-3 py-2">
+            <option value="administrador" {{ $usuario->tipo_usuario == 'administrador' ? 'selected' : '' }}>Administrador</option>
+            <option value="encargado_institucion" {{ $usuario->tipo_usuario == 'encargado_institucion' ? 'selected' : '' }}>Encargado de Institución</option>
+            <option value="encargado_departamento" {{ $usuario->tipo_usuario == 'encargado_departamento' ? 'selected' : '' }}>Encargado de Departamento</option>
+            <option value="responsable_plan" {{ $usuario->tipo_usuario == 'responsable_plan' ? 'selected' : '' }}>Responsable de Plan Estratégico</option>
+            <option value="responsable_meta" {{ $usuario->tipo_usuario == 'responsable_meta' ? 'selected' : '' }}>Responsable de Meta</option>
+            <option value="responsable_actividad" {{ $usuario->tipo_usuario == 'responsable_actividad' ? 'selected' : '' }}>Responsable de Actividad</option>
         </select>
     </div>
 

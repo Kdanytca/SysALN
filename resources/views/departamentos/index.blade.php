@@ -6,8 +6,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800">Lista de Departamentos de:
-                {{ $institucion->nombre_institucion }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800">Lista de Departamentos</h2>
 
             <!-- Botón para agregar un nuevo registro -->
             <div x-data="{ modalOpen: false }">
@@ -25,8 +24,9 @@
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Departamento</h2>
-                        @include('departamentos.create', ['instituciones' => $instituciones, 'institucion' =>
-                        $institucion])
+                        @include('departamentos.create', [
+                            'usuariosParaCrear' => $usuariosParaCrear
+                        ])
                     </div>
                 </div>
             </div>
@@ -57,9 +57,9 @@
                             <td class="px-4 py-3 font-medium truncate">
                                 {{ $departamento->departamento }}</td>
                             <td class="px-4 py-3 truncate">
-                                {{ $departamento->institucion->nombre_institucion }}</td>
+                                {{ $departamento->institucion?->nombre_institucion ?? 'Sin institución' }}</td>
                             <td class="px-4 py-3 truncate">
-                                {{ $departamento->encargado_departamento }}</td>
+                                {{ $departamento->encargadoDepartamento->nombre_usuario }}</td>
                             <td class="px-4 py-3 text-righ">
                                 <div class="flex flex-wrap justify-center gap-2">
                                     <div x-data="{ editModalOpen: false }">
@@ -74,11 +74,11 @@
                                             x-cloak>
                                             <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                                                 <h2 class="text-xl font-bold mb-4">Editar Departamento</h2>
-
                                                 @include('departamentos.edit', [
                                                 'action' => route('departamentos.update', $departamento->id),
                                                 'isEdit' => true,
                                                 'departamento' => $departamento,
+                                                'usuarios' => $usuariosParaEditar
                                                 ])
                                             </div>
                                         </div>

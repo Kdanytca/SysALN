@@ -12,6 +12,7 @@ use App\Http\Controllers\PlanEstrategicoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SeguimientoActividadController;
 use App\Http\Controllers\ResultadoController;
+use App\Http\Middleware\TipoUsuario;
 
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
@@ -40,11 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Departamento
     Route::resource('departamentos', DepartamentoController::class);
-    Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
-        ->name('institucion.departamentos');
-    // Para mostrar todos los departamentos
-    Route::get('/departamentos', [DepartamentoController::class, 'todos'])->name('departamentos.index');
-
+    
     // usuarios
     Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
     Route::resource('usuarios', UsuarioController::class);

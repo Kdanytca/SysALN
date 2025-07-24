@@ -11,7 +11,7 @@ class Institucion extends Model
     protected $fillable = [
         'nombre_institucion',
         'tipo_institucion',
-        'encargado_proyecto',
+        'idEncargadoInstitucion',
     ];
 
     // Relaciones
@@ -19,4 +19,15 @@ class Institucion extends Model
     {
         return $this->hasMany(Departamento::class, 'idInstitucion');
     }
+    
+    public function usuarios()
+    {
+        return $this->hasMany(Usuario::class, 'idInstitucion');
+    }
+
+    public function encargadoInstitucion()
+    {
+        return $this->belongsTo(Usuario::class, 'idEncargadoInstitucion');
+    }
+
 }

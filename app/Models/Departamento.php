@@ -8,7 +8,7 @@ class Departamento extends Model
 {
     protected $fillable = [
         'departamento',
-        'encargado_departamento',
+        'idEncargadoDepartamento',
         'idInstitucion',
     ];
 
@@ -23,4 +23,8 @@ class Departamento extends Model
         return $this->hasMany(Usuario::class, 'idDepartamento');
     }
 
+    public function encargadoDepartamento()
+    {
+        return $this->belongsTo(Usuario::class, 'idEncargadoDepartamento');
+    }
 }

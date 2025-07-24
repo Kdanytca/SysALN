@@ -4,7 +4,17 @@
     @method('PUT')
     @endif
 
-    <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
+    <div class="mb-4">
+        <label for="idInstitucion" class="block font-medium">Institución Perteneciente</label>
+        <select name="idInstitucion" id="idInstitucion" class="w-full border rounded px-3 py-2" required>
+            <option value="">Seleccione una institución</option>
+            @foreach ($instituciones as $institucion)
+            <option value="{{ $institucion->id }}" {{ (isset($departamento) && $departamento->idInstitucion == $institucion->id) ? 'selected' : '' }}>
+                {{ $institucion->nombre_institucion }}
+            </option>
+            @endforeach
+        </select>
+    </div>
 
     <div class="mb-4">
         <label for="departamento" class="block font-medium">Nombre del Departamento</label>
@@ -16,9 +26,15 @@
     <div class="mb-4">
         <label for="encargado_departamento" class="block font-medium">Encargado del
             Departamento</label>
-        <input type="text" name="encargado_departamento" id="encargado_departamento"
-            class="w-full border rounded px-3 py-2"
-            value="{{ $departamento->encargado_departamento }}" required>
+        <select name="idEncargadoDepartamento" id="idEncargadoDepartamento" class="w-full border rounded px-3 py-2" required>
+            <option value="">Seleccione un encargado</option>
+            @foreach ($usuariosParaEditar as $usuario)
+            <option value="{{ $usuario->id }}"
+                {{ (isset($departamento) && $departamento->idEncargadoDepartamento == $usuario->id) ? 'selected' : '' }}>
+                {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
+            </option>
+            @endforeach
+        </select>
     </div>
 
     <div class="flex justify-end">

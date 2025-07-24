@@ -258,13 +258,13 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                    <input type="email" name="correo" id="correo"
+                    <input type="email" name="email" id="email"
                         class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm" required>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <input type="password" name="contraseña" id="contraseña"
+                    <input type="password" name="password" id="email"
                         class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm" required>
                 </div>
 
@@ -273,8 +273,12 @@
                     <label class="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
                     <select name="tipo_usuario" required
                         class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm">
-                        <option value="Administrador">Administrador</option>
-                        <option value="Colaborador">Colaborador</option>
+                        <option value="administrador">Administrador</option>
+                        <option value="encargado_institucion">Encargado de Institución</option>
+                        <option value="encargado_departamento">Encargado de Departamento</option>
+                        <option value="responsable_plan">Responsable de Plan Estratégico</option>
+                        <option value="responsable_meta">Responsable de Meta</option>
+                        <option value="responsable_actividad">Responsable de Actividad</option>
                     </select>
                 </div>
 

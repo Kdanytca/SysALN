@@ -4,52 +4,81 @@ namespace App\Http\Controllers;
 
 use App\Models\Departamento;
 use App\Models\Institucion;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class DepartamentoController extends Controller
 {
     // Muestra la lista de departamentos
     public function index()
     {
-        $departamentos = Departamento::with('institucion')->get();
+        $usuario = Auth::user(); // Usuario actual autenticado
+
+        // Si es administrador, ve todo
+        if ($usuario->tipo_usuario === 'administrador') {
+            $departamentos = Departamento::with('encargadoDepartamento')->get();
+        } else if ($usuario->tipo_usuario === 'encargado_institucion') {
+            // Solo ve los departamentos de su institución
+            $departamentos = Departamento::with('encargadoDepartamento')
+                ->where('idInstitucion', $usuario->idInstitucion)
+                ->get();
+        } else {
+            // Otros roles no deberían ver nada, o puedes ajustar según tu lógica
+            $departamentos = collect(); // Lista vacía
+        }
+
+        // Obtener instituciones y usuarios solo si es admin (opcional)
         $instituciones = Institucion::all();
+        $usuarios = Usuario::all();
 
-        return view('departamentos.index', compact('departamentos', 'instituciones'));
-    }
+        // Filtro para mostrar solo usuarios encargados de departamento que aún no estén asignados
+        $usuariosParaCrear = Usuario::where('tipo_usuario', 'encargado_departamento')
+            ->whereDoesntHave('departamentos')
+            ->get();
 
-    // Muestra la lista de departamentos filtrados por institución
-    public function indexPorInstitucion(Institucion $institucion)
-    {
-        $departamentos = $institucion->departamentos()->with('institucion')->get();
-        $instituciones = Institucion::all();
+        $usuariosParaEditar = Usuario::where('tipo_usuario', 'encargado_departamento')->get();
 
-        return view('departamentos.index', compact('departamentos', 'institucion', 'instituciones'));
+        return view('departamentos.index', compact(
+            'departamentos',
+            'instituciones',
+            'usuarios',
+            'usuariosParaCrear',
+            'usuariosParaEditar'
+        ));
     }
 
     // Se encarga de crear un nuevo departamento
     public function store(Request $request)
     {
-        request()->validate([
+        $request->validate([
             'departamento' => 'required|string|max:255',
-            'encargado_departamento' => 'required|string|max:45',
-            'idInstitucion' => 'required|exists:instituciones,id',
+            'idEncargadoDepartamento' => [
+                'required',
+                'exists:usuarios,id',
+                Rule::unique('departamentos', 'idEncargadoDepartamento')
+            ],
         ]);
 
-        Departamento::create([
+        // Obtener la institución del usuario que está creando el departamento
+        $institucionId = Auth::user()->idInstitucion;
+
+        $departamento = Departamento::create([
             'departamento' => $request->departamento,
-            'encargado_departamento' => $request->encargado_departamento,
-            'idInstitucion' => $request->idInstitucion,
+            'idEncargadoDepartamento' => $request->idEncargadoDepartamento,
+            'idInstitucion' => $institucionId,
         ]);
+
+        // Asignar ese departamento al usuario encargado
+        Usuario::where('id', $request->idEncargadoDepartamento)
+            ->update([
+                'idDepartamento' => $departamento->id,
+                'idInstitucion' => $institucionId,
+            ]);
 
         return redirect()->back()->with('success', 'Departamento creado exitosamente.');
-    }
-
-    //mostrando todos los departamentos
-    public function todos()
-    {
-        $departamentos = Departamento::with('institucion')->get(); // si tienes relación con Institución
-        return view('departamentos.index_general', compact('departamentos'));
     }
 
     // Se encarga de editar un departamento
@@ -57,7 +86,7 @@ class DepartamentoController extends Controller
     {
         $request->validate([
             'departamento' => 'required|string|max:255',
-            'encargado_departamento' => 'required|string|max:45',
+            'idEncargadoDepartamento' => 'required|string|max:45',
             'idInstitucion' => 'required|exists:instituciones,id',
         ]);
 
@@ -66,7 +95,7 @@ class DepartamentoController extends Controller
 
         $departamento->update([
             'departamento' => $request->departamento,
-            'encargado_departamento' => $request->encargado_departamento,
+            'idEncargadoDepartamento' => $request->idEncargadoDepartamento,
             'idInstitucion' => $request->idInstitucion,
         ]);
 

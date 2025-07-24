@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('observaciones')->nullable();
             $table->enum('estado', ['pendiente', 'en progreso', 'finalizado'])->default('pendiente');
             $table->string('documento')->nullable(); // Ruta al archivo (si lo quieres)
-            $table->foreignId('idActividades')->constrained('actividades');
+            $table->foreignId('idActividades')->constrained('actividades')->onDelete('cascade');
             $table->timestamps();
         });
     }

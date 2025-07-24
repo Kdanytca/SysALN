@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('indicador', 45);
 
             // Usuario que creó el plan (admin Breeze)
-            $table->foreignId('creado_por')->constrained('users')->onDelete('cascade');
+            $table->foreignId('creado_por')->constrained('usuarios')->onDelete('cascade');
 
             $table->timestamps();
         });

@@ -21,9 +21,9 @@
             <!-- Card Instituciones -->
             <div class="bg-blue-600 text-white rounded-lg shadow p-6 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-2xl font-bold mb-2">Instituciones</h3>
-                    <p class="text-4xl font-extrabold">{{ $institucionesCount }}</p>
-                    <p class="mt-1">Total de instituciones registradas</p>
+                    <h3 class="text-3xl font-bold mb-2">Instituciones</h3>
+                    <p class="text-5xl font-extrabold">{{ $institucionesCount }}</p>
+                    <p class="mt-1 text-lg">Total de instituciones registradas</p>
                 </div>
                 <div class="mt-6">
                     <a href="{{ route('instituciones.index') }}"
@@ -36,9 +36,9 @@
             <!-- Card Planes -->
             <div class="bg-green-600 text-white rounded-lg shadow p-6 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-2xl font-bold mb-2">Planes Estratégicos</h3>
-                    <p class="text-4xl font-extrabold">{{ $planesCount }}</p>
-                    <p class="mt-1">Total de planes estratégicos registrados</p>
+                    <h3 class="text-3xl font-bold mb-2">Planes Estratégicos</h3>
+                    <p class="text-5xl font-extrabold">{{ $planesCount }}</p>
+                    <p class="mt-1 text-lg">Total de planes estratégicos registrados</p>
                 </div>
                 <div class="mt-6">
                     <a href="{{ route('planes.index') }}"
@@ -56,9 +56,9 @@
             <!-- Card Usuarios -->
             <div class="bg-yellow-500 text-white rounded-lg shadow p-6 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-2xl font-bold mb-2">Usuarios</h3>
-                    <p class="text-4xl font-extrabold">{{ $usuariosCount ?? 0 }}</p>
-                    <p class="mt-1">Total de usuarios registrados</p>
+                    <h3 class="text-3xl font-bold mb-2">Usuarios</h3>
+                    <p class="text-5xl font-extrabold">{{ $usuariosCount ?? 0 }}</p>
+                    <p class="mt-1 text-lg">Total de usuarios registrados</p>
                 </div>
                 <div class="mt-6">
                     <a href="{{ route('usuarios.index') }}"
@@ -71,9 +71,9 @@
             <!-- Otra Card -->
             <div class="bg-purple-600 text-white rounded-lg shadow p-6 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-2xl font-bold mb-2">Departamentos</h3>
-                    <p class="text-4xl font-extrabold">{{ $departamentosCount ?? 0 }}</p>
-                    <p class="mt-1">Departamentos Registrados</p>
+                    <h3 class="text-3xl font-bold mb-2">Departamentos</h3>
+                    <p class="text-5xl font-extrabold">{{ $departamentosCount ?? 0 }}</p>
+                    <p class="mt-1 text-lg">Departamentos Registrados</p>
                 </div>
                 <div class="mt-6">
                     <a href="{{ route('departamentos.index') }} "

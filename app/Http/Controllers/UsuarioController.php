@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use App\Models\Institucion;
 use App\Models\Departamento;
+use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
 {
@@ -14,7 +15,8 @@ class UsuarioController extends Controller
     {
         $usuarios = Usuario::with(['departamento'])->get();
         $departamentos = Departamento::all();
-        return view('usuarios.index', compact('usuarios', 'departamentos'));
+        $instituciones = Institucion::all();
+        return view('usuarios.index', compact('usuarios', 'departamentos', 'instituciones'));
     }
 
     // Se encarga de crear un nuevo usuario
@@ -25,14 +27,16 @@ class UsuarioController extends Controller
             'email' => 'required|email|max:255|unique:usuarios,email',
             'password' => 'required|string|min:8',
             'idDepartamento' => 'nullable|exists:departamentos,id',
+            'idInstitucion' => 'nullable|exists:instituciones,id',
             'tipo_usuario' => 'required',
         ]);
 
-        Usuario::create([
+        $usuario = Usuario::create([
             'nombre_usuario' => $request->nombre_usuario,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'idDepartamento' => $request->idDepartamento,
+            'idInstitucion' => $request->idInstitucion,
             'tipo_usuario' => $request->tipo_usuario,
             'remember_token' => $request->has('remember') ? $request->remember : null,
         ]);
@@ -47,7 +51,7 @@ class UsuarioController extends Controller
         return redirect()->route('usuarios.index')->with('success', 'Usuario registrado correctamente.');
     }
 
-    //optener usuarios por departamento
+    //obtener usuarios por departamento
     public function usuariosPorDepartamento($id)
     {
         $usuarios = Usuario::where('idDepartamento', $id)
@@ -60,11 +64,12 @@ class UsuarioController extends Controller
     // Se encarga de editar un usuario
     public function update(Request $request, string $id)
     {
-        request()->validate([
+        $request->validate([
             'nombre_usuario' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
             'password' => 'nullable|string|min:8',
             'idDepartamento' => 'nullable|exists:departamentos,id',
+            'idInstitucion' => 'nullable|exists:instituciones,id',
             'tipo_usuario' => 'required',
         ]);
 
@@ -72,10 +77,15 @@ class UsuarioController extends Controller
         $usuario->update([
             'nombre_usuario' => $request->nombre_usuario,
             'email' => $request->email,
-            'password' => $request->password ? bcrypt($request->password) : $usuario->password,
             'idDepartamento' => $request->idDepartamento,
+            'idInstitucion' => $request->idInstitucion,
             'tipo_usuario' => $request->tipo_usuario,
         ]);
+
+        // Solo actualiza el password si se proporcionó uno nuevo
+        if (!empty($request->password)) {
+            $data['password'] = Hash::make($request->password);
+        }
 
         // Obtener el nombre del nuevo departamento
         $nuevoDepartamento = $usuario->departamento->departamento ?? 'Sin departamento';

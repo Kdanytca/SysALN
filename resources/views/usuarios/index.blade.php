@@ -40,15 +40,17 @@
                     class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="w-1/6 px-4 py-3 text-left">
+                            <th class="w-1/7 px-4 py-3 text-left">
                                 Nombre</th>
-                            <th class="w-1/6 px-4 py-3 text-left">
+                            <th class="w-1/7 px-4 py-3 text-left">
                                 Correo</th>
-                            <th class="w-1/6 px-4 py-3 text-left">
+                            <th class="w-1/7 px-4 py-3 text-left">
                                 Departamento</th>
-                            <th class="w-1/6 px-4 py-3 text-left">
+                            <th class="w-1/7 px-4 py-3 text-left">
+                                Institución</th>
+                            <th class="w-1/7 px-4 py-3 text-left">
                                 Tipo</th>
-                            <th class="w-2/6 px-4 py-3 text-center">Acciones</th>
+                            <th class="w-2/7 px-4 py-3 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -60,8 +62,10 @@
                                 {{ $usuario->email }}</td>
                             <td class="px-4 py-3 truncate">
                                 {{ $usuario->departamento->departamento ?? '-' }}</td>
-                            <td class="px-4 py-3 truncate">
-                                {{ $usuario->tipo_usuario }}</td>
+                            <td class="px-4 py-3">
+                                {{ $usuario->institucion->nombre_institucion ?? '-' }}</td>
+                            <td class="px-4 py-3">
+                                {{ $usuario->tipo_usuario_label }}</td>
                             <td class="px-4 py-3 text-righ">
                                 <div class="flex flex-wrap justify-center gap-2">
                                     <div x-data="{ editModalOpen: false }">

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('idDepartamento')->nullable()->constrained('departamentos')->onDelete('cascade');
+            $table->unsignedBigInteger('idInstitucion')->nullable();
+            $table->unsignedBigInteger('idDepartamento')->nullable();
             $table->string('nombre_usuario', 255)->unique();
             $table->string('password', 255);
             $table->string('tipo_usuario', 255);

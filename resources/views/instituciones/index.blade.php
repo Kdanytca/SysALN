@@ -25,7 +25,9 @@
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nueva Institución</h2>
-                        @include('instituciones.create')
+                        @include('instituciones.create', [
+                            'usuarios' => $usuariosParaCrear
+                        ])
                     </div>
                 </div>
             </div>
@@ -58,7 +60,7 @@
                             <td class="px-4 py-3 truncate">
                                 {{ $institucion->tipo_institucion }}</td>
                             <td class="px-4 py-3 truncate">
-                                {{ $institucion->encargado_proyecto }}</td>
+                                {{ $institucion->encargadoInstitucion->nombre_usuario }}</td>
                             <td class="px-4 py-3 text-righ">
                                 <div class="flex flex-wrap justify-center gap-2">
                                     {{-- Editar --}}
@@ -77,6 +79,7 @@
                                                 'action' => route('instituciones.update', $institucion->id),
                                                 'isEdit' => true,
                                                 'institucion' => $institucion,
+                                                'usuarios' => $usuariosParaEditar
                                                 ])
                                             </div>
                                         </div>
@@ -124,7 +127,7 @@
                                     </div>
 
                                     {{-- Ver Departamentos --}}
-                                    <a href="{{ route('institucion.departamentos', $institucion->id) }}"
+                                    <a href="{{ route('departamentos.index') }}"
                                         class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
                                         Ver Departamentos
                                     </a>
