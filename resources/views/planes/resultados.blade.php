@@ -2,66 +2,114 @@
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <h1 class="text-2xl font-bold mb-4">Resultados del Plan: {{ $plan->nombre_plan_estrategico }}</h1>
 
-        @if (isset($porcentajeTotal))
-            @php
-                $hoy = \Carbon\Carbon::today();
-                $inicio = \Carbon\Carbon::parse($plan->fecha_inicio);
-                $fin = \Carbon\Carbon::parse($plan->fecha_fin);
+        @if ($plan->indicador === 'finalizado')
+            <div class="mb-6 p-6 bg-purple-100 text-purple-800 rounded shadow-sm text-base">
+                <strong class="block text-lg mb-2">⛔ Este plan está finalizado.</strong>
+                <p class="mb-2">El progreso y el estado de tiempo no se actualizarán hasta que se reactive.</p>
 
-                $totalDias = $inicio->diffInDays($fin);
-                $diasTranscurridos = $inicio->diffInDays($hoy);
-                $diasRestantes = $hoy->lessThanOrEqualTo($fin) ? $hoy->diffInDays($fin) : 0;
-                $diasRetrasados = $hoy->greaterThan($fin) ? $fin->diffInDays($hoy) : 0;
+                <div class="grid grid-cols-3 gap-6 text-purple-700 mt-4">
+                    <div>
+                        <p class="font-semibold">📅 Fecha de inicio</p>
+                        <p>{{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d/m/Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold">✅ Fecha de finalización</p>
+                        <p>{{ \Carbon\Carbon::parse($plan->updated_at)->format('d/m/Y') }}</p>
+                    </div>
+                    @php
+                        $inicio = \Carbon\Carbon::parse($plan->fecha_inicio);
+                        $finReal = \Carbon\Carbon::parse($plan->updated_at);
+                        $finEstimada = \Carbon\Carbon::parse($plan->fecha_fin); // Fecha esperada
+                        $diferenciaHoras = $inicio->diffInHours($finReal);
+                        $duracionDiasAprox = round($diferenciaHoras / 24);
 
-                $estadoTiempo = match ($plan->indicador) {
-                    'verde' => '✅ El plan va bien según el tiempo estimado.',
-                    'amarillo' => '🟡 Atención: el plan ha pasado la mitad del tiempo.',
-                    'rojo' => '🔴 El plan está atrasado según la fecha final.',
-                    'blanco' => '🕒 El plan está en su etapa inicial.',
-                    default => '⏳ Sin estado definido.',
-                };
+                        $mensajeTiempo = $finReal->lte($finEstimada)
+                            ? '✅ El plan se completó en el tiempo estipulado.'
+                            : '⚠️ El plan se completó después del tiempo previsto.';
+                    @endphp
 
-                $detalleTiempo = 'Inicio: ' . $inicio->format('d M Y') . ' | Fin: ' . $fin->format('d M Y') . ' | ';
+                    <div>
+                        <p class="font-semibold">🕓 Duración total</p>
+                        <p>{{ $duracionDiasAprox }} días</p>
+                    </div>
+                </div>
 
-                if ($diasRetrasados > 0) {
-                    $detalleTiempo .= "⏰ $diasRetrasados días de retraso.";
-                } else {
-                    $detalleTiempo .= "$diasTranscurridos días transcurridos, $diasRestantes días restantes.";
-                }
-
-                $colorFondo = match ($plan->indicador) {
-                    'verde' => 'green-100',
-                    'amarillo' => 'yellow-100',
-                    'rojo' => 'red-100',
-                    default => 'gray-100',
-                };
-
-                $colorTexto = match ($plan->indicador) {
-                    'verde' => 'green-800',
-                    'amarillo' => 'yellow-800',
-                    'rojo' => 'red-800',
-                    default => 'gray-800',
-                };
-            @endphp
+                <div
+                    class="mt-4 p-4 rounded text-white {{ $finReal->lte($finEstimada) ? 'bg-green-400' : 'bg-yellow-400' }}">
+                    {{ $mensajeTiempo }}
+                </div>
+            </div>
 
             <div class="flex flex-col sm:flex-row gap-4 mb-4">
                 <div class="sm:w-1/2 p-4 bg-blue-100 text-blue-800 rounded">
-                    Avance global del plan estratégico: <strong>{{ $porcentajeTotal }}%</strong>
+                    Avance global al finalizar el plan: <strong>{{ $porcentajeTotal }}%</strong>
                 </div>
-                <div class="sm:w-1/2 p-4 bg-{{ $colorFondo }} text-{{ $colorTexto }} rounded text-sm">
-                    <div class="font-semibold mb-1">{{ $estadoTiempo }}</div>
-                    <div>{{ $detalleTiempo }}</div>
+                <div class="sm:w-1/2 p-4 bg-blue-50 text-blue-900 rounded text-sm">
+                    <div class="font-semibold mb-1">📌 Estado final</div>
+                    <div>Este fue el porcentaje alcanzado al momento de finalizar el plan.</div>
                 </div>
             </div>
         @endif
 
+        @if (isset($porcentajeTotal))
+            @if ($plan->indicador !== 'finalizado')
+                @php
+                    $hoy = \Carbon\Carbon::today();
+                    $inicio = \Carbon\Carbon::parse($plan->fecha_inicio);
+                    $fin = \Carbon\Carbon::parse($plan->fecha_fin);
+
+                    $totalDias = $inicio->diffInDays($fin);
+                    $diasTranscurridos = $inicio->diffInDays($hoy);
+                    $diasRestantes = $hoy->lessThanOrEqualTo($fin) ? $hoy->diffInDays($fin) : 0;
+                    $diasRetrasados = $hoy->greaterThan($fin) ? $fin->diffInDays($hoy) : 0;
+
+                    $estadoTiempo = match ($plan->indicador) {
+                        'verde' => '✅ El plan va bien según el tiempo estimado.',
+                        'amarillo' => '🟡 Atención: el plan ha pasado la mitad del tiempo.',
+                        'rojo' => '🔴 El plan está atrasado según la fecha final.',
+                        'blanco' => '🕒 El plan está en su etapa inicial.',
+                        default => '⏳ Sin estado definido.',
+                    };
+
+                    $detalleTiempo = 'Inicio: ' . $inicio->format('d M Y') . ' | Fin: ' . $fin->format('d M Y') . ' | ';
+
+                    if ($diasRetrasados > 0) {
+                        $detalleTiempo .= "⏰ $diasRetrasados días de retraso.";
+                    } else {
+                        $detalleTiempo .= "$diasTranscurridos días transcurridos, $diasRestantes días restantes.";
+                    }
+
+                    $colorFondo = match ($plan->indicador) {
+                        'verde' => 'green-100',
+                        'amarillo' => 'yellow-100',
+                        'rojo' => 'red-100',
+                        default => 'gray-100',
+                    };
+
+                    $colorTexto = match ($plan->indicador) {
+                        'verde' => 'green-800',
+                        'amarillo' => 'yellow-800',
+                        'rojo' => 'red-800',
+                        default => 'gray-800',
+                    };
+                @endphp
+
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <div class="sm:w-1/2 p-4 bg-blue-100 text-blue-800 rounded">
+                        Avance global del plan estratégico: <strong>{{ $porcentajeTotal }}%</strong>
+                    </div>
+                    <div class="sm:w-1/2 p-4 bg-{{ $colorFondo }} text-{{ $colorTexto }} rounded text-sm">
+                        <div class="font-semibold mb-1">{{ $estadoTiempo }}</div>
+                        <div>{{ $detalleTiempo }}</div>
+                    </div>
+                </div>
+            @endif
+        @endif
 
         <div class="mt-10">
             <h2 class="text-xl font-semibold mb-4">Avance por Meta</h2>
             <canvas id="graficaAvancePorMeta" class="w-full max-h-48"></canvas>
         </div>
-
-
 
         @if (empty($data))
             <p class="text-gray-500">Este plan no tiene metas con actividades registradas aún.</p>
@@ -90,13 +138,37 @@
             </table>
         @endif
 
-        <div class="mt-6">
-            <a href="{{ route('institucion.planes', $plan->departamento->idInstitucion) }}"
-                class="text-blue-600 hover:underline">
-                ← Volver a planes
-            </a>
-        </div>
+        @auth
+            @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan']))
+                @php
+                    switch (auth()->user()->tipo_usuario) {
+                        case 'responsable_plan':
+                            $rutaInicio = route('plan.responsable', $plan->id);
+                            break;
+                        case 'administrador':
+                            $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
+                            break;
+                        default:
+                            $rutaInicio = '#';
+                    }
+                @endphp
+
+                @if ($rutaInicio !== '#')
+                    <div class="mt-6 flex justify-between items-center">
+                        <a href="{{ $rutaInicio }}" class="text-blue-600 hover:underline">
+                            ← Volver a planes
+                        </a>
+
+                        <a href="{{ route('plan.reporte.pdf', $plan->id) }}"
+                            class="inline-block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                            📄 Descargar Reporte PDF
+                        </a>
+                    </div>
+                @endif
+            @endif
+        @endauth
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

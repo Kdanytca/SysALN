@@ -27,4 +27,8 @@ class Meta extends Model
     {
         return $this->hasMany(Actividad::class, 'idMetas');
     }
+    public function responsable()
+    {
+        return $this->belongsTo(Usuario::class, 'usuario_responsable', 'nombre_usuario');
+    }
 }

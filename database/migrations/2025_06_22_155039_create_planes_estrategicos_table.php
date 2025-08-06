@@ -21,6 +21,7 @@ return new class extends Migration
 
             $table->string('nombre_plan_estrategico', 255);
             $table->string('ejes_estrategicos', 255);
+            $table->json('objetivos')->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->string('indicador', 45);

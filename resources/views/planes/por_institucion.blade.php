@@ -28,6 +28,7 @@
                             <th class="px-4 py-3 text-left">Departamento</th>
                             <th class="px-4 py-3 text-left">Responsable</th>
                             <th class="px-4 py-3 text-left">Ejes Estratégicos</th>
+                            <th class="px-4 py-3 text-left">Objetivos</th>
                             <th class="px-4 py-3 text-left">Fecha Inicio</th>
                             <th class="px-4 py-3 text-left">Fecha Fin</th>
                             <th class="px-4 py-3 text-center">Indicador</th>
@@ -48,6 +49,15 @@
                                         </span>
                                     @endforeach
                                 </td>
+                                <td class="px-4 py-3">
+                                    @if ($plan->objetivos)
+                                        @foreach (json_decode($plan->objetivos) as $objetivo)
+                                            <div class="text-gray-800 text-xs mb-1">• {{ $objetivo }}</div>
+                                        @endforeach
+                                    @else
+                                        <span class="italic text-gray-400">Sin objetivos</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3">{{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}
                                 </td>
                                 <td class="px-4 py-3">{{ \Carbon\Carbon::parse($plan->fecha_fin)->format('d-m-Y') }}
@@ -58,6 +68,7 @@
                                             'rojo' => 'bg-red-400',
                                             'amarillo' => 'bg-yellow-300',
                                             'verde' => 'bg-green-400',
+                                            'finalizado' => 'bg-blue-400', // Aquí agregas el azul para finalizado
                                             default => 'bg-gray-300',
                                         };
                                     @endphp
@@ -90,33 +101,63 @@
                                             class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-md text-xs hover:bg-indigo-200 transition shadow-sm">
                                             Ver Reporte
                                         </a>
-
+                                        <form method="POST" action="{{ route('planes.finalizar', $plan->id) }}">
+                                            @csrf
+                                            @php
+                                                $esFinalizado = $plan->indicador === 'finalizado';
+                                                $clasesBoton = $esFinalizado
+                                                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' // Reanudar
+                                                    : 'bg-teal-100 text-teal-800 hover:bg-teal-200'; // Finalizar
+                                            @endphp
+                                            <button type="submit"
+                                                class="{{ $clasesBoton }} px-3 py-1.5 rounded-md text-xs transition shadow-sm">
+                                                {{ $esFinalizado ? 'Reanudar Plan' : 'Finalizar Plan' }}
+                                            </button>
+                                        </form>
                                     </div>
+
+                                </td>
+                                <td>
+
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-4 text-center text-gray-500">No hay planes
+                                <td colspan="9" class="px-4 py-4 text-center text-gray-500">No hay planes
                                     registrados.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
                 <br>
-                <div class="mb-6">
-                    <div
-                        class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
-                        <a href="{{ route('instituciones.index') }}"
-                            class="flex items-center space-x-1 text-sm font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                            <span>Volver a instituciones</span>
-                        </a>
-                    </div>
-                </div>
+                @auth
+                    @php
+                        switch (auth()->user()->tipo_usuario) {
+                            case 'encargado_institucion':
+                                $rutaInicio = route('institucion.ver', auth()->user()->idInstitucion);
+                                break;
+                            case 'administrador':
+                                $rutaInicio = route('instituciones.index');
+                                break;
+                            default:
+                                $rutaInicio = '#'; // o nada
+                        }
+                    @endphp
+
+                    @if ($rutaInicio !== '#')
+                        <div class="mt-8">
+                            <a href="{{ $rutaInicio }}"
+                                class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200 text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Volver a instituciones
+                            </a>
+                        </div>
+                    @endif
+                @endauth
 
             </div>
         </div>
@@ -179,6 +220,24 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Objetivos -->
+                <div class="mb-4">
+                    <label class="block font-medium">Objetivos</label>
+                    <div id="contenedorObjetivos">
+                        <!-- Los objetivos se insertarán aquí dinámicamente -->
+                    </div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <button type="button" onclick="agregarObjetivo()" class="text-sm text-blue-600 underline">
+                            + Agregar objetivo
+                        </button>
+                        <button id="btnEliminarObjetivo" type="button" onclick="eliminarUltimoObjetivo()"
+                            class="text-sm text-red-600 underline hidden">
+                            🗑 Eliminar último objetivo
+                        </button>
+                    </div>
+                </div>
+
 
                 <div class="flex gap-4 mb-4">
                     <div class="w-1/2">
@@ -292,6 +351,8 @@
         </div>
     </div>
 
+
+
     <script>
         // Datos en JS para departamentos y usuarios de la institución actual 
         const departamentos = @json($institucion->departamentos);
@@ -331,7 +392,28 @@
                 });
             }
         });
+        // Funciones para agregar y eliminar objetivos
+        function agregarObjetivo() {
+            const contenedor = document.getElementById('contenedorObjetivos');
+            const input = document.createElement('div');
+            input.classList.add('relative', 'mb-2');
+            input.innerHTML = `
+            <input type="text" name="objetivos[]" class="w-full border rounded px-3 py-2 pr-10" required>
+        `;
+            contenedor.appendChild(input);
 
+            document.getElementById('btnEliminarObjetivo').classList.remove('hidden');
+        }
+
+        function eliminarUltimoObjetivo() {
+            const contenedor = document.getElementById('contenedorObjetivos');
+            if (contenedor.children.length > 0) {
+                contenedor.removeChild(contenedor.lastChild);
+            }
+            if (contenedor.children.length === 0) {
+                document.getElementById('btnEliminarObjetivo').classList.add('hidden');
+            }
+        }
         // Funciones para agregar y eliminar ejes
         function actualizarBotonEliminar() {
             const contenedor = document.getElementById('contenedorEjes');
@@ -362,6 +444,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             actualizarBotonEliminar();
+
 
             // Abrir modal con botón
             document.getElementById('btnNuevoPlan').addEventListener('click', () => {
@@ -486,16 +569,66 @@
 
             const ejes = plan.ejes_estrategicos.split(',');
             ejes.forEach(eje => {
+                const div = document.createElement('div');
+                div.className = 'relative mb-2';
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'ejes_estrategicos[]';
-                input.className = 'w-full border rounded px-3 py-2 mb-2';
+                input.className = 'w-full border rounded px-3 py-2 pr-10'; // espacio para el botón
                 input.required = true;
                 input.value = eje.trim();
-                contenedorEjes.appendChild(input);
+
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
+                btnEliminar.innerHTML = '&times;';
+                btnEliminar.title = 'Eliminar eje estratégico';
+                btnEliminar.onclick = () => div.remove();
+
+                div.appendChild(input);
+                div.appendChild(btnEliminar);
+                contenedorEjes.appendChild(div);
             });
 
             actualizarBotonEliminar(); // Muestra el botón de eliminar eje si es necesario
+
+            // Limpiar y cargar objetivos
+            const contenedorObjetivos = document.getElementById('contenedorObjetivos');
+            contenedorObjetivos.innerHTML = '';
+
+            if (plan.objetivos) {
+                let objetivosArray = [];
+                try {
+                    objetivosArray = typeof plan.objetivos === 'string' ? JSON.parse(plan.objetivos) : plan.objetivos;
+                } catch {
+                    objetivosArray = [];
+                }
+
+                objetivosArray.forEach(objetivo => {
+                    const div = document.createElement('div');
+                    div.className = 'relative mb-2';
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = 'objetivos[]';
+                    input.className = 'w-full border rounded px-3 py-2 pr-10';
+                    input.value = objetivo ?? '';
+
+                    const btnEliminar = document.createElement('button');
+                    btnEliminar.type = 'button';
+                    btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
+                    btnEliminar.innerHTML = '&times;';
+                    btnEliminar.title = 'Eliminar objetivo';
+                    btnEliminar.onclick = () => div.remove();
+
+                    div.appendChild(input);
+                    div.appendChild(btnEliminar);
+                    contenedorObjetivos.appendChild(div);
+                });
+
+            }
+
 
             // Filtrar usuarios disponibles por departamento
             const selectResponsable = document.getElementById('responsable');
@@ -512,7 +645,10 @@
                     const option = document.createElement('option');
                     option.value = usuario.id;
                     option.textContent = usuario.nombre_usuario;
-                    if (usuario.id === plan.idUsuario) {
+                    console.log('Plan responsable id:', plan.idUsuario);
+                    console.log('Usuario id actual:', usuario.id);
+
+                    if (usuario.id == plan.idUsuario) {
                         option.selected = true;
                         usuarioActualIncluido = true;
                     }

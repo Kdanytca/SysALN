@@ -64,8 +64,8 @@ class Usuario extends Authenticatable
         return $this->hasMany(Actividad::class, 'idUsuario');
     }
 
-    public function planesEstrategicos()
+    public function planEstrategico()
     {
-        return $this->hasMany(PlanEstrategico::class, 'idUsuario');
+        return $this->hasOne(PlanEstrategico::class, 'idUsuario');
     }
 }

@@ -20,6 +20,7 @@ class PlanEstrategico extends Model
         'indicador',
         'responsable',
         'creado_por',
+        'objetivos',
     ];
 
     // Relaciones
@@ -42,6 +43,11 @@ class PlanEstrategico extends Model
     //Indicador de progreso
     public function getIndicadorAttribute()
     {
+        // Si está finalizado, devuelve el valor guardado
+        if (!is_null($this->attributes['indicador']) && $this->attributes['indicador'] === 'finalizado') {
+            return 'finalizado';
+        }
+
         $hoy = Carbon::today();
         $inicio = Carbon::parse($this->fecha_inicio);
         $fin = Carbon::parse($this->fecha_fin);

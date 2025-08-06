@@ -6,6 +6,9 @@ use App\Models\Resultado;
 use App\Models\PlanEstrategico;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+
 
 class ResultadoController extends Controller
 {
@@ -89,5 +92,65 @@ class ResultadoController extends Controller
             'porcentajes' => [],
             'porcentajeTotal' => $porcentajeTotal,
         ]);
+    }
+    //Metodo para generar el reporte en PDF
+    public function generarPDF($id)
+    {
+        $plan = PlanEstrategico::with([
+            'departamento.institucion',
+            'responsable', // del plan
+            'metas.responsable', // del meta
+            'metas.actividades.usuario', // del actividad
+            'metas.actividades.seguimientos',
+        ])->findOrFail($id);
+
+        //dd($plan->metas->pluck('responsable'));
+
+        $data = [];
+        $totalSeguimientosGlobal = 0;
+        $seguimientosFinalizadosGlobal = 0;
+
+        foreach ($plan->metas as $meta) {
+            $actividades = $meta->actividades ?? collect();
+            if ($actividades->isEmpty()) continue;
+
+            $totalSeguimientos = 0;
+            $seguimientosFinalizados = 0;
+
+            foreach ($actividades as $actividad) {
+                $seguimientos = $actividad->seguimientos;
+                $totalSeguimientos += $seguimientos->count();
+                $seguimientosFinalizados += $seguimientos->filter(
+                    fn($s) =>
+                    strtolower(trim($s->estado ?? '')) === 'finalizado'
+                )->count();
+            }
+
+            $porcentajeMeta = $totalSeguimientos > 0
+                ? round(($seguimientosFinalizados / $totalSeguimientos) * 100)
+                : 0;
+
+            $totalSeguimientosGlobal += $totalSeguimientos;
+            $seguimientosFinalizadosGlobal += $seguimientosFinalizados;
+
+            $data[] = [
+                'meta' => $meta->nombre_meta,
+                'descripcion' => "$totalSeguimientos seguimientos - $seguimientosFinalizados finalizados",
+                'porcentaje' => $porcentajeMeta,
+                'comentario' => $meta->comentario ?? '',
+                'indicador' => match (true) {
+                    $porcentajeMeta >= 75 => 'verde',
+                    $porcentajeMeta >= 40 => 'amarillo',
+                    default => 'rojo',
+                },
+            ];
+        }
+
+        $porcentajeTotal = $totalSeguimientosGlobal > 0
+            ? round(($seguimientosFinalizadosGlobal / $totalSeguimientosGlobal) * 100)
+            : 0;
+
+        $pdf = PDF::loadView('planes.reporte-pdf', compact('plan', 'data', 'porcentajeTotal'));
+        return $pdf->download('reporte_plan_' . $plan->id . '.pdf');
     }
 }

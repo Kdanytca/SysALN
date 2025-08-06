@@ -11,7 +11,7 @@
 
     @csrf
 
-    <input type="hidden" name="idMetas" value="{{ $meta->id }}">
+    <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
 
     <div class="mb-4">
         <select name="idUsuario" id="idUsuario" required

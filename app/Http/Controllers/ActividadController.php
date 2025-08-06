@@ -5,43 +5,87 @@ namespace App\Http\Controllers;
 use App\Models\Actividad;
 use App\Models\Meta;
 use App\Models\Usuario;
-use App\models\Departamento;
+use App\Models\Departamento;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class ActividadController extends Controller
 {
-    // Muestra la lista de actividades en el index
+    // Vista general (solo admins o encargados)
     public function index()
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
+        }
+
         $actividades = Actividad::with('meta', 'usuario')->get();
         $metas = Meta::all();
         $usuarios = Usuario::all();
         $departamentos = Departamento::all();
+
         return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos'));
     }
 
-    // Muestra la lista de actividades filtradas por meta
+    // Vista de actividades filtradas por meta (solo admins o encargados)
     public function indexPorMeta(Meta $meta)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
+        }
+
         $meta->load('planEstrategico');
         $actividades = $meta->actividades()->with('meta')->get();
         $metas = Meta::all();
         $usuarios = Usuario::all();
         $departamentos = Departamento::all();
+
         return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos'));
     }
 
-    // Se encarga de crear una nueva actividad
+    // Vista exclusiva para responsables de actividades
+    public function indexResponsable()
+    {
+        $usuario = Auth::user();
+
+        if ($usuario->tipo_usuario !== 'responsable_actividad') {
+            return redirect()->route('home')->with('error', 'No tienes permiso para ver esta sección.');
+        }
+
+        $actividades = Actividad::with(['meta.planEstrategico', 'usuario.departamento'])
+            ->where('idUsuario', $usuario->id)
+            ->get();
+
+        if ($actividades->isEmpty()) {
+            return redirect()->route('home')->with('error', 'No tienes actividades asignadas.');
+        }
+
+        $metas = Meta::all(); // opcional, si la vista las usa
+        $usuarios = Usuario::all(); // opcional
+        $departamentos = Departamento::all(); // opcional
+
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos'));
+    }
+
+    // Crear actividad (solo admins o encargados)
     public function create()
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan','responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear actividades.');
+        }
+
         $metas = Meta::all();
         $usuarios = Usuario::all();
         $departamentos = Departamento::all();
+
         return view('actividades.create', compact('metas', 'usuarios', 'departamentos'));
     }
 
     public function store(Request $request)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear actividades.');
+        }
+
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idUsuario' => 'required|exists:usuarios,id',
@@ -67,19 +111,27 @@ class ActividadController extends Controller
         return redirect()->back()->with('success', 'Actividad creada exitosamente.');
     }
 
-    // se encarga de editar una actividad
+    // Editar actividad (solo admins o encargados)
     public function edit(Actividad $actividad)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan','responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar actividades.');
+        }
+
         $actividad = Actividad::find($actividad->id);
         $metas = Meta::all();
-        $usuarios = Usuario::all();
         $usuarios = Usuario::with('departamento')->get();
         $departamentos = Departamento::all();
+
         return view('actividades.edit', compact('actividad', 'metas', 'usuarios', 'departamentos'));
     }
 
     public function update(Request $request, string $id)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para actualizar actividades.');
+        }
+
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idUsuario' => 'required|exists:usuarios,id',
@@ -106,11 +158,17 @@ class ActividadController extends Controller
         return redirect()->back()->with('success', 'Actividad actualizada exitosamente.');
     }
 
-    // Elimina una actividad
+    // Eliminar actividad (solo admins o encargados)
     public function destroy(string $id)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar actividades.');
+        }
+
         $actividad = Actividad::findOrFail($id);
         $actividad->delete();
+
         return redirect()->back()->with('success', 'Actividad eliminada exitosamente.');
     }
+ 
 }

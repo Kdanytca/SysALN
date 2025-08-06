@@ -24,39 +24,113 @@
     <nav class="bg-gray-800 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
+
+                {{-- Logo a la izquierda (redirecciona diferente según el tipo de usuario) --}}
                 <div class="flex-shrink-0">
-                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
+                    @php
+                        use Illuminate\Support\Facades\Auth;
+
+                        $user = Auth::user();
+                        $rol = $user->tipo_usuario ?? null;
+
+                        // Definir la ruta de inicio según el rol
+                        switch ($rol) {
+                            case 'administrador':
+                                $rutaInicio = route('dashboard');
+                                break;
+
+                            case 'encargado_institucion':
+                                $rutaInicio = route('institucion.ver', $user->idInstitucion);
+                                break;
+
+                            case 'encargado_departamento':
+                                $rutaInicio = url("/departamento/{$user->idDepartamento}");
+                                break;
+
+                            case 'responsable_plan':
+                                $plan = $user->planEstrategico ?? null;
+                                $rutaInicio = $plan ? url("/plan-estrategico/{$plan->id}") : url('/sin-plan-asignado');
+                                break;
+
+                            case 'responsable_meta':
+                                $rutaInicio = route('meta.responsable');
+                                break;
+
+                            case 'responsable_actividad':
+                                $rutaInicio = route('actividades.indexResponsable');
+                                break;
+
+                            default:
+                                $rutaInicio = '#';
+                                break;
+                        }
+                    @endphp
+
+                    <a href="{{ $rutaInicio }}" class="flex items-center space-x-2">
                         <i class="bi bi-house-door-fill text-xl"></i>
                         <span class="font-bold text-lg">SysALN</span>
                     </a>
                 </div>
+                
+                {{-- Enlaces del menú (solo admin puede verlos) --}}
+                <div class="hidden md:flex space-x-6 items-center">
+                    @if ($rol === 'administrador')
+                        <a href="{{ route('dashboard') }}"
+                            class="hover:text-gray-300 {{ request()->routeIs('dashboard') ? 'underline' : '' }}">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
 
-                <div class="hidden md:flex space-x-6">
-                    <a href="{{ route('dashboard') }}"
-                        class="hover:text-gray-300 {{ request()->routeIs('dashboard') ? 'underline' : '' }}">
-                        <i class="bi bi-house-door"></i> Home
-                    </a>
-                    <a href="{{ route('instituciones.index') }}"
-                        class="hover:text-gray-300 {{ request()->routeIs('instituciones.*') ? 'underline' : '' }}">
-                        <i class="bi bi-building"></i> Instituciones
-                    </a>
-                    <a href="{{ route('planes.index') }}"
-                        class="hover:text-gray-300 {{ request()->routeIs('planes.*') ? 'underline' : '' }}">
-                        <i class="bi bi-kanban-fill"></i> Planes
-                    </a>
-                    <a href="{{ route('usuarios.index') }}"
-                        class="hover:text-gray-300 {{ request()->routeIs('usuarios.*') ? 'underline' : '' }}">
-                        <i class="bi bi-people"></i> Usuarios
-                    </a>
-                    <a href="{{ route('departamentos.index') }}"
-                        class="hover:text-gray-300 {{ request()->routeIs('departamentos.*') ? 'underline' : '' }}">
-                        <i class="bi bi-building"></i> Departamentos
-                    </a>
+                        <a href="{{ route('instituciones.index') }}"
+                            class="hover:text-gray-300 {{ request()->routeIs('instituciones.*') ? 'underline' : '' }}">
+                            <i class="bi bi-building"></i> Instituciones
+                        </a>
 
+                        <a href="{{ route('planes.index') }}"
+                            class="hover:text-gray-300 {{ request()->routeIs('planes.*') ? 'underline' : '' }}">
+                            <i class="bi bi-kanban-fill"></i> Planes
+                        </a>
+
+                        <a href="{{ route('usuarios.index') }}"
+                            class="hover:text-gray-300 {{ request()->routeIs('usuarios.*') ? 'underline' : '' }}">
+                            <i class="bi bi-people"></i> Usuarios
+                        </a>
+
+                        <a href="{{ route('departamentos.index') }}"
+                            class="hover:text-gray-300 {{ request()->routeIs('departamentos.*') ? 'underline' : '' }}">
+                            <i class="bi bi-building"></i> Departamentos
+                        </a>
+                    @endif
+
+                    {{-- Botón cerrar sesión para todos los roles --}}
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:text-gray-300 flex items-center space-x-1">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Salir</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </nav>
+    <!-- ALERTAS DE SESIÓN -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mt-3 mx-3 fw-bold fs-5 shadow border border-success"
+            role="alert" style="background-color: #d4edda;">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mt-3 mx-3 fw-bold fs-5 shadow border border-danger"
+            role="alert" style="background-color: #f44336; color: white;">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    @endif
+    <!-- ALERTAS DE SESIÓN -->
+
 
     <!-- HEADER (Si existe) -->
     @isset($header)
@@ -131,5 +205,7 @@
 
 
 </body>
+
+
 
 </html>

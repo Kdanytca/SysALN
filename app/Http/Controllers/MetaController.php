@@ -7,46 +7,89 @@ use App\Models\PlanEstrategico;
 use App\Models\Usuario;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MetaController extends Controller
 {
-    // Muestra la lista de metas
     public function index()
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
+        }
+
         $metas = Meta::with('planEstrategico')->get();
         $planes = PlanEstrategico::all();
-        $usuarios = Usuario::all();
+        $usuarios = Usuario::all(); // Usar el modelo correcto 'Usuario'
 
         return view('metas.index', compact('metas', 'planes', 'usuarios'));
     }
 
-    // Muestra la lista de metas filtradas por plan estratégico
+
+    // Vista de metas por plan (solo admin y encargados)
     public function indexPorPlan(PlanEstrategico $plan)
     {
-        $plan->load('departamento.institucion'); // Esto incluye la institución relacionada
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
+        }
+
+        $plan->load('departamento.institucion');
         $metas = $plan->metas()->with('planEstrategico')->get();
         $planes = PlanEstrategico::all();
-
-        // Obtener solo los usuarios del mismo departamento del plan
         $usuarios = Usuario::where('idDepartamento', $plan->idDepartamento)->get();
 
         return view('metas.index', compact('metas', 'plan', 'planes', 'usuarios'));
     }
 
-    // Filtra el usuario responsable
+    // Vista exclusiva para el responsable_meta
+    public function indexResponsable()
+    {
+        $usuario = Auth::user();
+
+        if ($usuario->tipo_usuario !== 'responsable_meta') {
+            return redirect()->route('home')->with('error', 'No tienes permiso para ver esta sección.');
+        }
+
+        $metas = Meta::with(['planEstrategico.departamento.institucion'])
+            ->where('usuario_responsable', $usuario->nombre_usuario)
+            ->get();
+
+        if ($metas->isEmpty()) {
+            return redirect()->route('home')->with('error', 'No tienes metas asignadas.');
+        }
+
+        // Obtener el plan del primer meta para pasarlo a la vista
+        $plan = $metas->first()->planEstrategico ?? null;
+
+        $usuarios = Usuario::all();
+
+        return view('metas.index', [
+            'metas' => $metas,
+            'usuarios' => $usuarios,
+            'plan' => $plan,
+        ]);
+    }
+
+
+    // Crear meta (solo admin y encargados)
     public function create($planId)
     {
-        $plan = PlanEstrategico::findOrFail($planId);
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear metas.');
+        }
 
-        // Obtener solo usuarios del mismo departamento del plan
+        $plan = PlanEstrategico::findOrFail($planId);
         $usuarios = Usuario::where('idDepartamento', $plan->idDepartamento)->get();
 
         return view('metas.create', compact('plan', 'usuarios'));
     }
 
-    // Se encarga de crear una nueva meta
+
     public function store(Request $request)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para crear metas.');
+        }
+
         $plan = PlanEstrategico::findOrFail($request->idPlanEstrategico);
 
         $request->validate([
@@ -78,12 +121,18 @@ class MetaController extends Controller
             'comentario' => $request->comentario,
         ]);
 
-        return redirect()->back()->with('success', 'Meta creada exitosamente.');
+        return redirect()->route('plan.metas', $request->idPlanEstrategico)
+            ->with('success', 'Meta creada exitosamente.');
     }
 
-    // Se encarga de editar una meta
+
+    // Editar meta (solo admin y encargados)
     public function update(Request $request, Meta $meta)
     {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para editar metas.');
+        }
+
         $plan = PlanEstrategico::findOrFail($request->idPlanEstrategico);
 
         $request->validate([
@@ -118,12 +167,20 @@ class MetaController extends Controller
         return redirect()->back()->with('success', 'Meta actualizada exitosamente.');
     }
 
-    // Elimina una meta
+    // Eliminar meta (solo admin y encargados)
     public function destroy(Meta $meta)
     {
-        $meta = Meta::findOrFail($meta->id);
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan'])) {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar metas.');
+        }
+
         $meta->delete();
 
         return redirect()->back()->with('success', 'Meta eliminada exitosamente.');
+    }
+
+    public function createDesdePlan(PlanEstrategico $plan)
+    {
+        return view('metas.create', compact('plan'));
     }
 }

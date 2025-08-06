@@ -6,18 +6,21 @@ use App\Models\Institucion;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class InstitucionController extends Controller
 {
-    // Muestra la lista de instituciones
     public function index()
     {
+        if (Auth::user()->tipo_usuario === 'encargado_institucion') {
+            return redirect()->back()->with('error', 'No tienes permiso para ver esta sección.');
+        }
+
         $instituciones = Institucion::with('encargadoInstitucion')->get();
         $usuarios = Usuario::all();
 
-        // Obtener usuarios tipo 'encargado_institucion' que aún no han sido asignados como encargados
         $usuariosParaCrear = Usuario::where('tipo_usuario', 'encargado_institucion')
-            ->whereDoesntHave('instituciones') // Solo los libres
+            ->whereDoesntHave('instituciones')
             ->get();
 
         $usuariosParaEditar = Usuario::where('tipo_usuario', 'encargado_institucion')->get();
@@ -25,9 +28,12 @@ class InstitucionController extends Controller
         return view('instituciones.index', compact('instituciones', 'usuarios', 'usuariosParaCrear', 'usuariosParaEditar'));
     }
 
-    // Se encarga de crear una nueva institución
     public function store(Request $request)
     {
+        if (Auth::user()->tipo_usuario === 'encargado_institucion') {
+            return redirect()->back()->with('error', 'No tienes permiso para crear instituciones.');
+        }
+
         $request->validate([
             'nombre_institucion' => 'required|string|max:255',
             'tipo_institucion' => 'required|string|max:255',
@@ -44,16 +50,18 @@ class InstitucionController extends Controller
             'idEncargadoInstitucion' => $request->idEncargadoInstitucion,
         ]);
 
-        // Asignar esa institución al usuario encargado
         Usuario::where('id', $request->idEncargadoInstitucion)
             ->update(['idInstitucion' => $institucion->id]);
 
         return redirect()->route('instituciones.index')->with('success', 'Institución registrada correctamente.');
     }
 
-    // se encarga de editar una institución
     public function update(Request $request, string $id)
     {
+        if (Auth::user()->tipo_usuario === 'encargado_institucion') {
+            return redirect()->back()->with('error', 'No tienes permiso para actualizar instituciones.');
+        }
+
         $request->validate([
             'nombre_institucion' => 'required|string|max:255',
             'tipo_institucion' => 'required|string|max:255',
@@ -69,13 +77,31 @@ class InstitucionController extends Controller
 
         return redirect()->route('instituciones.index')->with('success', 'Institución actualizada correctamente.');
     }
-    
-    // Elimina una institución
+
     public function destroy($id)
     {
+        if (Auth::user()->tipo_usuario === 'encargado_institucion') {
+            return redirect()->back()->with('error', 'No tienes permiso para eliminar instituciones.');
+        }
+
         $institucion = Institucion::findOrFail($id);
         $institucion->delete();
 
         return redirect()->route('instituciones.index')->with('success', 'Institución eliminada correctamente.');
+    }
+
+    public function ver($id)
+    {
+        $usuario = Auth::user();
+
+        if ($usuario->tipo_usuario !== 'encargado_institucion' || $usuario->idInstitucion != $id) {
+            return redirect()->back()->with('error', 'No tienes permiso para ver esta institución.');
+        }
+
+        $instituciones = Institucion::where('id', $id)->get();
+        $usuariosParaCrear = Usuario::all();
+        $usuariosParaEditar = Usuario::all();
+
+        return view('instituciones.index', compact('instituciones', 'usuariosParaCrear', 'usuariosParaEditar'));
     }
 }

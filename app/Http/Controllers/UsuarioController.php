@@ -55,11 +55,13 @@ class UsuarioController extends Controller
     public function usuariosPorDepartamento($id)
     {
         $usuarios = Usuario::where('idDepartamento', $id)
-            ->whereDoesntHave('planesEstrategicos') // opcional por si no se quiere repetir responsables
-            ->get();
+            ->whereDoesntHave('planEstrategico')
+            ->get(['id', 'nombre_usuario']);
 
         return response()->json($usuarios);
     }
+
+
 
     // Se encarga de editar un usuario
     public function update(Request $request, string $id)

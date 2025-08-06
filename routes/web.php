@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Departamento
     Route::resource('departamentos', DepartamentoController::class);
-    
+
     // usuarios
     Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
     Route::resource('usuarios', UsuarioController::class);
@@ -49,16 +49,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Metas
     Route::resource('metas', MetaController::class);
     Route::get('/planes/{plan}/metas', [MetaController::class, 'indexPorPlan'])->name('plan.metas');
-    
+
     // Actividades
-    Route::resource('actividades', ActividadController::class);
+    Route::resource('actividades', ActividadController::class)->except(['show']);
     Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
     //seguimiento de actividades
     Route::get('/actividades/{actividad}/seguimientos', [\App\Http\Controllers\SeguimientoActividadController::class, 'listarPorActividad']);
     Route::delete('/seguimientos/{seguimiento}', [\App\Http\Controllers\SeguimientoActividadController::class, 'destroy'])->name('seguimientos.destroy');
     //resumen de actividades por meta
     Route::get('/metas/{meta}/resumen-seguimientos', [SeguimientoActividadController::class, 'resumenPorMeta'])->name('meta.resumen_seguimientos');
-
+    //rol meta
+    Route::get('/planes/{plan}/metas/create', [MetaController::class, 'createDesdePlan'])->name('metas.createDesdePlan');
 
 
 
@@ -75,9 +76,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/instituciones/{id}/planes', [App\Http\Controllers\PlanEstrategicoController::class, 'planesPorInstitucion'])->name('institucion.planes');
     //mostrar planes globales
     Route::get('/planes/todos', [PlanEstrategicoController::class, 'indexGlobal'])->name('planes.global');
-
+    //finaliza un plan estratégico
+    Route::post('/planes/{id}/finalizar', [PlanEstrategicoController::class, 'toggleFinalizar'])->name('planes.finalizar');
     // Mostrar resultados registrados
     Route::get('/planes/{id}/reporte', [ResultadoController::class, 'verReporte'])->name('planes.reporte');
+    //Generar Reporte PDF
+    Route::get('/plan/{id}/reporte-pdf', [ResultadoController::class, 'generarPDF'])->name('plan.reporte.pdf');
+
 
 
 
@@ -90,6 +95,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/seguimientos/{seguimiento}', [SeguimientoActividadController::class, 'show']);
     Route::put('/seguimientos/{id}', [SeguimientoActividadController::class, 'update'])->name('seguimientos.update');
 
+    //Por roles
+    //Institución
+    Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])
+        ->middleware(['auth'])
+        ->name('institucion.ver');
+    //Plan estrategico
+    Route::middleware(['auth'])->get(
+        '/plan-estrategico/{id}',
+        [PlanEstrategicoController::class, 'verResponsable']
+    )->name('plan.responsable');
+    //Meta
+    Route::get('/mis-metas', [MetaController::class, 'indexResponsable'])->name('meta.responsable');
+    //actividad
+    // Vista de actividades para el responsable
+    Route::get('/actividades/responsable', [ActividadController::class, 'indexResponsable'])->name('actividades.indexResponsable');
+
+
+    Route::get('/mi-departamento', [DepartamentoController::class, 'verMiDepartamento'])
+        ->middleware('auth')->name('departamento.ver');
 });
 
 require __DIR__ . '/auth.php';

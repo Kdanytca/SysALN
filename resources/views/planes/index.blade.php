@@ -34,6 +34,7 @@
                             <th class="px-4 py-3 text-left">Departamento</th>
                             <th class="px-4 py-3 text-left">Plan</th>
                             <th class="px-4 py-3 text-left">Ejes Estratégicos</th>
+                            <th class="px-4 py-3 text-left">Objetivos</th>
                             <th class="px-4 py-3 text-left">Inicio</th>
                             <th class="px-4 py-3 text-left">Fin</th>
                             <th class="px-4 py-3 text-left">Responsable</th>
@@ -56,6 +57,15 @@
                                         </span>
                                     @endforeach
                                 </td>
+                                <td class="px-4 py-3">
+                                    @if ($plan->objetivos)
+                                        @foreach (json_decode($plan->objetivos) as $objetivo)
+                                            <div class="text-gray-800 text-xs mb-1">• {{ $objetivo }}</div>
+                                        @endforeach
+                                    @else
+                                        <span class="italic text-gray-400">Sin objetivos</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-2 text-gray-600">
                                     {{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}
                                 </td>
@@ -76,25 +86,56 @@
                                             class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-md text-xs hover:bg-indigo-200 transition shadow-sm">
                                             Ver Reporte
                                         </a>
+
+                                        <form method="POST" action="{{ route('planes.finalizar', $plan->id) }}">
+                                            @csrf
+                                            @php
+                                                $esFinalizado = $plan->indicador === 'finalizado';
+                                                $clasesBoton = $esFinalizado
+                                                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' // Reanudar
+                                                    : 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'; // Finalizar (mismo azul)
+                                            @endphp
+                                            <button type="submit"
+                                                class="{{ $clasesBoton }} px-3 py-1.5 rounded-md text-xs transition shadow-sm">
+                                                {{ $esFinalizado ? 'Reanudar Plan' : 'Finalizar Plan' }}
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
 
                 <!-- Botón Volver estilizado -->
-                <div class="mt-8">
-                    <a href="{{ route('instituciones.index') }}"
-                        class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200 text-sm font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Volver a instituciones
-                    </a>
-                </div>
+                @auth
+                    @php
+                        switch (auth()->user()->tipo_usuario) {
+                            case 'encargado_institucion':
+                                $rutaInicio = route('institucion.ver', auth()->user()->idInstitucion);
+                                break;
+                            case 'administrador':
+                                $rutaInicio = route('instituciones.index');
+                                break;
+                            default:
+                                $rutaInicio = '#'; // o nada
+                        }
+                    @endphp
+
+                    @if ($rutaInicio !== '#')
+                        <div class="mt-8">
+                            <a href="{{ $rutaInicio }}"
+                                class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200 text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Volver a instituciones
+                            </a>
+                        </div>
+                    @endif
+                @endauth
             </div>
         </div>
     </div>
