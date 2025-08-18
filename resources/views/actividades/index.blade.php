@@ -15,14 +15,22 @@
             <div class="flex items-center space-x-4">
                 <!-- Botón para agregar nueva actividad (abre modal) -->
                 <div x-data="{ modalOpen: false }">
-                    <button @click="modalOpen = true"
-                        class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nueva Actividad
-                    </button>
+                    @php
+                        $rol = Auth::user()->tipo_usuario ?? null;
+                    @endphp
+
+                    @if (in_array($rol, ['encargado_institucion', 'responsable_plan', 'responsable_meta']))
+                        <button @click="modalOpen = true"
+                            class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                            Nueva Actividad
+                        </button>
+                    @endif
+
 
                     <!-- Modal -->
                     <div x-show="modalOpen"
@@ -75,148 +83,145 @@
                 @endif
 
                 <!-- Tabla de actividades -->
+                @php
+                    $rol = Auth::user()->tipo_usuario ?? null;
+                    $rolesPermitidos = ['encargado_institucion', 'responsable_plan', 'responsable_meta'];
+                @endphp
+
                 <table
                     class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Usuario</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Nombre de la Actividad</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Obejtivos</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Inicio</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Fin</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Resultados Esperados</th>
-                            <th class="w-1/9 px-4 py-3 text-left">
-                                Unidad Encargada</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Usuario</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Nombre de la Actividad</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Objetivos</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Inicio</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Fin</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Resultados Esperados</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Unidad Encargada</th>
 
-                            <th class="w-1/9 px-4 py-3 text-center">
-                                Acciones
-                            </th>
-                            <th class="w-1/9 px-4 py-3 text-center">
-                                Seguimiento
-                            </th>
+                            {{-- Solo mostrar columna Acciones a roles permitidos --}}
+                            @if (in_array($rol, $rolesPermitidos))
+                                <th class="w-1/9 px-4 py-3 text-center">Acciones</th>
+                            @endif
+
+                            <th class="w-1/9 px-4 py-3 text-center">Seguimiento</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($actividades as $actividad)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium">
-                                    {{ $actividad->usuario->nombre_usuario }}</td>
-                                <td class="px-4 py-3">
-                                    {{ $actividad->nombre_actividad }}</td>
-                                <td class="px-4 py-3">
-                                    {{ $actividad->objetivos }}</td>
+                                <td class="px-4 py-3 font-medium">{{ $actividad->usuario->nombre_usuario }}</td>
+                                <td class="px-4 py-3">{{ $actividad->nombre_actividad }}</td>
+                                <td class="px-4 py-3">{{ $actividad->objetivos }}</td>
                                 <td class="px-4 py-3">
                                     {{ \Carbon\Carbon::parse($actividad->fecha_inicio)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-3">
                                     {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3">
-                                    {{ $actividad->resultados_esperados }}</td>
-                                <td class="px-4 py-3">
-                                    {{ $actividad->unidad_encargada }}</td>
-                                <td class="px-4 py-3 text-righ">
-                                    <div class="flex flex-wrap justify-center gap-2">
-                                        <div x-data="{ editModalOpen: false }" class="inline-block">
-                                            <button @click="editModalOpen = true"
-                                                class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
-                                                Editar
-                                            </button>
+                                <td class="px-4 py-3">{{ $actividad->resultados_esperados }}</td>
+                                <td class="px-4 py-3">{{ $actividad->unidad_encargada }}</td>
 
-                                            <!-- Modal de edición -->
-                                            <div x-show="editModalOpen"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold mb-4">Editar Actividad</h2>
-                                                    @include('actividades.edit', [
-                                                        'action' => route('actividades.update', $actividad->id),
-                                                        'isEdit' => true,
-                                                        'actividad' => $actividad,
-                                                        'departamentos' => $departamentos,
-                                                    ])
+                                {{-- Acciones solo para roles permitidos --}}
+                                @if (in_array($rol, $rolesPermitidos))
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex flex-wrap justify-center gap-2">
+                                            {{-- Editar --}}
+                                            <div x-data="{ editModalOpen: false }" class="inline-block">
+                                                <button @click="editModalOpen = true"
+                                                    class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                    Editar
+                                                </button>
+
+                                                <!-- Modal de edición -->
+                                                <div x-show="editModalOpen"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold mb-4">Editar Actividad</h2>
+                                                        @include('actividades.edit', [
+                                                            'action' => route(
+                                                                'actividades.update',
+                                                                $actividad->id),
+                                                            'isEdit' => true,
+                                                            'actividad' => $actividad,
+                                                            'departamentos' => $departamentos,
+                                                        ])
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Eliminar -->
-                                        <div x-data="{ confirmDelete: false }" class="inline-block">
-                                            <!-- Botón que abre el modal -->
-                                            <button @click="confirmDelete = true"
-                                                class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
-                                                Eliminar
-                                            </button>
+                                            {{-- Eliminar --}}
+                                            <div x-data="{ confirmDelete: false }" class="inline-block">
+                                                <button @click="confirmDelete = true"
+                                                    class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                    Eliminar
+                                                </button>
 
-                                            <!-- Modal de confirmación -->
-                                            <div x-show="confirmDelete"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                        eliminación</h2>
-                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        esta
-                                                        Actividad?</p>
+                                                <!-- Modal de confirmación -->
+                                                <div x-show="confirmDelete"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                            eliminación</h2>
+                                                        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
+                                                            eliminar esta
+                                                            Actividad?</p>
 
-                                                    <div class="flex justify-end items-center gap-3 items-stretch">
-                                                        <div>
-                                                            <button @click="confirmDelete = false"
-                                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                                Cancelar
-                                                            </button>
-                                                        </div>
-
-                                                        <div class="flex items-center">
-                                                            <form method="POST"
-                                                                action="{{ route('actividades.destroy', $actividad->id) }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
-                                                                    Eliminar
+                                                        <div class="flex justify-end items-center gap-3 items-stretch">
+                                                            <div>
+                                                                <button @click="confirmDelete = false"
+                                                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                                    Cancelar
                                                                 </button>
-                                                            </form>
+                                                            </div>
+                                                            <div class="flex items-center">
+                                                                <form method="POST"
+                                                                    action="{{ route('actividades.destroy', $actividad->id) }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
+                                                                        Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </td>
+                                @endif
 
-                                </td>
+                                {{-- Seguimiento visible para todos --}}
                                 <td class="text-center px-4 py-2">
                                     <div class="flex flex-col items-center space-y-2">
-                                        {{-- Contenedor flex para alinear verticalmente y añadir espacio --}}
                                         <button onclick="abrirModalCrearSeguimiento({{ $actividad->id }})"
                                             class="bg-purple-300 text-purple-800 px-3 py-1 rounded hover:bg-purple-400 transition text-sm">
-                                            {{-- Morado pastel --}}
                                             Seguimiento
                                         </button>
                                         <button onclick="mostrarSeguimientos({{ $actividad->id }})"
                                             class="bg-blue-300 text-blue-800 px-3 py-1 rounded hover:bg-blue-400 transition text-sm">
-                                            {{-- Azul pastel (similar al anterior) --}}
                                             Ver Seguimientos
                                         </button>
                                     </div>
                                 </td>
-
                             </tr>
                         @endforeach
 
                         @if ($actividades->isEmpty())
                             <tr>
-                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">No hay metas
-                                    registradas.</td>
+                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    No hay actividades registradas.
+                                </td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
+
                 <br>
                 @auth
                     @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_meta']))

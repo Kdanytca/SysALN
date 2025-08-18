@@ -11,14 +11,21 @@
 
             <!-- Botón para agregar un nuevo registro -->
             <div x-data="{ modalOpen: false }">
-                <button @click="modalOpen = true"
-                    class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nueva Meta
-                </button>
+                @php
+                    $rol = Auth::user()->tipo_usuario ?? null;
+                @endphp
+
+                @if ($rol === 'encargado_institucion' || $rol === 'responsable_plan')
+                    <button @click="modalOpen = true"
+                        class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nueva Meta
+                    </button>
+                @endif
+
 
                 <!-- Modal -->
                 <div x-show="modalOpen"
@@ -97,74 +104,84 @@
                                 <td class="px-4 py-3 max-w-xs truncate whitespace-normal break-words">
                                     {{ $meta->comentario }}</td>
                                 <td class="px-4 py-3 text-righ">
-                                    <div class="flex flex-wrap justify-center gap-2">
-                                        <div x-data="{ editModalOpen: false }" class="inline-block">
-                                            <button @click="editModalOpen = true"
-                                                class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
-                                                Editar
-                                            </button>
+                                    @php
+                                        $rol = Auth::user()->tipo_usuario ?? null;
+                                    @endphp
 
-                                            <!-- Modal de edición -->
-                                            <div x-show="editModalOpen"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold mb-4">Editar Meta</h2>
-                                                    @include('metas.edit', [
-                                                        'action' => route('metas.update', $meta->id),
-                                                        'isEdit' => true,
-                                                        'meta' => $meta,
-                                                        'plan' => $meta->planEstrategico,
-                                                        'usuarios' => $usuarios,
-                                                    ])
+                                    <div class="flex flex-wrap justify-center gap-2">
+
+                                        {{-- Editar (solo encargado_institucion o responsable_plan) --}}
+                                        @if ($rol === 'encargado_institucion' || $rol === 'responsable_plan')
+                                            <div x-data="{ editModalOpen: false }" class="inline-block">
+                                                <button @click="editModalOpen = true"
+                                                    class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                    Editar
+                                                </button>
+
+                                                <!-- Modal de edición -->
+                                                <div x-show="editModalOpen"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold mb-4">Editar Meta</h2>
+                                                        @include('metas.edit', [
+                                                            'action' => route('metas.update', $meta->id),
+                                                            'isEdit' => true,
+                                                            'meta' => $meta,
+                                                            'plan' => $meta->planEstrategico,
+                                                            'usuarios' => $usuarios,
+                                                        ])
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <!-- Eliminar -->
-                                        <div x-data="{ confirmDelete: false }" class="inline-block">
-                                            <!-- Botón que abre el modal -->
-                                            <button @click="confirmDelete = true"
-                                                class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
-                                                Eliminar
-                                            </button>
+                                            <!-- Eliminar -->
+                                            <div x-data="{ confirmDelete: false }" class="inline-block">
+                                                <!-- Botón que abre el modal -->
+                                                <button @click="confirmDelete = true"
+                                                    class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                    Eliminar
+                                                </button>
 
-                                            <!-- Modal de confirmación -->
-                                            <div x-show="confirmDelete"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                        eliminación</h2>
-                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        esta Meta?</p>
+                                                <!-- Modal de confirmación -->
+                                                <div x-show="confirmDelete"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                            eliminación</h2>
+                                                        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
+                                                            eliminar
+                                                            esta Meta?</p>
 
-                                                    <div class="flex justify-end items-center gap-3 items-stretch">
-                                                        <div>
-                                                            <button @click="confirmDelete = false"
-                                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                                Cancelar
-                                                            </button>
-                                                        </div>
-
-                                                        <div class="flex items-center">
-                                                            <form method="POST"
-                                                                action="{{ route('metas.destroy', $meta->id) }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
-                                                                    Eliminar
+                                                        <div class="flex justify-end items-center gap-3 items-stretch">
+                                                            <div>
+                                                                <button @click="confirmDelete = false"
+                                                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                                    Cancelar
                                                                 </button>
-                                                            </form>
+                                                            </div>
+
+                                                            <div class="flex items-center">
+                                                                <form method="POST"
+                                                                    action="{{ route('metas.destroy', $meta->id) }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
+                                                                        Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        @endif
 
+                                        {{-- Actividades (lo ven todos) --}}
                                         <a href="{{ route('meta.actividades', $meta->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
                                             Actividades
