@@ -25,13 +25,24 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
 
-                {{-- Logo a la izquierda (redirecciona diferente según el tipo de usuario) --}}
-                <div class="flex-shrink-0">
+                {{-- Logo + usuario --}}
+                <div class="flex items-center space-x-6">
                     @php
                         use Illuminate\Support\Facades\Auth;
 
                         $user = Auth::user();
                         $rol = $user->tipo_usuario ?? null;
+
+                        // Traducción de roles
+                        $rolLegible =
+                            [
+                                'administrador' => 'Administrador',
+                                'encargado_institucion' => 'Encargado de Institución',
+                                'encargado_departamento' => 'Encargado de Departamento',
+                                'responsable_plan' => 'Responsable de Plan',
+                                'responsable_meta' => 'Responsable de Meta',
+                                'responsable_actividad' => 'Responsable de Actividad',
+                            ][$rol] ?? ucfirst(str_replace('_', ' ', (string) $rol));
 
                         // Definir la ruta de inicio según el rol
                         switch ($rol) {
@@ -66,53 +77,55 @@
                         }
                     @endphp
 
+                    {{-- Logo --}}
                     <a href="{{ $rutaInicio }}" class="flex items-center space-x-2">
                         <i class="bi bi-house-door-fill text-xl"></i>
                         <span class="font-bold text-lg">SysALN</span>
                     </a>
+
+                    {{-- Usuario --}}
+                    <div class="flex items-center space-x-2">
+                        <i class="bi bi-person-circle text-xl"></i>
+                        <span class="text-sm">
+                            {{ $user->nombre_usuario ?? 'Usuario' }}
+                            <span class="text-gray-300">({{ $rolLegible ?: 'Sin rol' }})</span>
+                        </span>
+                    </div>
                 </div>
-                
-                {{-- Enlaces del menú (solo admin puede verlos) --}}
-                <div class="hidden md:flex space-x-6 items-center">
+
+                {{-- Contenedor derecho --}}
+                <div class="hidden md:flex items-center space-x-6 h-full">
+
                     @if ($rol === 'administrador')
-                        <a href="{{ route('dashboard') }}"
-                            class="hover:text-gray-300 {{ request()->routeIs('dashboard') ? 'underline' : '' }}">
-                            <i class="bi bi-house-door"></i> Dashboard
-                        </a>
-
                         <a href="{{ route('instituciones.index') }}"
-                            class="hover:text-gray-300 {{ request()->routeIs('instituciones.*') ? 'underline' : '' }}">
-                            <i class="bi bi-building"></i> Instituciones
-                        </a>
-
-                        <a href="{{ route('planes.index') }}"
-                            class="hover:text-gray-300 {{ request()->routeIs('planes.*') ? 'underline' : '' }}">
-                            <i class="bi bi-kanban-fill"></i> Planes
+                            class="inline-flex items-center hover:text-gray-300 {{ request()->routeIs('instituciones.*') ? 'underline' : '' }}">
+                            <i class="bi bi-building"></i>
+                            <span>Instituciones</span>
                         </a>
 
                         <a href="{{ route('usuarios.index') }}"
-                            class="hover:text-gray-300 {{ request()->routeIs('usuarios.*') ? 'underline' : '' }}">
-                            <i class="bi bi-people"></i> Usuarios
-                        </a>
-
-                        <a href="{{ route('departamentos.index_general') }}"
-                            class="hover:text-gray-300 {{ request()->routeIs('departamentos.*') ? 'underline' : '' }}">
-                            <i class="bi bi-building"></i> Departamentos
+                            class="inline-flex items-center hover:text-gray-300 {{ request()->routeIs('usuarios.*') ? 'underline' : '' }}">
+                            <i class="bi bi-people"></i>
+                            <span>Usuarios</span>
                         </a>
                     @endif
 
-                    {{-- Botón cerrar sesión para todos los roles --}}
-                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                    {{-- Botón cerrar sesión con confirmación --}}
+                    <form method="POST" action="{{ route('logout') }}"
+                        onsubmit="return confirm('¿Estás seguro de que deseas cerrar sesión?');" class="m-0 p-0">
                         @csrf
-                        <button type="submit" class="hover:text-gray-300 flex items-center space-x-1">
+                        <button type="submit" class="inline-flex items-center hover:text-gray-300 focus:outline-none">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Salir</span>
                         </button>
                     </form>
+
                 </div>
+
             </div>
         </div>
     </nav>
+
     <!-- ALERTAS DE SESIÓN -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show mt-3 mx-3 fw-bold fs-5 shadow border border-success"

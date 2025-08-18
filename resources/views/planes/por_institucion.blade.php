@@ -267,11 +267,19 @@
                     </button>
                 </div>
 
-                <div class="text-right">
+                <div class="flex justify-end gap-2">
+                    {{-- Botón Cancelar --}}
+                    <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
+                        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                        Cancelar
+                    </button>
+
+                    {{-- Botón Guardar --}}
                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                         Guardar Plan
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

@@ -139,7 +139,7 @@
         @endif
 
         @auth
-            @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan']))
+            @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan', 'encargado_institucion']))
                 @php
                     switch (auth()->user()->tipo_usuario) {
                         case 'responsable_plan':

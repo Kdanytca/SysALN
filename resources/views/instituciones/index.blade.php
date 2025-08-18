@@ -9,17 +9,23 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800">Lista de Instituciones</h2>
 
-            @if (auth()->user()->tipo_usuario === 'administrador')
-            <!-- Botón solo visible para administradores -->
+            <!-- Botón para agregar un nuevo registro -->
             <div x-data="{ modalInstitucion: false, modalNuevoUsuario: false }">
-                <button @click="modalInstitucion = true"
-                    class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nueva Institución
-                </button>
+                @php
+                    $user = Auth::user();
+                @endphp
+
+                @if ($user && $user->tipo_usuario === 'administrador')
+                    <button @click="modalInstitucion = true"
+                        class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nueva Institución
+                    </button>
+                @endif
+
 
                 <!-- Modal de Institución -->
                 <div x-show="modalInstitucion"
@@ -80,89 +86,102 @@
                                 <td class="px-4 py-3 truncate">
                                     {{ $institucion->encargadoInstitucion->nombre_usuario ?? '-'}}</td>
                                 <td class="px-4 py-3 text-righ">
-                                    <div class="flex flex-wrap justify-center gap-2">
-                                        {{-- Editar --}}
-                                        <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }">
-                                            <button @click="editModalOpen = true"
-                                                class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
-                                                Editar
-                                            </button>
+                                    @php
+                                        $user = Auth::user();
+                                    @endphp
 
-                                            <div x-show="editModalOpen"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-xl font-bold mb-4">Editar Institución</h2>
-                                                    @include('instituciones.edit', [
-                                                        'action' => route(
-                                                            'instituciones.update',
-                                                            $institucion->id),
-                                                        'isEdit' => true,
-                                                        'institucion' => $institucion,
-                                                        'usuariosParaEditar' => $usuariosParaEditar,
-                                                    ])
+                                    @if ($user && $user->tipo_usuario === 'administrador')
+                                        <div class="flex flex-wrap justify-center gap-2">
+                                            {{-- Editar --}}
+                                            <div x-data="{ editModalOpen: false }">
+                                                <button @click="editModalOpen = true"
+                                                    class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                    Editar
+                                                </button>
+
+                                                <div x-show="editModalOpen"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-xl font-bold mb-4">Editar Institución</h2>
+                                                        @include('instituciones.edit', [
+                                                            'action' => route(
+                                                                'instituciones.update',
+                                                                $institucion->id),
+                                                            'isEdit' => true,
+                                                            'institucion' => $institucion,
+                                                            'usuarios' => $usuariosParaEditar,
+                                                        ])
+                                                    </div>
+                                                </div>
+
+                                                <!-- Modal de Usuario dentro de editar -->
+                                                <div x-show="modalNuevoUsuario"
+                                                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                                                        @include('instituciones.usuario', [
+                                                            'closeModal' => 'modalNuevoUsuario = false',
+                                                            'ocultarCamposRelacionados' => true
+                                                        ])
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <!-- Modal de Usuario dentro de editar -->
-                                            <div x-show="modalNuevoUsuario"
-                                                x-on:close-modal-usuario.window="modalNuevoUsuario = false"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+                                            {{-- Eliminar --}}
+                                            <div x-data="{ confirmDelete: false }" class="inline-block">
 
-                                                    @include('instituciones.usuario', [
-                                                        'closeModal' => 'modalNuevoUsuario = false',
-                                                        'ocultarCamposRelacionados' => true
-                                                    ])
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <button @click="confirmDelete = true"
+                                                    class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                    Eliminar
+                                                </button>
 
-                                        {{-- Eliminar --}}
-                                        <div x-data="{ confirmDelete: false }" class="inline-block">
+                                                <div x-show="confirmDelete"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                            eliminación</h2>
+                                                        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
+                                                            eliminar
+                                                            esta institución?</p>
 
-                                            <button @click="confirmDelete = true"
-                                                class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
-                                                Eliminar
-                                            </button>
-
-                                            <div x-show="confirmDelete"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                        eliminación</h2>
-                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        esta
-                                                        institución?</p>
-
-                                                    <div class="flex justify-end items-center gap-3 items-stretch">
-                                                        <div>
-                                                            <button @click="confirmDelete = false"
-                                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                                Cancelar
-                                                            </button>
-                                                        </div>
-
-                                                        <div class="flex items-center">
-                                                            <form method="POST"
-                                                                action="{{ route('instituciones.destroy', $institucion->id) }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
-                                                                    Eliminar
+                                                        <div class="flex justify-end items-center gap-3 items-stretch">
+                                                            <div>
+                                                                <button @click="confirmDelete = false"
+                                                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                                    Cancelar
                                                                 </button>
-                                                            </form>
+                                                            </div>
+
+                                                            <div class="flex items-center">
+                                                                <form method="POST"
+                                                                    action="{{ route('instituciones.destroy', $institucion->id) }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
+                                                                        Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                    @endif
 
+
+                                    @php
+                                        $user = Auth::user();
+                                    @endphp
+
+                                    @if ($user && $user->tipo_usuario === 'encargado_institucion')
                                         {{-- Ver Departamentos --}}
                                         <a href="{{ route('institucion.departamentos', $institucion->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
@@ -174,39 +193,41 @@
                                             class="bg-green-100 text-green-800 px-3 py-1.5 rounded-md text-xs hover:bg-green-200 transition shadow-sm">
                                             Ver Planes Estratégicos
                                         </a>
-                                    </div>
-                                </td>
+                                    @endif
 
-                            </tr>
-                        @endforeach
-
-                        @if ($instituciones->isEmpty())
-                            <tr>
-                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">No hay
-                                    instituciones registradas.</td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-                <br>
-                @auth
-                    @if (auth()->user()->tipo_usuario === 'administrador')
-                        <div class="mb-6">
-                            <div
-                                class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
-                                <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 text-sm font-medium">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                    <span>Volver al inicio</span>
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-                @endauth
             </div>
+            </td>
+
+            </tr>
+            @endforeach
+
+            @if ($instituciones->isEmpty())
+                <tr>
+                    <td colspan="4" class="px-4 py-4 text-center text-gray-500">No hay
+                        instituciones registradas.</td>
+                </tr>
+            @endif
+            </tbody>
+            </table>
+            <br>
+            @auth
+                @if (auth()->user()->tipo_usuario === 'administrador')
+                    <div class="mb-6">
+                        <div
+                            class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
+                            <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                                <span>Volver al inicio</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
+            @endauth
         </div>
+    </div>
     </div>
 </x-app-layout>
