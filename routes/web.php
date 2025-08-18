@@ -41,6 +41,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Departamento
     Route::resource('departamentos', DepartamentoController::class);
+    Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])
+        ->name('institucion.departamentos');
+    // Para mostrar todos los departamentos
+    Route::get('/departamentos', [DepartamentoController::class, 'todos'])->name('departamentos.index_general');
 
     // usuarios
     Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
@@ -97,7 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Por roles
     //Institución
-    Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])
+    Route::get('/instituciones/{id}', [InstitucionController::class, 'ver'])
         ->middleware(['auth'])
         ->name('institucion.ver');
     //Plan estrategico

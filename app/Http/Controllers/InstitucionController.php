@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Institucion;
+use App\Models\Departamento;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,15 +18,32 @@ class InstitucionController extends Controller
         }
 
         $instituciones = Institucion::with('encargadoInstitucion')->get();
+        $departamentos = Departamento::all();
         $usuarios = Usuario::all();
 
         $usuariosParaCrear = Usuario::where('tipo_usuario', 'encargado_institucion')
             ->whereDoesntHave('instituciones')
             ->get();
 
-        $usuariosParaEditar = Usuario::where('tipo_usuario', 'encargado_institucion')->get();
+        $usuariosParaEditar = [];
 
-        return view('instituciones.index', compact('instituciones', 'usuarios', 'usuariosParaCrear', 'usuariosParaEditar'));
+        foreach ($instituciones as $institucion) {
+            $encargadoActual = $institucion->encargadoInstitucion;
+
+            $usuariosDisponibles = Usuario::where('tipo_usuario', 'encargado_institucion')
+                ->where(function ($query) use ($encargadoActual) {
+                    $query->whereDoesntHave('instituciones');
+
+                    if ($encargadoActual) {
+                        $query->orWhere('id', $encargadoActual->id);
+                    }
+                })
+                ->get();
+
+            $usuariosParaEditar[$institucion->id] = $usuariosDisponibles;
+        }
+
+        return view('instituciones.index', compact('instituciones', 'usuarios', 'usuariosParaCrear', 'usuariosParaEditar', 'departamentos'));
     }
 
     public function store(Request $request)

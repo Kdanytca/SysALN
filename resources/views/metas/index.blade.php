@@ -10,7 +10,7 @@
                 "{{ $plan->nombre_plan_estrategico }}"</h2>
 
             <!-- Botón para agregar un nuevo registro -->
-            <div x-data="{ modalOpen: false }">
+            <div x-data="{ modalOpen: false, modalNuevoUsuario: false }">
                 <button @click="modalOpen = true"
                     class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
@@ -26,6 +26,24 @@
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nueva Meta</h2>
                         @include('metas.create')
+                    </div>
+                </div>
+
+                <!-- Modal de Usuario -->
+                <div x-show="modalNuevoUsuario"
+                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                        <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                        @include('instituciones.usuario', [
+                            'closeModal' => 'modalNuevoUsuario = false',
+                            'ocultarCamposRelacionados' => false,
+                            'institucion' => $institucion,
+                            'instituciones' => $instituciones ?? collect(),
+                            'departamentos' => $departamentos ?? collect(),
+                            'vistaMetas' => $vistaMetas ?? true,
+                        ])
                     </div>
                 </div>
             </div>
@@ -63,7 +81,7 @@
                         @foreach ($metas as $meta)
                             <tr class="hover:bg-indigo-50 transition">
                                 <td class="px-4 py-3 font-medium">
-                                    {{ $meta->planEstrategico->responsable->nombre_usuario ?? 'Sin asignar' }}</td>
+                                    {{ $meta->encargadoMeta->nombre_usuario ?? 'Sin asignar' }}</td>
                                 <td class="px-4 py-3">
                                     {{ $meta->nombre_meta }}</td>
                                 <td class="px-4 py-3 max-w-[200px]">
@@ -98,7 +116,7 @@
                                     {{ $meta->comentario }}</td>
                                 <td class="px-4 py-3 text-righ">
                                     <div class="flex flex-wrap justify-center gap-2">
-                                        <div x-data="{ editModalOpen: false }" class="inline-block">
+                                        <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }" class="inline-block">
                                             <button @click="editModalOpen = true"
                                                 class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
                                                 Editar
@@ -117,6 +135,24 @@
                                                         'meta' => $meta,
                                                         'plan' => $meta->planEstrategico,
                                                         'usuarios' => $usuarios,
+                                                    ])
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal de Usuario -->
+                                            <div x-show="modalNuevoUsuario"
+                                                x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                                                    @include('instituciones.usuario', [
+                                                        'closeModal' => 'modalNuevoUsuario = false',
+                                                        'ocultarCamposRelacionados' => false,
+                                                        'institucion' => $institucion,
+                                                        'instituciones' => $instituciones ?? collect(),
+                                                        'departamentos' => $departamentos ?? collect(),
+                                                        'vistaMetas' => $vistaMetas ?? true,
                                                     ])
                                                 </div>
                                             </div>

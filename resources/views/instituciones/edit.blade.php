@@ -6,29 +6,35 @@
 
     <div class="mb-4">
         <label class="block font-medium">Nombre</label>
-        <input type="text" name="nombre_institucion" id="nombre_institucion"
+        <input type="text" name="nombre_institucion"
             class="w-full border rounded px-3 py-2"
             value="{{ $institucion->nombre_institucion }}" required>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Tipo de Institucion</label>
-        <input type="text" name="tipo_institucion" id="tipo_institucion"
+        <input type="text" name="tipo_institucion"
             class="w-full border rounded px-3 py-2"
             value="{{ $institucion->tipo_institucion }}" required>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Encargado del Proyecto</label>
-        <select name="idEncargadoInstitucion" id="idEncargadoInstitucion" class="w-full border rounded px-3 py-2" required>
+        <select name="idEncargadoInstitucion" class="w-full border rounded px-3 py-2" required>
             <option value="">Seleccione un encargado</option>
-            @foreach ($usuariosParaEditar as $usuario)
+            @foreach ($usuariosParaEditar[$institucion->id] as $usuario)
                 <option value="{{ $usuario->id }}"
-                    {{ (isset($institucion) && $institucion->idEncargadoInstitucion == $usuario->id) ? 'selected' : '' }}>
+                    {{ $institucion->idEncargadoInstitucion == $usuario->id ? 'selected' : '' }}>
                     {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
                 </option>
             @endforeach
         </select>
+
+        <!-- Botón que usa el mismo modalNuevoUsuario definido en index -->
+        <button type="button" @click="modalNuevoUsuario = true"
+            class="mt-2 text-blue-600 text-sm hover:underline">
+            Agregar nuevo usuario
+        </button>
     </div>
 
     <div class="flex justify-end">
@@ -41,3 +47,4 @@
         </button>
     </div>
 </form>
+

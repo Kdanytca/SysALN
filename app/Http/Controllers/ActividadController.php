@@ -36,10 +36,18 @@ class ActividadController extends Controller
         $meta->load('planEstrategico');
         $actividades = $meta->actividades()->with('meta')->get();
         $metas = Meta::all();
-        $usuarios = Usuario::all();
+
+        $usuarios = Usuario::where('idInstitucion', $meta->planEstrategico->departamento->idInstitucion)
+            ->whereIn('tipo_usuario', ['responsable_actividad', 'encargado_institucion'])
+            ->get();
+
         $departamentos = Departamento::all();
 
-        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos'));
+        $institucion = $meta->planEstrategico->departamento->institucion;
+
+        $vistaMetas = true;
+
+        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos', 'institucion', 'vistaMetas'));
     }
 
     // Vista exclusiva para responsables de actividades
@@ -88,20 +96,21 @@ class ActividadController extends Controller
 
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
-            'idUsuario' => 'required|exists:usuarios,id',
+            'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string|max:255',
-            'objetivos' => 'required|string|max:255',
+            'objetivos' => 'required|array|min:1',
+            'objetivos.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'resultados_esperados' => 'required|string|max:255',
-            'unidad_encargada' => 'required|string|max:255',
+            'unidad_encargada' => 'nullable|string|max:255',
         ]);
 
         Actividad::create([
             'idMetas' => $request->idMetas,
-            'idUsuario' => $request->idUsuario,
+            'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => $request->objetivos,
+            'objetivos' => implode(', ', $request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'resultados_esperados' => $request->resultados_esperados,
@@ -134,21 +143,22 @@ class ActividadController extends Controller
 
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
-            'idUsuario' => 'required|exists:usuarios,id',
+            'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string|max:255',
-            'objetivos' => 'required|string|max:255',
+            'objetivos' => 'required|array|min:1',
+            'objetivos.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'resultados_esperados' => 'required|string|max:255',
-            'unidad_encargada' => 'required|string|max:255',
+            'unidad_encargada' => 'nullable|string|max:255',
         ]);
 
         $actividad = Actividad::find($id);
         $actividad->update([
             'idMetas' => $request->idMetas,
-            'idUsuario' => $request->idUsuario,
+            'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => $request->objetivos,
+            'objetivos' => implode(', ', $request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'resultados_esperados' => $request->resultados_esperados,

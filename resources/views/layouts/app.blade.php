@@ -95,7 +95,7 @@
                             <i class="bi bi-people"></i> Usuarios
                         </a>
 
-                        <a href="{{ route('departamentos.index') }}"
+                        <a href="{{ route('departamentos.index_general') }}"
                             class="hover:text-gray-300 {{ request()->routeIs('departamentos.*') ? 'underline' : '' }}">
                             <i class="bi bi-building"></i> Departamentos
                         </a>

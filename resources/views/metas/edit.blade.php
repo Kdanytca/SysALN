@@ -14,17 +14,24 @@
 
     <div class="mb-4">
         <label class="block font-medium">Usuario Responsable</label>
-        <select name="usuario_responsable"
-            class="w-full border rounded px-3 py-2"
-            required>
+        <select name="idEncargadoMeta" class="w-full border rounded px-3 py-2" required>
             <option value="" disabled>Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->nombre_usuario }}"
-                    {{ $usuario->nombre_usuario == $meta->usuario_responsable ? 'selected' : '' }}>
-                    {{ $usuario->nombre_usuario }}
+                <option value="{{ $usuario->id }}"
+                    {{ $usuario->id == $meta->idEncargadoMeta ? 'selected' : '' }}>
+                    {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
                 </option>
             @endforeach
         </select>
+
+        <p class="text-sm text-gray-600 mt-2">
+            ¿No encuentras al encargado?
+            <button type="button"
+                @click="modalNuevoUsuario = true"
+                class="ml-2 text-blue-600 hover:underline">
+                Agregar nuevo usuario
+            </button>
+        </p>
     </div>
 
     <div class="mb-4">

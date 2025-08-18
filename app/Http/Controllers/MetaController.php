@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Meta;
 use App\Models\PlanEstrategico;
 use App\Models\Usuario;
+use App\Models\Institucion;
+use App\Models\Departamento;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +23,9 @@ class MetaController extends Controller
         $planes = PlanEstrategico::all();
         $usuarios = Usuario::all(); // Usar el modelo correcto 'Usuario'
 
-        return view('metas.index', compact('metas', 'planes', 'usuarios'));
+        $vistaMetas = true;
+
+        return view('metas.index', compact('metas', 'planes', 'usuarios', 'vistaMetas'));
     }
 
 
@@ -35,9 +39,18 @@ class MetaController extends Controller
         $plan->load('departamento.institucion');
         $metas = $plan->metas()->with('planEstrategico')->get();
         $planes = PlanEstrategico::all();
-        $usuarios = Usuario::where('idDepartamento', $plan->idDepartamento)->get();
 
-        return view('metas.index', compact('metas', 'plan', 'planes', 'usuarios'));
+        $usuarios = Usuario::where('idInstitucion', $plan->departamento->idInstitucion)
+            ->whereIn('tipo_usuario', ['responsable_meta', 'encargado_institucion'])
+            ->get();
+
+        $departamentos = Departamento::all();
+        
+        $institucion = $plan->departamento->institucion;
+
+        $vistaMetas = true;
+
+        return view('metas.index', compact('metas', 'plan', 'planes', 'usuarios', 'institucion', 'departamentos', 'vistaMetas'));
     }
 
     // Vista exclusiva para el responsable_meta
@@ -50,7 +63,7 @@ class MetaController extends Controller
         }
 
         $metas = Meta::with(['planEstrategico.departamento.institucion'])
-            ->where('usuario_responsable', $usuario->nombre_usuario)
+            ->where('idEncargadoMeta', $usuario->nombre_usuario)
             ->get();
 
         if ($metas->isEmpty()) {
@@ -94,12 +107,7 @@ class MetaController extends Controller
 
         $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
-            'usuario_responsable' => [
-                'required',
-                Rule::exists('usuarios', 'nombre_usuario')->where(function ($query) use ($plan) {
-                    return $query->where('idDepartamento', $plan->idDepartamento);
-                }),
-            ],
+            'idEncargadoMeta' => 'required|exists:usuarios,id',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|array|min:1',
             'ejes_estrategicos.*' => 'required|string|max:255',
@@ -112,7 +120,7 @@ class MetaController extends Controller
 
         Meta::create([
             'idPlanEstrategico' => $request->idPlanEstrategico,
-            'usuario_responsable' => $request->usuario_responsable,
+            'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
             'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
             'nombre_actividades' => implode(',', $request->nombre_actividades),
@@ -137,12 +145,7 @@ class MetaController extends Controller
 
         $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
-            'usuario_responsable' => [
-                'required',
-                Rule::exists('usuarios', 'nombre_usuario')->where(function ($query) use ($plan) {
-                    return $query->where('idDepartamento', $plan->idDepartamento);
-                }),
-            ],
+            'idEncargadoMeta' => 'required|exists:usuarios,id',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|array|min:1',
             'ejes_estrategicos.*' => 'required|string|max:255',
@@ -155,7 +158,7 @@ class MetaController extends Controller
 
         $meta->update([
             'idPlanEstrategico' => $request->idPlanEstrategico,
-            'usuario_responsable' => $request->usuario_responsable,
+            'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
             'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
             'nombre_actividades' => implode(',', $request->nombre_actividades),

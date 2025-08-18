@@ -8,7 +8,7 @@ class Meta extends Model
 {
     protected $fillable = [
         'idPlanEstrategico',
-        'usuario_responsable',
+        'idEncargadoMeta',
         'nombre_meta',
         'ejes_estrategicos',
         'nombre_actividades',
@@ -27,8 +27,15 @@ class Meta extends Model
     {
         return $this->hasMany(Actividad::class, 'idMetas');
     }
+
     public function responsable()
     {
         return $this->belongsTo(Usuario::class, 'usuario_responsable', 'nombre_usuario');
     }
+
+    public function encargadoMeta()
+    {
+        return $this->belongsTo(Usuario::class, 'idEncargadoMeta');
+    }
+
 }

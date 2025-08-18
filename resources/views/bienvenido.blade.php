@@ -76,7 +76,7 @@
                     <p class="mt-1 text-lg">Departamentos Registrados</p>
                 </div>
                 <div class="mt-6">
-                    <a href="{{ route('departamentos.index') }} "
+                    <a href="{{ route('departamentos.index_general') }}"
                         class="inline-block bg-white text-purple-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
                         Ver Departamentos
                     </a>

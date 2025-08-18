@@ -9,9 +9,10 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800">Lista de Instituciones</h2>
 
-            <!-- Botón para agregar un nuevo registro -->
-            <div x-data="{ modalOpen: false }">
-                <button @click="modalOpen = true"
+            @if (auth()->user()->tipo_usuario === 'administrador')
+            <!-- Botón solo visible para administradores -->
+            <div x-data="{ modalInstitucion: false, modalNuevoUsuario: false }">
+                <button @click="modalInstitucion = true"
                     class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -20,19 +21,36 @@
                     Nueva Institución
                 </button>
 
-                <!-- Modal -->
-                <div x-show="modalOpen"
+                <!-- Modal de Institución -->
+                <div x-show="modalInstitucion"
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nueva Institución</h2>
                         @include('instituciones.create', [
                             'usuarios' => $usuariosParaCrear,
+                            'closeModal' => 'modalInstitucion = false'
+                        ])
+                    </div>
+                </div>
+
+                <!-- Modal de Usuario -->
+                <div x-show="modalNuevoUsuario"
+                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                        <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                        @include('instituciones.usuario', [
+                            'closeModal' => 'modalNuevoUsuario = false',
+                            'ocultarCamposRelacionados' => true
                         ])
                     </div>
                 </div>
             </div>
+            @endif
         </div>
     </x-slot>
+
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -56,15 +74,15 @@
                         @foreach ($instituciones as $institucion)
                             <tr class="hover:bg-indigo-50 transition">
                                 <td class="px-4 py-3 font-medium truncate">
-                                    {{ $institucion->nombre_institucion }}</td>
+                                    {{ $institucion->nombre_institucion ?? '-' }}</td>
                                 <td class="px-4 py-3 truncate">
-                                    {{ $institucion->tipo_institucion }}</td>
+                                    {{ $institucion->tipo_institucion ?? '-' }}</td>
                                 <td class="px-4 py-3 truncate">
-                                    {{ $institucion->encargadoInstitucion->nombre_usuario }}</td>
+                                    {{ $institucion->encargadoInstitucion->nombre_usuario ?? '-'}}</td>
                                 <td class="px-4 py-3 text-righ">
                                     <div class="flex flex-wrap justify-center gap-2">
                                         {{-- Editar --}}
-                                        <div x-data="{ editModalOpen: false }">
+                                        <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }">
                                             <button @click="editModalOpen = true"
                                                 class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
                                                 Editar
@@ -82,7 +100,21 @@
                                                             $institucion->id),
                                                         'isEdit' => true,
                                                         'institucion' => $institucion,
-                                                        'usuarios' => $usuariosParaEditar,
+                                                        'usuariosParaEditar' => $usuariosParaEditar,
+                                                    ])
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal de Usuario dentro de editar -->
+                                            <div x-show="modalNuevoUsuario"
+                                                x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                                                    @include('instituciones.usuario', [
+                                                        'closeModal' => 'modalNuevoUsuario = false',
+                                                        'ocultarCamposRelacionados' => true
                                                     ])
                                                 </div>
                                             </div>
@@ -132,7 +164,7 @@
                                         </div>
 
                                         {{-- Ver Departamentos --}}
-                                        <a href="{{ route('departamentos.index') }}"
+                                        <a href="{{ route('institucion.departamentos', $institucion->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
                                             Ver Departamentos
                                         </a>

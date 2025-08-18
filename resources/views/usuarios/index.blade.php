@@ -9,8 +9,8 @@
             <h2 class="font-semibold text-xl text-gray-800">Lista de Usuarios</h2>
 
             <!-- Botón para agregar un nuevo registro -->
-            <div x-data="{ modalOpen: false }">
-                <button @click="modalOpen = true"
+            <div x-data="{ modalUsuario: false }">
+                <button @click="modalUsuario = true"
                     class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -20,11 +20,14 @@
                 </button>
 
                 <!-- Modal -->
-                <div x-show="modalOpen"
+                <div x-show="modalUsuario"
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
-                        @include('usuarios.create', ['usuarios' => $usuarios])
+                        @include('usuarios.create', [
+                            'usuarios' => $usuarios,
+                            'closeModal' => 'modalUsuario = false',
+                        ])
                     </div>
                 </div>
             </div>

@@ -17,17 +17,17 @@
 
     <div class="mb-4">
         <label class="block font-medium">Nombre del Usuario</label>
-        <input type="text" name="nombre_usuario" id="nombre_usuario" value="{{ $usuario->nombre_usuario}}"
+        <input type="text" name="nombre_usuario" value="{{ $usuario->nombre_usuario}}"
             class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
         <label class="block font-medium">Correo Electronico</label>
-        <input type="email" name="email" id="email" value="{{ $usuario->email}}"
+        <input type="email" name="email" value="{{ $usuario->email}}"
             class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
         <label class="block font-medium">Contraseña</label>
-        <input type="password" name="password" id="password" value=""
+        <input type="password" name="password" value=""
             class="w-full border rounded px-3 py-2">
     </div>
     

@@ -6,19 +6,23 @@
 
     <div class="mb-4">
         <label for="idInstitucion" class="block font-medium">Institución Perteneciente</label>
-        <select name="idInstitucion" id="idInstitucion" class="w-full border rounded px-3 py-2" required>
+
+        <select name="institucionVisible" class="w-full border rounded px-3 py-2" disabled>
             <option value="">Seleccione una institución</option>
-            @foreach ($instituciones as $institucion)
-            <option value="{{ $institucion->id }}" {{ (isset($departamento) && $departamento->idInstitucion == $institucion->id) ? 'selected' : '' }}>
-                {{ $institucion->nombre_institucion }}
-            </option>
+            @foreach ($instituciones as $inst)
+                <option value="{{ $inst->id }}" {{ $departamento->idInstitucion == $inst->id ? 'selected' : '' }}>
+                    {{ $inst->nombre_institucion }}
+                </option>
             @endforeach
         </select>
+
+        <!-- Campo oculto para enviar el valor real -->
+        <input type="hidden" name="idInstitucion" value="{{ $departamento->idInstitucion }}">
     </div>
 
     <div class="mb-4">
         <label for="departamento" class="block font-medium">Nombre del Departamento</label>
-        <input type="text" name="departamento" id="departamento"
+        <input type="text" name="departamento"
             class="w-full border rounded px-3 py-2"
             value="{{ $departamento->departamento }}" required>
     </div>
@@ -26,15 +30,24 @@
     <div class="mb-4">
         <label for="encargado_departamento" class="block font-medium">Encargado del
             Departamento</label>
-        <select name="idEncargadoDepartamento" id="idEncargadoDepartamento" class="w-full border rounded px-3 py-2" required>
+        <select name="idEncargadoDepartamento" class="w-full border rounded px-3 py-2" required>
             <option value="">Seleccione un encargado</option>
-            @foreach ($usuariosParaEditar as $usuario)
-            <option value="{{ $usuario->id }}"
-                {{ (isset($departamento) && $departamento->idEncargadoDepartamento == $usuario->id) ? 'selected' : '' }}>
-                {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
-            </option>
+            @foreach ($usuariosParaEditar[$departamento->id] ?? [] as $usuario)
+                <option value="{{ $usuario->id }}"
+                    {{ (isset($departamento) && $departamento->idEncargadoDepartamento == $usuario->id) ? 'selected' : '' }}>
+                    {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
+                </option>
             @endforeach
         </select>
+
+        <p class="text-sm text-gray-600 mt-2">
+            ¿No encuentras al encargado?
+            <button type="button"
+                @click="modalNuevoUsuario = true"
+                class="ml-2 text-blue-600 hover:underline">
+                Agregar nuevo usuario
+            </button>
+        </p>
     </div>
 
     <div class="flex justify-end">

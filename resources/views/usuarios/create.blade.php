@@ -12,17 +12,17 @@
 
     <div class="mb-4">
         <label class="block font-medium">Nombre del Usuario</label>
-        <input type="text" name="nombre_usuario" id="nombre_usuario"
+        <input type="text" name="nombre_usuario"
             class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
         <label class="block font-medium">Correo Electronico</label>
-        <input type="email" name="email" id="email"
+        <input type="email" name="email"
             class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
         <label class="block font-medium">Contraseña</label>
-        <input type="password" name="password" id="password"
+        <input type="password" name="password"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
@@ -61,7 +61,7 @@
     </div>
 
     <div class="flex justify-end">
-        <button type="button" @click="modalOpen = false"
+        <button type="button" @click="{{ $closeModal }}"
             class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
             Cancelar
         </button>

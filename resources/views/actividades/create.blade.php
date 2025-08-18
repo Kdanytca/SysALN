@@ -1,105 +1,139 @@
-<form method="POST" action="{{ route('actividades.store') }}">
-    @if ($errors->any())
-    <div class="mb-4">
-        <ul class="list-disc list-inside text-sm text-red-600">
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
-
+<form method="POST" action="{{ $actividad->id ?? false ? route('actividades.update', $actividad) : route('actividades.store') }}">
     @csrf
+    @if($actividad->id ?? false)
+        @method('PUT')
+    @endif
 
     <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
 
-    <div class="mb-4">
-        <select name="idUsuario" id="idUsuario" required
-            class="w-full border rounded px-3 py-2">
-            <option value="">Seleccione una Usuario</option>
-            @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->id }}"
-                    data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
-                    {{ $usuario->nombre_usuario }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    <div class="mb-4">
-        <label class="block font-medium">Nombre Actividad</label>
-        <input type="text" name="nombre_actividad" id="nombre_actividad"
-            class="w-full border rounded px-3 py-2" required>
-    </div>
-
-    <div class="mb-4">
-        <label class="block font-medium">Objetivos</label>
-        <input type="text" name="objetivos" id="objetivos"
-            class="w-full border rounded px-3 py-2" required>
-    </div>
-
-    <div class="flex gap-4 mb-4">
-        <div class="w-1/2">
-            <label class="block font-medium">Fecha de Inicio</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio"
+    <div x-data="actividadForm({{ $usuarios->toJson() }}, '{{ $actividad->idEncargadoActividad ?? '' }}', '{{ $actividad->unidad_encargada ?? '' }}')" x-init="init()" class="space-y-4">
+        
+        {{-- Usuario Responsable --}}
+        <div>
+            <label class="block font-medium">Usuario Responsable</label>
+            <select name="idEncargadoActividad" x-model="usuarioSeleccionado" @change="actualizarUnidad()"
+                id="idEncargadoActividad"
                 class="w-full border rounded px-3 py-2" required>
+                <option value="">Seleccione un usuario</option>
+                @foreach ($usuarios as $usuario)
+                    <option value="{{ $usuario->id }}"
+                        data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
+                        {{ $usuario->nombre_usuario }} ({{ $usuario->tipo_usuario }})
+                    </option>
+                @endforeach
+            </select>
+
+            <p class="text-sm text-gray-600 mt-2">
+                ¿No encuentras al encargado?
+                <button type="button"
+                    @click="modalNuevoUsuario = true"
+                    class="ml-2 text-blue-600 hover:underline">
+                    Agregar nuevo usuario
+                </button>
+            </p>
         </div>
-    
-        <div class="w-1/2">
-            <label class="block font-medium">Fecha de Fin</label>
-            <input type="date" name="fecha_fin" id="fecha_fin"
-                class="w-full border rounded px-3 py-2" required>
+
+        {{-- Nombre de la actividad --}}
+        <div>
+            <label class="block font-medium">Nombre Actividad</label>
+            <input type="text" name="nombre_actividad" class="w-full border rounded px-3 py-2" 
+                value="{{ old('nombre_actividad', $actividad->nombre_actividad ?? '') }}" required>
         </div>
-    </div>
 
-    <div class="mb-4">
-        <label class="block font-medium">Resultados Esperados</label>
-        <input type="text" name="resultados_esperados" id="resultados_esperados"
-            class="w-full border rounded px-3 py-2" required>
-    </div>
+        {{-- Objetivos --}}
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Objetivos</label>
+            <div id="contenedorObjetivos">
+                <input type="text" name="objetivos[]" class="w-full border rounded px-3 py-2 mb-2" required>
+            </div>
+            <div class="flex items-center gap-4 mt-2">
+                <button type="button"
+                    onclick="agregarCampo('contenedorObjetivos', 'objetivos[]', 'btnEliminarObjetivo')"
+                    class="text-sm text-blue-600 underline hover:text-blue-800 transition">
+                    + Agregar otro objetivo
+                </button>
 
-    <div class="mb-4">
-        <label class="block font-medium">Unidad Encargada</label>
-        <select id="unidad_encargada_display" disabled
-            class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
-            <option value="">Seleccione un departamento</option>
-            @foreach($departamentos as $departamento)
-                <option value="{{ $departamento->departamento }}"
-                    {{ old('unidad_encargada', $actividad->unidad_encargada ?? '') == $departamento->departamento ? 'selected' : '' }}>
-                    {{ $departamento->departamento }}
-                </option>
-            @endforeach
-        </select>
-        <!-- Campo oculto para enviar el valor al backend -->
-        <input type="hidden" name="unidad_encargada" id="unidad_encargada"
-            value="{{ old('unidad_encargada', $actividad->unidad_encargada ?? '') }}">
-    </div>
+                <button type="button"
+                    onclick="eliminarUltimoCampo('contenedorObjetivos', 'btnEliminarObjetivo')"
+                    id="btnEliminarObjetivo"
+                    class="text-sm text-red-600 underline hover:text-red-800 transition hidden">
+                    🗑 Eliminar último objetivo
+                </button>
+            </div>
+        </div>
 
-    <div class="flex justify-end">
-        <button type="button" @click="modalOpen = false"
-            class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-            Cancelar
-        </button>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            Guardar
-        </button>
+        {{-- Fechas --}}
+        <div class="flex gap-4">
+            <div class="w-1/2">
+                <label class="block font-medium">Fecha de Inicio</label>
+                <input type="date" name="fecha_inicio" class="w-full border rounded px-3 py-2"
+                    value="{{ old('fecha_inicio', $actividad->fecha_inicio ?? '') }}" required>
+            </div>
+            <div class="w-1/2">
+                <label class="block font-medium">Fecha de Fin</label>
+                <input type="date" name="fecha_fin" class="w-full border rounded px-3 py-2"
+                    value="{{ old('fecha_fin', $actividad->fecha_fin ?? '') }}" required>
+            </div>
+        </div>
+
+        {{-- Resultados esperados --}}
+        <div>
+            <label class="block font-medium">Resultados Esperados</label>
+            <input type="text" name="resultados_esperados" class="w-full border rounded px-3 py-2"
+                value="{{ old('resultados_esperados', $actividad->resultados_esperados ?? '') }}" required>
+        </div>
+
+        {{-- Unidad Encargada (Departamento) --}}
+        <div>
+            <label class="block font-medium mt-4">Unidad Encargada</label>
+            <select id="unidad_encargada_display" disabled
+                class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
+                <option value="">Sin Departamento</option>
+                @foreach($departamentos as $departamento)
+                    <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
+                @endforeach
+            </select>
+            <input type="hidden" name="unidad_encargada" id="unidad_encargada" x-model="unidad">
+        </div>
+
+        {{-- Botones --}}
+        <div class="flex justify-end gap-2">
+            <button type="button" @click="modalOpen = false"
+                class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Guardar
+            </button>
+        </div>
+
     </div>
 </form>
 
 <script>
-    document.getElementById('idUsuario').addEventListener('change', function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const departamento = selectedOption.getAttribute('data-departamento');
+document.addEventListener('alpine:init', () => {
+    Alpine.data('actividadForm', (usuarioInicial, unidadInicial) => ({
+        usuarioSeleccionado: usuarioInicial,
+        unidad: unidadInicial,
 
-        if (departamento) {
-            // Mostrar visualmente
+        actualizarUnidad() {
+            const selectUsuario = document.getElementById('idEncargadoActividad');
+            const opcion = selectUsuario.options[selectUsuario.selectedIndex];
+            this.unidad = opcion ? (opcion.getAttribute('data-departamento') ?? '') : '';
+            
+            // marcar también en el select visual
             const selectDepartamento = document.getElementById('unidad_encargada_display');
             for (let option of selectDepartamento.options) {
-                option.selected = option.value === departamento;
+                option.selected = option.value === this.unidad;
             }
+        },
 
-            // Enviar valor oculto
-            document.getElementById('unidad_encargada').value = departamento;
+        init() {
+            // al cargar, si ya hay usuario seleccionado -> actualizar departamento
+            if (this.usuarioSeleccionado) {
+                const selectUsuario = document.getElementById('idEncargadoActividad');
+                selectUsuario.value = this.usuarioSeleccionado;
+                this.actualizarUnidad();
+            }
         }
-    });
+    }));
+});
 </script>

@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('actividades', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idMetas')->constrained('metas')->onDelete('cascade');
-            $table->foreignId('idUsuario')->nullable()->constrained('usuarios')->nullOnDelete();
+            $table->foreignId('idEncargadoActividad')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->string('nombre_actividad', 255);
             $table->string('objetivos', 255);
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->string('resultados_esperados', 255);
-            $table->string('unidad_encargada', 255);
+            $table->string('unidad_encargada', 255)->nullable();
             $table->timestamps();
         });
     }

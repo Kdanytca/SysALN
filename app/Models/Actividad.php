@@ -10,7 +10,7 @@ class Actividad extends Model
 
     protected $fillable = [
         'idMetas',
-        'idUsuario',
+        'idEncargadoActividad',
         'nombre_actividad',
         'objetivos',
         'fecha_inicio',
@@ -29,8 +29,14 @@ class Actividad extends Model
     {
         return $this->belongsTo(Usuario::class, 'idUsuario');
     }
+
     public function seguimientos()
     {
         return $this->hasMany(SeguimientoActividad::class, 'idActividades');
+    }
+
+    public function encargadoActividad()
+    {
+        return $this->belongsTo(Usuario::class, 'idEncargadoActividad');
     }
 }

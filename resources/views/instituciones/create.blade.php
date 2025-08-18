@@ -14,19 +14,20 @@
     @csrf
     <div class="mb-4">
         <label class="block font-medium">Nombre</label>
-        <input type="text" name="nombre_institucion" id="nombre_institucion"
+        <input type="text" name="nombre_institucion"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Tipo de Institucion</label>
-        <input type="text" name="tipo_institucion" id="tipo_institucion"
+        <input type="text" name="tipo_institucion"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Encargado del Proyecto</label>
-        <select name="idEncargadoInstitucion" id="idEncargadoInstitucion" class="w-full border rounded px-3 py-2" required>
+
+        <select id="idEncargadoInstitucion" name="idEncargadoInstitucion" class="w-full border rounded px-3 py-2" required>
             <option value="">Seleccione un encargado</option>
             @foreach ($usuariosParaCrear as $usuario)
                 <option value="{{ $usuario->id }}">
@@ -34,10 +35,19 @@
                 </option>
             @endforeach
         </select>
+
+        <p class="text-sm text-gray-600 mt-2">
+            ¿No encuentras al encargado?
+            <button type="button"
+                @click="modalNuevoUsuario = true"
+                class="ml-2 text-blue-600 hover:underline">
+                Agregar nuevo usuario
+            </button>
+        </p>
     </div>
 
     <div class="flex justify-end">
-        <button type="button" @click="modalOpen = false"
+        <button type="button" @click="{{ $closeModal }}"
             class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
             Cancelar
         </button>
@@ -46,3 +56,4 @@
         </button>
     </div>
 </form>
+

@@ -11,27 +11,38 @@
 
     @csrf
 
-    <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
-
+    
     <div class="mb-4">
         <label class="block font-medium">Plan Estrategico</label>
         <input type="text" disabled value="{{ $plan->nombre_plan_estrategico }}"
             class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
+        <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
     </div>
 
     <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Usuario Responsable</label>
-        <select name="usuario_responsable" required class="w-full rounded-md border border-gray-500 shadow-sm">
+        <select name="idEncargadoMeta" required class="w-full rounded-md border border-gray-500 shadow-sm">
             <option value="">Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->nombre_usuario }}">{{ $usuario->nombre_usuario }}</option>
+                <option value="{{ $usuario->id }}">
+                    {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
+                </option>
             @endforeach
         </select>
+
+        <p class="text-sm text-gray-600 mt-2">
+            ¿No encuentras al encargado?
+            <button type="button"
+                @click="modalNuevoUsuario = true"
+                class="ml-2 text-blue-600 hover:underline">
+                Agregar nuevo usuario
+            </button>
+        </p>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Nombre de la Meta</label>
-        <input type="text" name="nombre_meta" id="nombre_meta"
+        <input type="text" name="nombre_meta"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
@@ -84,20 +95,20 @@
     <div class="flex gap-4 mb-4">
         <div class="w-1/2">
             <label class="block font-medium">Fecha de Inicio</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio"
+            <input type="date" name="fecha_inicio"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     
         <div class="w-1/2">
             <label class="block font-medium">Fecha de Fin</label>
-            <input type="date" name="fecha_fin" id="fecha_fin"
+            <input type="date" name="fecha_fin"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Comentario</label>
-        <textarea name="comentario" id="comentario"
+        <textarea name="comentario"
             class="w-full border rounded px-3 py-2" required></textarea>
     </div>
 

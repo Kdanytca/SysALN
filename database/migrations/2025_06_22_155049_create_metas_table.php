@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('metas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('idPlanEstrategico')->constrained('planes_estrategicos')->onDelete('cascade');
-            $table->string('usuario_responsable');
+            $table->foreignId('idEncargadoMeta')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->string('nombre_meta', 255);
             $table->string('ejes_estrategicos', 255);
             $table->string('nombre_actividades', 255)->nullable();

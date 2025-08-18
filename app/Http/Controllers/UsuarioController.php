@@ -48,7 +48,7 @@ class UsuarioController extends Controller
             ], 200);
         }
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario registrado correctamente.');
+        return redirect()->back()->with('success', 'Usuario registrado correctamente.');
     }
 
     //obtener usuarios por departamento
@@ -93,7 +93,7 @@ class UsuarioController extends Controller
         $nuevoDepartamento = $usuario->departamento->departamento ?? 'Sin departamento';
 
         // Actualizar todas las actividades del usuario con el nuevo nombre del departamento
-        \App\Models\Actividad::where('idUsuario', $usuario->id)
+        \App\Models\Actividad::where('idEncargadoActividad', $usuario->id)
             ->update(['unidad_encargada' => $nuevoDepartamento]);
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
