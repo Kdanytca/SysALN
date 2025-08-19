@@ -41,7 +41,7 @@ class MetaController extends Controller
         $planes = PlanEstrategico::all();
 
         $usuarios = Usuario::where('idInstitucion', $plan->departamento->idInstitucion)
-            ->whereIn('tipo_usuario', ['responsable_meta', 'encargado_institucion'])
+            ->whereIn('tipo_usuario', ['responsable_meta', 'responsable_plan'])
             ->get();
 
         $departamentos = Departamento::all();
@@ -63,7 +63,7 @@ class MetaController extends Controller
         }
 
         $metas = Meta::with(['planEstrategico.departamento.institucion'])
-            ->where('idEncargadoMeta', $usuario->nombre_usuario)
+            ->where('idEncargadoMeta', $usuario->id)
             ->get();
 
         if ($metas->isEmpty()) {
@@ -75,10 +75,13 @@ class MetaController extends Controller
 
         $usuarios = Usuario::all();
 
+        $institucion = $plan->departamento->institucion;
+
         return view('metas.index', [
             'metas' => $metas,
             'usuarios' => $usuarios,
             'plan' => $plan,
+            'institucion' => $institucion,
         ]);
     }
 

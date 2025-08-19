@@ -1,42 +1,40 @@
-<form method="POST" action="{{ $actividad->id ?? false ? route('actividades.update', $actividad) : route('actividades.store') }}">
+<form method="POST"
+    action="{{ $actividad->id ?? false ? route('actividades.update', $actividad) : route('actividades.store') }}">
     @csrf
     @if($actividad->id ?? false)
-        @method('PUT')
+    @method('PUT')
     @endif
 
     <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
 
-    <div x-data="actividadForm({{ $usuarios->toJson() }}, '{{ $actividad->idEncargadoActividad ?? '' }}', '{{ $actividad->unidad_encargada ?? '' }}')" x-init="init()" class="space-y-4">
-        
+    <div x-data="actividadForm('nuevo', '{{ old('idEncargadoActividad', $actividad->idEncargadoActividad ?? '') }}', '{{ old('unidad_encargada', $actividad->unidad_encargada ?? '') }}')" 
+        x-init="init('nuevo')" class="space-y-4">
+
         {{-- Usuario Responsable --}}
         <div>
             <label class="block font-medium">Usuario Responsable</label>
-            <select name="idEncargadoActividad" x-model="usuarioSeleccionado" @change="actualizarUnidad()"
-                id="idEncargadoActividad"
-                class="w-full border rounded px-3 py-2" required>
+            <select name="idEncargadoActividad" id="idEncargadoActividad_nuevo" x-model="usuarioSeleccionado"
+                @change="actualizarUnidad('nuevo')" class="w-full border rounded px-3 py-2" required>
                 <option value="">Seleccione un usuario</option>
                 @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->id }}"
-                        data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
-                        {{ $usuario->nombre_usuario }} ({{ $usuario->tipo_usuario }})
-                    </option>
+                <option value="{{ $usuario->id }}" data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
+                    {{ $usuario->nombre_usuario }} ({{ $usuario->tipo_usuario }})
+                </option>
                 @endforeach
             </select>
 
             <p class="text-sm text-gray-600 mt-2">
                 ¿No encuentras al encargado?
-                <button type="button"
-                    @click="modalNuevoUsuario = true"
-                    class="ml-2 text-blue-600 hover:underline">
+                <button type="button" @click="modalNuevoUsuario = true" class="ml-2 text-blue-600 hover:underline">
                     Agregar nuevo usuario
                 </button>
             </p>
         </div>
 
-        {{-- Nombre de la actividad --}}
+        {{-- Nombre Actividad --}}
         <div>
             <label class="block font-medium">Nombre Actividad</label>
-            <input type="text" name="nombre_actividad" class="w-full border rounded px-3 py-2" 
+            <input type="text" name="nombre_actividad" class="w-full border rounded px-3 py-2"
                 value="{{ old('nombre_actividad', $actividad->nombre_actividad ?? '') }}" required>
         </div>
 
@@ -53,7 +51,7 @@
                     + Agregar otro objetivo
                 </button>
 
-                <button type="button"
+                <button type="button" 
                     onclick="eliminarUltimoCampo('contenedorObjetivos', 'btnEliminarObjetivo')"
                     id="btnEliminarObjetivo"
                     class="text-sm text-red-600 underline hover:text-red-800 transition hidden">
@@ -83,17 +81,17 @@
                 value="{{ old('resultados_esperados', $actividad->resultados_esperados ?? '') }}" required>
         </div>
 
-        {{-- Unidad Encargada (Departamento) --}}
+        {{-- Unidad Encargada --}}
         <div>
             <label class="block font-medium mt-4">Unidad Encargada</label>
-            <select id="unidad_encargada_display" disabled
+            <select id="unidad_encargada_display_nuevo" disabled
                 class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
                 <option value="">Sin Departamento</option>
                 @foreach($departamentos as $departamento)
-                    <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
+                <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
                 @endforeach
             </select>
-            <input type="hidden" name="unidad_encargada" id="unidad_encargada" x-model="unidad">
+            <input type="hidden" name="unidad_encargada" id="unidad_encargada_nuevo" x-model="unidad">
         </div>
 
         {{-- Botones --}}
@@ -110,30 +108,29 @@
 
 <script>
 document.addEventListener('alpine:init', () => {
-    Alpine.data('actividadForm', (usuarioInicial, unidadInicial) => ({
+    Alpine.data('actividadForm', (id = 'nuevo', usuarioInicial = '', unidadInicial = '') => ({
         usuarioSeleccionado: usuarioInicial,
         unidad: unidadInicial,
 
-        actualizarUnidad() {
-            const selectUsuario = document.getElementById('idEncargadoActividad');
-            const opcion = selectUsuario.options[selectUsuario.selectedIndex];
-            this.unidad = opcion ? (opcion.getAttribute('data-departamento') ?? '') : '';
-            
-            // marcar también en el select visual
-            const selectDepartamento = document.getElementById('unidad_encargada_display');
+        actualizarUnidad(sufijo = 'nuevo') {
+            const selectUsuario = document.getElementById('idEncargadoActividad_' + sufijo);
+            const opcion = selectUsuario?.options[selectUsuario.selectedIndex];
+            this.unidad = opcion?.getAttribute('data-departamento') ?? '';
+
+            const selectDepartamento = document.getElementById('unidad_encargada_display_' + sufijo);
             for (let option of selectDepartamento.options) {
                 option.selected = option.value === this.unidad;
             }
         },
 
-        init() {
-            // al cargar, si ya hay usuario seleccionado -> actualizar departamento
-            if (this.usuarioSeleccionado) {
-                const selectUsuario = document.getElementById('idEncargadoActividad');
+        init(sufijo = 'nuevo') {
+            const selectUsuario = document.getElementById('idEncargadoActividad_' + sufijo);
+            if (selectUsuario && this.usuarioSeleccionado) {
                 selectUsuario.value = this.usuarioSeleccionado;
-                this.actualizarUnidad();
+                this.actualizarUnidad(sufijo);
             }
         }
     }));
 });
+
 </script>

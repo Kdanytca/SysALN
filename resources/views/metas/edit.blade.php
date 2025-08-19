@@ -36,7 +36,7 @@
 
     <div class="mb-4">
         <label class="block font-medium">Nombre de la Meta</label>
-        <input type="text" name="nombre_meta" id="nombre_meta" value="{{ $meta->nombre_meta }}"
+        <input type="text" name="nombre_meta" value="{{ $meta->nombre_meta }}"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
@@ -104,20 +104,20 @@
     <div class="flex gap-4 mb-4">
         <div class="w-1/2">
             <label class="block font-medium">Fecha de Inicio</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ $meta->fecha_inicio }}"
+            <input type="date" name="fecha_inicio" value="{{ $meta->fecha_inicio }}"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     
         <div class="w-1/2">
             <label class="block font-medium">Fecha de Fin</label>
-            <input type="date" name="fecha_fin" id="fecha_fin" value="{{ $meta->fecha_fin }}"
+            <input type="date" name="fecha_fin" value="{{ $meta->fecha_fin }}"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     </div>
 
     <div class="mb-4">
         <label class="block font-medium">Comentario</label>
-        <textarea name="comentario" id="comentario"
+        <textarea name="comentario"
             class="w-full border rounded px-3 py-2">{{ $meta->comentario }}</textarea>
     </div>
 

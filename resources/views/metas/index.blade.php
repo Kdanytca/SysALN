@@ -10,18 +10,7 @@
                 "{{ $plan->nombre_plan_estrategico }}"</h2>
 
             <!-- Botón para agregar un nuevo registro -->
-<<<<<<< HEAD
             <div x-data="{ modalOpen: false, modalNuevoUsuario: false }">
-                <button @click="modalOpen = true"
-                    class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nueva Meta
-                </button>
-=======
-            <div x-data="{ modalOpen: false }">
                 @php
                     $rol = Auth::user()->tipo_usuario ?? null;
                 @endphp
@@ -37,7 +26,6 @@
                     </button>
                 @endif
 
->>>>>>> 425ea6e4908ef69eb34aeecd8931abdcfd45bf79
 
                 <!-- Modal -->
                 <div x-show="modalOpen"
@@ -164,26 +152,25 @@
                                                         ])
                                                     </div>
                                                 </div>
-                                            </div>
+                                            
+                                                <!-- Modal de Usuario -->
+                                                <div x-show="modalNuevoUsuario"
+                                                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
+                                                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
 
-                                            <!-- Modal de Usuario -->
-                                            <div x-show="modalNuevoUsuario"
-                                                x-on:close-modal-usuario.window="modalNuevoUsuario = false"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
-
-                                                    @include('instituciones.usuario', [
-                                                        'closeModal' => 'modalNuevoUsuario = false',
-                                                        'ocultarCamposRelacionados' => false,
-                                                        'institucion' => $institucion,
-                                                        'instituciones' => $instituciones ?? collect(),
-                                                        'departamentos' => $departamentos ?? collect(),
-                                                        'vistaMetas' => $vistaMetas ?? true,
-                                                    ])
+                                                        @include('instituciones.usuario', [
+                                                            'closeModal' => 'modalNuevoUsuario = false',
+                                                            'ocultarCamposRelacionados' => false,
+                                                            'institucion' => $institucion,
+                                                            'instituciones' => $instituciones ?? collect(),
+                                                            'departamentos' => $departamentos ?? collect(),
+                                                            'vistaMetas' => $vistaMetas ?? true,
+                                                        ])
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
                                             <!-- Eliminar -->
                                             <div x-data="{ confirmDelete: false }" class="inline-block">

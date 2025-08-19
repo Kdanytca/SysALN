@@ -53,7 +53,6 @@
                     </div>
                 </div>
             </div>
-            @endif
         </div>
     </x-slot>
 
@@ -195,39 +194,37 @@
                                         </a>
                                     @endif
 
-            </div>
-            </td>
+                            </td>
+                        </tr>
+                        @endforeach
 
-            </tr>
-            @endforeach
-
-            @if ($instituciones->isEmpty())
-                <tr>
-                    <td colspan="4" class="px-4 py-4 text-center text-gray-500">No hay
-                        instituciones registradas.</td>
-                </tr>
-            @endif
-            </tbody>
-            </table>
-            <br>
-            @auth
-                @if (auth()->user()->tipo_usuario === 'administrador')
-                    <div class="mb-6">
-                        <div
-                            class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
-                            <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 text-sm font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                                <span>Volver al inicio</span>
-                            </a>
+                        @if ($instituciones->isEmpty())
+                            <tr>
+                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">No hay
+                                    instituciones registradas.</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+                <br>
+                @auth
+                    @if (auth()->user()->tipo_usuario === 'administrador')
+                        <div class="mb-6">
+                            <div
+                                class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
+                                <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 text-sm font-medium">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span>Volver al inicio</span>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                @endif
-            @endauth
+                    @endif
+                @endauth
+            </div>
         </div>
-    </div>
     </div>
 </x-app-layout>

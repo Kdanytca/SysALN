@@ -38,7 +38,7 @@ class ActividadController extends Controller
         $metas = Meta::all();
 
         $usuarios = Usuario::where('idInstitucion', $meta->planEstrategico->departamento->idInstitucion)
-            ->whereIn('tipo_usuario', ['responsable_actividad', 'encargado_institucion'])
+            ->whereIn('tipo_usuario', ['responsable_actividad', 'responsable_meta'])
             ->get();
 
         $departamentos = Departamento::all();
@@ -60,7 +60,7 @@ class ActividadController extends Controller
         }
 
         $actividades = Actividad::with(['meta.planEstrategico', 'usuario.departamento'])
-            ->where('idUsuario', $usuario->id)
+            ->where('idEncargadoActividad', $usuario->id)
             ->get();
 
         if ($actividades->isEmpty()) {
@@ -70,8 +70,9 @@ class ActividadController extends Controller
         $metas = Meta::all(); // opcional, si la vista las usa
         $usuarios = Usuario::all(); // opcional
         $departamentos = Departamento::all(); // opcional
+        $institucion = $actividades->first()->meta->planEstrategico->departamento->institucion;
 
-        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos'));
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos', 'institucion'));
     }
 
     // Crear actividad (solo admins o encargados)
