@@ -239,13 +239,16 @@
                 <br>
                 @if (isset($plan))
                     @auth
-                        @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan']))
+                        @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan', 'encargado_institucion']))
                             @php
                                 switch (auth()->user()->tipo_usuario) {
                                     case 'responsable_plan':
                                         $rutaInicio = route('plan.responsable', $plan->id);
                                         break;
                                     case 'administrador':
+                                        $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
+                                        break;
+                                    case 'encargado_institucion':
                                         $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
                                         break;
                                     default:

@@ -256,13 +256,19 @@
 
                 <br>
                 @auth
-                    @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_meta']))
+                    @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_meta', 'encargado_institucion', 'responsable_plan']))
                         @php
                             switch (auth()->user()->tipo_usuario) {
                                 case 'responsable_meta':
                                     $rutaInicio = route('meta.responsable');
                                     break;
                                 case 'administrador':
+                                    $rutaInicio = route('plan.metas', $meta->planEstrategico->id);
+                                    break;
+                                case 'encargado_institucion':
+                                    $rutaInicio = route('plan.metas', $meta->planEstrategico->id);
+                                    break;
+                                case 'responsable_plan':
                                     $rutaInicio = route('plan.metas', $meta->planEstrategico->id);
                                     break;
                                 default:

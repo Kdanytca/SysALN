@@ -41,7 +41,7 @@ class MetaController extends Controller
         $planes = PlanEstrategico::all();
 
         $usuarios = Usuario::where('idInstitucion', $plan->departamento->idInstitucion)
-            ->whereIn('tipo_usuario', ['responsable_meta', 'responsable_plan'])
+            ->whereIn('tipo_usuario', ['responsable_meta', 'encargado_institucion'])
             ->get();
 
         $departamentos = Departamento::all();

@@ -148,6 +148,9 @@
                         case 'administrador':
                             $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
                             break;
+                        case 'encargado_institucion':
+                            $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
+                            break;
                         default:
                             $rutaInicio = '#';
                     }

@@ -38,7 +38,7 @@ class ActividadController extends Controller
         $metas = Meta::all();
 
         $usuarios = Usuario::where('idInstitucion', $meta->planEstrategico->departamento->idInstitucion)
-            ->whereIn('tipo_usuario', ['responsable_actividad', 'responsable_meta'])
+            ->whereIn('tipo_usuario', ['responsable_actividad', 'encargado_institucion'])
             ->get();
 
         $departamentos = Departamento::all();
