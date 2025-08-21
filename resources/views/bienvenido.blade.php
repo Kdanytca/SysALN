@@ -1,6 +1,5 @@
 <x-app-layout>
 
-
     <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
 
         <!-- Primera fila -->
@@ -14,32 +13,38 @@
                     <p class="mt-1 text-lg">Total de instituciones registradas</p>
                 </div>
                 <div class="mt-6">
-                    <a href="{{ route('instituciones.index') }}"
-                        class="inline-block bg-white text-blue-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
-                        Ver Instituciones
-                    </a>
+                    @if (Auth::user()->tipo_usuario === 'administrador')
+                        <a href="{{ route('instituciones.index') }}"
+                            class="inline-block bg-white text-blue-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
+                            Ver Instituciones
+                        </a>
+                    @elseif (Auth::user()->tipo_usuario === 'encargado_institucion')
+                        <a href="{{ route('institucion.ver', Auth::user()->idInstitucion) }}"
+                            class="inline-block bg-white text-blue-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
+                            Ver Mi Institución
+                        </a>
+                    @endif
                 </div>
             </div>
 
-            <!-- Card Usuarios -->
-            <div class="bg-yellow-500 text-white rounded-lg shadow p-6 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-3xl font-bold mb-2">Usuarios</h3>
-                    <p class="text-5xl font-extrabold">{{ $usuariosCount ?? 0 }}</p>
-                    <p class="mt-1 text-lg">Total de usuarios registrados</p>
+            <!-- Card Usuarios (solo admin) -->
+            @if (Auth::user()->tipo_usuario === 'administrador')
+                <div class="bg-yellow-500 text-white rounded-lg shadow p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-3xl font-bold mb-2">Usuarios</h3>
+                        <p class="text-5xl font-extrabold">{{ $usuariosCount ?? 0 }}</p>
+                        <p class="mt-1 text-lg">Total de usuarios registrados</p>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{{ route('usuarios.index') }}"
+                            class="inline-block bg-white text-yellow-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
+                            Ver Usuarios
+                        </a>
+                    </div>
                 </div>
-                <div class="mt-6">
-                    <a href="{{ route('usuarios.index') }}"
-                        class="inline-block bg-white text-yellow-600 font-semibold px-4 py-2 rounded hover:bg-gray-100 transition">
-                        Ver Usuarios
-                    </a>
-                </div>
-            </div>
+            @endif
+
         </div>
 
-
     </div>
-
-
-
 </x-app-layout>

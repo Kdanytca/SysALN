@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->intended('/dashboard');
 
             case 'encargado_institucion':
-                return redirect()->intended("/institucion/{$user->idInstitucion}");
+                return redirect()->intended("/dashboard");
 
             case 'encargado_departamento':
                 return redirect()->intended("/departamento/{$user->idDepartamento}");

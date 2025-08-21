@@ -253,10 +253,12 @@
                 <!-- Responsable -->
                 <div class="mb-4">
                     <label for="responsable" class="block font-medium">Responsable</label>
-                    <select name="responsable" id="responsable" class="w-full border rounded px-3 py-2" required>
+                    <select name="responsable" id="responsable" class="w-full border rounded px-3 py-2"
+                        data-encargado-id="{{ Auth::id() }}"
+                        data-encargado-nombre="{{ Auth::user()->name ?? Auth::user()->nombre_usuario }}">
                         <option value="">Seleccione un responsable</option>
-                        <!-- Se llenará dinámicamente con JS -->
                     </select>
+
                     <div id="mensajeNoUsuarios" class="text-red-600 font-semibold mt-2" style="display: none;">
                         No hay usuarios disponibles.
                     </div>
@@ -266,6 +268,7 @@
                         Agregar usuario
                     </button>
                 </div>
+
 
                 <div class="flex justify-end gap-2">
                     {{-- Botón Cancelar --}}
@@ -359,25 +362,37 @@
         </div>
     </div>
 
-
-
     <script>
-        // Datos en JS para departamentos y usuarios de la institución actual 
+        // ==================== DATOS BASE ====================
         const departamentos = @json($institucion->departamentos);
 
-        //traer usuarios por departamento
+        // ==================== CARGA DE USUARIOS ====================
         async function cargarUsuarios(departamentoId) {
             try {
                 const res = await fetch(`/departamentos/${departamentoId}/usuarios-disponibles`);
                 if (!res.ok) throw new Error('Error cargando usuarios');
                 return await res.json();
             } catch (e) {
-                console.error(e);
+                console.error("Error al cargar usuarios:", e);
                 return [];
             }
         }
 
-        // Filtrar usuarios cuando cambia departamento
+        function agregarEncargado(select) {
+            const encargadoId = select.dataset.encargadoId;
+            const encargadoNombre = select.dataset.encargadoNombre;
+
+            // Evitar duplicados
+            if (![...select.options].some(o => o.value == encargadoId)) {
+                const optionEncargado = document.createElement('option');
+                optionEncargado.value = encargadoId;
+                optionEncargado.textContent = `${encargadoNombre} (Encargado)`;
+                optionEncargado.selected = true;
+                select.appendChild(optionEncargado);
+            }
+        }
+
+        // ==================== EVENTOS ====================
         document.getElementById('idDepartamento').addEventListener('change', async function() {
             const departamentoId = this.value;
             const selectResponsable = document.getElementById('responsable');
@@ -386,21 +401,32 @@
             selectResponsable.innerHTML = '<option value="">Seleccione un responsable</option>';
             mensaje.style.display = 'none';
 
-            if (!departamentoId) return;
+            if (departamentoId) {
+                const usuarios = await cargarUsuarios(departamentoId);
 
-            const usuarios = await cargarUsuarios(departamentoId);
-            if (usuarios.length === 0) {
-                mensaje.style.display = 'block';
-            } else {
-                usuarios.forEach(u => {
-                    const option = document.createElement('option');
-                    option.value = u.id;
-                    option.textContent = u.nombre_usuario;
-                    selectResponsable.appendChild(option);
-                });
+                if (usuarios.length === 0) {
+                    mensaje.style.display = 'block';
+                } else {
+                    usuarios.forEach(u => {
+                        const option = document.createElement('option');
+                        option.value = u.id;
+                        option.textContent = u.nombre_usuario;
+                        selectResponsable.appendChild(option);
+                    });
+                }
             }
+
+            // SIEMPRE agregar al encargado
+            agregarEncargado(selectResponsable);
         });
-        // Funciones para agregar y eliminar objetivos
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const selectResponsable = document.getElementById('responsable');
+            agregarEncargado(selectResponsable);
+            actualizarBotonEliminar();
+        });
+
+        // ==================== OBJETIVOS ====================
         function agregarObjetivo() {
             const contenedor = document.getElementById('contenedorObjetivos');
             const input = document.createElement('div');
@@ -409,7 +435,6 @@
             <input type="text" name="objetivos[]" class="w-full border rounded px-3 py-2 pr-10" required>
         `;
             contenedor.appendChild(input);
-
             document.getElementById('btnEliminarObjetivo').classList.remove('hidden');
         }
 
@@ -422,7 +447,8 @@
                 document.getElementById('btnEliminarObjetivo').classList.add('hidden');
             }
         }
-        // Funciones para agregar y eliminar ejes
+
+        // ==================== EJES ====================
         function actualizarBotonEliminar() {
             const contenedor = document.getElementById('contenedorEjes');
             const inputs = contenedor.querySelectorAll('input');
@@ -450,29 +476,21 @@
             actualizarBotonEliminar();
         }
 
+        // ==================== MODALES ====================
         document.addEventListener('DOMContentLoaded', () => {
-            actualizarBotonEliminar();
-
-
-            // Abrir modal con botón
             document.getElementById('btnNuevoPlan').addEventListener('click', () => {
                 const modal = document.getElementById('modal');
                 const form = document.getElementById('formPlan');
 
                 form.reset();
-
-                // Establecer institución fija (por si reset la borra)
                 form.institucion_id.value = '{{ $institucion->id }}';
-
-                // Limpiar select responsable
                 document.getElementById('responsable').innerHTML =
                     '<option value="">Seleccione un responsable</option>';
                 document.getElementById('mensajeNoUsuarios').style.display = 'none';
-
                 modal.classList.remove('hidden');
             });
         });
-        // ==================== MODAL USUARIO ====================
+
         function abrirModalUsuario() {
             document.getElementById('modalUsuario').classList.remove('hidden');
         }
@@ -482,6 +500,7 @@
             document.getElementById('formUsuario').reset();
         }
 
+        // ==================== CREAR USUARIO ====================
         const formUsuario = document.getElementById('formUsuario');
         formUsuario?.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -524,7 +543,7 @@
             }
         });
 
-        // ==================== FILTRAR DEPARTAMENTOS POR INSTITUCIÓN (MODAL USUARIO) ====================
+        // ==================== FILTRAR DEPARTAMENTOS ====================
         document.getElementById('institucion_usuario')?.addEventListener('change', function() {
             const institucionId = this.value;
             const departamentoSelect = document.getElementById('departamento_usuario');
@@ -543,16 +562,15 @@
                 });
             }
         });
-        // ==================== MODAL PLAN: EDITAR ====================
+
+        // ==================== EDITAR PLAN ====================
         async function openEditModal(plan) {
             const modal = document.getElementById('modal');
             const form = document.getElementById('formPlan');
 
-            // Resetear el formulario antes de editar
             form.reset();
             form.action = `/planes/${plan.id}`;
 
-            // Agregar o reemplazar método PUT para la edición
             let methodInput = form.querySelector('input[name="_method"]');
             if (methodInput) {
                 methodInput.value = 'PUT';
@@ -564,26 +582,23 @@
                 form.appendChild(methodInput);
             }
 
-            // Asignar valores a los campos
             form.querySelector('input[name="nombre_plan_estrategico"]').value = plan.nombre_plan_estrategico;
             form.querySelector('input[name="fecha_inicio"]').value = plan.fecha_inicio;
             form.querySelector('input[name="fecha_fin"]').value = plan.fecha_fin;
             form.querySelector('input[name="institucion_id"]').value = plan.idInstitucion;
             form.querySelector('select[name="idDepartamento"]').value = plan.idDepartamento;
 
-            // Limpiar y cargar ejes estratégicos
+            // Ejes estratégicos
             const contenedorEjes = document.getElementById('contenedorEjes');
             contenedorEjes.innerHTML = '';
-
             const ejes = plan.ejes_estrategicos.split(',');
             ejes.forEach(eje => {
                 const div = document.createElement('div');
                 div.className = 'relative mb-2';
-
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'ejes_estrategicos[]';
-                input.className = 'w-full border rounded px-3 py-2 pr-10'; // espacio para el botón
+                input.className = 'w-full border rounded px-3 py-2 pr-10';
                 input.required = true;
                 input.value = eje.trim();
 
@@ -591,20 +606,17 @@
                 btnEliminar.type = 'button';
                 btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
                 btnEliminar.innerHTML = '&times;';
-                btnEliminar.title = 'Eliminar eje estratégico';
                 btnEliminar.onclick = () => div.remove();
 
                 div.appendChild(input);
                 div.appendChild(btnEliminar);
                 contenedorEjes.appendChild(div);
             });
+            actualizarBotonEliminar();
 
-            actualizarBotonEliminar(); // Muestra el botón de eliminar eje si es necesario
-
-            // Limpiar y cargar objetivos
+            // Objetivos
             const contenedorObjetivos = document.getElementById('contenedorObjetivos');
             contenedorObjetivos.innerHTML = '';
-
             if (plan.objetivos) {
                 let objetivosArray = [];
                 try {
@@ -612,33 +624,27 @@
                 } catch {
                     objetivosArray = [];
                 }
-
                 objetivosArray.forEach(objetivo => {
                     const div = document.createElement('div');
                     div.className = 'relative mb-2';
-
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.name = 'objetivos[]';
                     input.className = 'w-full border rounded px-3 py-2 pr-10';
                     input.value = objetivo ?? '';
-
                     const btnEliminar = document.createElement('button');
                     btnEliminar.type = 'button';
                     btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
                     btnEliminar.innerHTML = '&times;';
-                    btnEliminar.title = 'Eliminar objetivo';
                     btnEliminar.onclick = () => div.remove();
 
                     div.appendChild(input);
                     div.appendChild(btnEliminar);
                     contenedorObjetivos.appendChild(div);
                 });
-
             }
 
-
-            // Filtrar usuarios disponibles por departamento
+            // Usuarios
             const selectResponsable = document.getElementById('responsable');
             const mensaje = document.getElementById('mensajeNoUsuarios');
             selectResponsable.innerHTML = '<option value="">Seleccione un responsable</option>';
@@ -647,34 +653,14 @@
                 const response = await fetch(`/departamentos/${plan.idDepartamento}/usuarios-disponibles`);
                 const usuarios = await response.json();
 
-                let usuarioActualIncluido = false;
-
                 usuarios.forEach(usuario => {
                     const option = document.createElement('option');
                     option.value = usuario.id;
                     option.textContent = usuario.nombre_usuario;
-                    console.log('Plan responsable id:', plan.idUsuario);
-                    console.log('Usuario id actual:', usuario.id);
-
-                    if (usuario.id == plan.idUsuario) {
-                        option.selected = true;
-                        usuarioActualIncluido = true;
-                    }
                     selectResponsable.appendChild(option);
                 });
 
-                // Si no está en la lista, agregar al responsable actual
-                if (!usuarioActualIncluido) {
-                    const res = await fetch(`/usuarios/${plan.idUsuario}`);
-                    const data = await res.json();
-
-                    const option = document.createElement('option');
-                    option.value = data.id;
-                    option.textContent = `${data.nombre_usuario} (actual)`;
-                    option.selected = true;
-                    selectResponsable.appendChild(option);
-                }
-
+                agregarEncargado(selectResponsable);
                 mensaje.style.display = usuarios.length === 0 ? 'block' : 'none';
 
             } catch (err) {
@@ -682,9 +668,9 @@
                 mensaje.style.display = 'block';
             }
 
-            // Mostrar modal
             modal.classList.remove('hidden');
         }
     </script>
+
 
 </x-app-layout>

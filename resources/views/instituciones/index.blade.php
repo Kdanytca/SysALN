@@ -34,21 +34,20 @@
                         <h2 class="text-xl font-bold mb-4">Registrar Nueva Institución</h2>
                         @include('instituciones.create', [
                             'usuarios' => $usuariosParaCrear,
-                            'closeModal' => 'modalInstitucion = false'
+                            'closeModal' => 'modalInstitucion = false',
                         ])
                     </div>
                 </div>
 
                 <!-- Modal de Usuario -->
-                <div x-show="modalNuevoUsuario"
-                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                <div x-show="modalNuevoUsuario" x-on:close-modal-usuario.window="modalNuevoUsuario = false"
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
 
                         @include('instituciones.usuario', [
                             'closeModal' => 'modalNuevoUsuario = false',
-                            'ocultarCamposRelacionados' => true
+                            'ocultarCamposRelacionados' => true,
                         ])
                     </div>
                 </div>
@@ -83,7 +82,7 @@
                                 <td class="px-4 py-3 truncate">
                                     {{ $institucion->tipo_institucion ?? '-' }}</td>
                                 <td class="px-4 py-3 truncate">
-                                    {{ $institucion->encargadoInstitucion->nombre_usuario ?? '-'}}</td>
+                                    {{ $institucion->encargadoInstitucion->nombre_usuario ?? '-' }}</td>
                                 <td class="px-4 py-3 text-righ">
                                     @php
                                         $user = Auth::user();
@@ -118,13 +117,15 @@
                                                 <!-- Modal de Usuario dentro de editar -->
                                                 <div x-show="modalNuevoUsuario"
                                                     x-on:close-modal-usuario.window="modalNuevoUsuario = false"
-                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                                                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                                                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
 
                                                         @include('instituciones.usuario', [
                                                             'closeModal' => 'modalNuevoUsuario = false',
-                                                            'ocultarCamposRelacionados' => true
+                                                            'ocultarCamposRelacionados' => true,
                                                         ])
                                                     </div>
                                                 </div>
@@ -181,21 +182,23 @@
                                     @endphp
 
                                     @if ($user && $user->tipo_usuario === 'encargado_institucion')
-                                        {{-- Ver Departamentos --}}
-                                        <a href="{{ route('institucion.departamentos', $institucion->id) }}"
-                                            class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
-                                            Ver Departamentos
-                                        </a>
+                                        <div class="flex space-x-2">
+                                            {{-- Ver Departamentos --}}
+                                            <a href="{{ route('institucion.departamentos', $institucion->id) }}"
+                                                class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
+                                                Ver Departamentos
+                                            </a>
 
-                                        {{-- Ver Planes Estratégicos --}}
-                                        <a href="{{ route('institucion.planes', $institucion->id) }}"
-                                            class="bg-green-100 text-green-800 px-3 py-1.5 rounded-md text-xs hover:bg-green-200 transition shadow-sm">
-                                            Ver Planes Estratégicos
-                                        </a>
+                                            {{-- Ver Planes Estratégicos --}}
+                                            <a href="{{ route('institucion.planes', $institucion->id) }}"
+                                                class="bg-green-100 text-green-800 px-3 py-1.5 rounded-md text-xs hover:bg-green-200 transition shadow-sm">
+                                                Ver Planes Estratégicos
+                                            </a>
+                                        </div>
                                     @endif
 
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
                         @endforeach
 
                         @if ($instituciones->isEmpty())

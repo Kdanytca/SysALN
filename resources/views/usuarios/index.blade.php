@@ -1,7 +1,7 @@
 <style>
-[x-cloak] {
-    display: none !important;
-}
+    [x-cloak] {
+        display: none !important;
+    }
 </style>
 <x-app-layout>
     <x-slot name="header">
@@ -58,97 +58,106 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($usuarios as $usuario)
-                        <tr class="hover:bg-indigo-50 transition">
-                            <td class="px-4 py-3 font-medium truncate">
-                                {{ $usuario->nombre_usuario }}</td>
-                            <td class="px-4 py-3 truncate">
-                                {{ $usuario->email }}</td>
-                            <td class="px-4 py-3 truncate">
-                                {{ $usuario->departamento->departamento ?? '-' }}</td>
-                            <td class="px-4 py-3">
-                                {{ $usuario->institucion->nombre_institucion ?? '-' }}</td>
-                            <td class="px-4 py-3">
-                                {{ $usuario->tipo_usuario_label }}</td>
-                            <td class="px-4 py-3 text-righ">
-                                <div class="flex flex-wrap justify-center gap-2">
-                                    <div x-data="{ editModalOpen: false }">
-                                        <button @click="editModalOpen = true"
-                                            class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
-                                            Editar
-                                        </button>
+                            <tr class="hover:bg-indigo-50 transition">
+                                <td class="px-4 py-3 font-medium truncate">
+                                    {{ $usuario->nombre_usuario }}
+                                </td>
+                                <td class="px-4 py-3 truncate">
+                                    {{ $usuario->email }}
+                                </td>
+                                <td class="px-4 py-3 truncate">
+                                    {{ $usuario->departamento->departamento ?? '-' }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    {{ $usuario->institucion->nombre_institucion ?? '-' }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    {{ $usuario->tipo_usuario_label }}
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex flex-wrap justify-center gap-2">
+                                        <!-- Editar -->
+                                        <div x-data="{ editModalOpen: false }">
+                                            <button @click="editModalOpen = true"
+                                                class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                Editar
+                                            </button>
 
-                                        <!-- Modal de edición -->
-                                        <div x-show="editModalOpen"
-                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                            x-cloak>
-                                            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                <h2 class="text-lg font-semibold mb-4">Editar Usuario</h2>
+                                            <!-- Modal de edición -->
+                                            <div x-show="editModalOpen"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                x-cloak>
+                                                <div
+                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                    <h2 class="text-lg font-semibold mb-4">Editar Usuario</h2>
 
-                                                @include('usuarios.edit', [
-                                                'action' => route('usuarios.update', $usuario->id),
-                                                'isEdit' => true,
-                                                'usuario' => $usuario,
-                                                ])
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Eliminar -->
-                                    <div x-data="{ confirmDelete: false }">
-                                        <!-- Botón que abre el modal -->
-                                        <button @click="confirmDelete = true"
-                                            class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
-                                            Eliminar
-                                        </button>
-
-                                        <!-- Modal de confirmación -->
-                                        <div x-show="confirmDelete"
-                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                            x-cloak>
-                                            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                    eliminación</h2>
-                                                <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar este
-                                                    Usuario?</p>
-
-                                                <div class="flex justify-end items-center gap-3 items-stretch">
-                                                    <div>
-                                                        <button @click="confirmDelete = false"
-                                                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                            Cancelar
-                                                        </button>
-                                                    </div>
-
-                                                    <div class="flex items-center">
-                                                        <form method="POST"
-                                                            action="{{ route('usuarios.destroy', $usuario->id) }}">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
-                                                                Eliminar
-                                                            </button>
-                                                        </form>
-                                                    </div>
+                                                    @include('usuarios.edit', [
+                                                        'action' => route('usuarios.update', $usuario->id),
+                                                        'isEdit' => true,
+                                                        'usuario' => $usuario,
+                                                    ])
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Eliminar -->
+                                        @if ($usuario->id !== Auth::id() && $usuario->tipo_usuario !== 'administrador')
+                                            <div x-data="{ confirmDelete: false }">
+                                                <!-- Botón que abre el modal -->
+                                                <button @click="confirmDelete = true"
+                                                    class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                    Eliminar
+                                                </button>
+
+                                                <!-- Modal de confirmación -->
+                                                <div x-show="confirmDelete"
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                            eliminación</h2>
+                                                        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
+                                                            eliminar este Usuario?</p>
+
+                                                        <div class="flex justify-end items-center gap-3 items-stretch">
+                                                            <div>
+                                                                <button @click="confirmDelete = false"
+                                                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                                    Cancelar
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="flex items-center">
+                                                                <form method="POST"
+                                                                    action="{{ route('usuarios.destroy', $usuario->id) }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
+                                                                        Eliminar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
-                                </div>
-
-
-
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
                         @endforeach
 
-                        @if($usuarios->isEmpty())
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No hay usuarios
-                                registrados.</td>
-                        </tr>
+                        @if ($usuarios->isEmpty())
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    No hay usuarios registrados.
+                                </td>
+                            </tr>
                         @endif
                     </tbody>
+
                 </table>
             </div>
         </div>
