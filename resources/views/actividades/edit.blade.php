@@ -23,7 +23,7 @@
                 @foreach ($usuarios as $usuario)
                     <option value="{{ $usuario->id }}" 
                         data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
-                        {{ $usuario->nombre_usuario }}
+                        {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
                     </option>
                 @endforeach
             </select>
@@ -99,8 +99,8 @@
         {{-- Unidad Encargada --}}
         <div class="mb-4">
             <label class="block font-medium">Unidad Encargada</label>
-            <select id="unidad_encargada_display_{{ $actividad->id }}" disabled
-                class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
+            <select id="unidad_encargada_display_{{ $actividad->id }}"
+                class="w-full border rounded px-3 py-2">
                 <option value="">Sin Departamento</option>
                 @foreach($departamentos as $departamento)
                     <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>

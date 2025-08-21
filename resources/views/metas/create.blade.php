@@ -20,7 +20,7 @@
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Usuario Responsable</label>
+        <label class="block font-medium">Usuario Responsable</label>
         <select name="idEncargadoMeta" required class="w-full rounded-md border border-gray-500 shadow-sm">
             <option value="">Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
@@ -72,7 +72,7 @@
     </div>
 
     <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Actividades</label>
+        <label class="block font-medium">Actividades</label>
         <div id="contenedorActividades">
             <input type="text" name="nombre_actividades[]" class="w-full border rounded px-3 py-2 mb-2" required>
         </div>

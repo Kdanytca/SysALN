@@ -44,7 +44,12 @@ class UsuarioController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'usuario' => $usuario,
+                'usuario' => [
+                    'id' => $usuario->id,
+                    'nombre_usuario' => $usuario->nombre_usuario,
+                    'email' => $usuario->email,
+                    'departamento' => $usuario->departamento->departamento ?? 'Sin Departamento',
+                ]
             ], 200);
         }
 

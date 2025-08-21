@@ -33,17 +33,18 @@ class ActividadController extends Controller
             return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
-        $meta->load('planEstrategico');
+        $meta->load('planEstrategico.departamento.institucion');
         $actividades = $meta->actividades()->with('meta')->get();
         $metas = Meta::all();
-
+        
+        $institucion = $meta->planEstrategico->departamento->institucion;
+        
         $usuarios = Usuario::where('idInstitucion', $meta->planEstrategico->departamento->idInstitucion)
             ->whereIn('tipo_usuario', ['responsable_actividad', 'encargado_institucion'])
             ->get();
 
-        $departamentos = Departamento::all();
+        $departamentos = Departamento::where('idInstitucion', $institucion->id)->get();
 
-        $institucion = $meta->planEstrategico->departamento->institucion;
 
         $vistaMetas = true;
 
