@@ -51,7 +51,7 @@
                                 break;
 
                             case 'encargado_institucion':
-                                $rutaInicio = route('institucion.ver', $user->idInstitucion);
+                                $rutaInicio = route('dashboard');
                                 break;
 
                             case 'encargado_departamento':
