@@ -10,6 +10,7 @@ use App\Models\Departamento;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MetaController extends Controller
 {
@@ -113,9 +114,11 @@ class MetaController extends Controller
             'idEncargadoMeta' => 'required|exists:usuarios,id',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|array|min:1',
-            'ejes_estrategicos.*' => 'required|string|max:255',
+            'ejes_estrategicos.*' => 'required|string',
             'nombre_actividades' => 'required|array|min:1',
             'nombre_actividades.*' => 'required|string|max:255',
+            'resultados_esperados' => 'required|string|max:255',
+            'indicador_resultados' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',
@@ -125,8 +128,10 @@ class MetaController extends Controller
             'idPlanEstrategico' => $request->idPlanEstrategico,
             'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
-            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
+            'ejes_estrategicos' => json_encode($request->ejes_estrategicos),
             'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'resultados_esperados' => $request->resultados_esperados,
+            'indicador_resultados' => $request->indicador_resultados,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'comentario' => $request->comentario,
@@ -151,9 +156,11 @@ class MetaController extends Controller
             'idEncargadoMeta' => 'required|exists:usuarios,id',
             'nombre_meta' => 'required|string|max:255',
             'ejes_estrategicos' => 'required|array|min:1',
-            'ejes_estrategicos.*' => 'required|string|max:255',
+            'ejes_estrategicos.*' => 'required|string',
             'nombre_actividades' => 'required|array|min:1',
             'nombre_actividades.*' => 'required|string|max:255',
+            'resultados_esperados' => 'required|string|max:255',
+            'indicador_resultados' => 'nullable|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'comentario' => 'nullable|string|max:255',
@@ -163,8 +170,10 @@ class MetaController extends Controller
             'idPlanEstrategico' => $request->idPlanEstrategico,
             'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
-            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
+            'ejes_estrategicos' => json_encode($request->ejes_estrategicos),
             'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'resultados_esperados' => $request->resultados_esperados,
+            'indicador_resultados' => $request->indicador_resultados,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'comentario' => $request->comentario,

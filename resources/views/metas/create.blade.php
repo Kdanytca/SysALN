@@ -50,10 +50,11 @@
         <label class="block font-medium mb-2">Ejes Estratégicos</label>
         <div class="flex flex-wrap gap-2">
             @php
-                $ejesSeleccionados = old('ejes_estrategicos', $meta->ejes_estrategicos ?? []);
-                if (is_string($ejesSeleccionados)) {
-                    $ejesSeleccionados = explode(',', $ejesSeleccionados);
-                }
+                // Ejes seleccionados previamente, si existen en old() o en el modelo
+                $ejesSeleccionados = old('ejes_estrategicos', []); // No necesitamos json_decode aquí ya que no estamos editando
+
+                // Limpiar espacios de cada eje seleccionado
+                $ejesSeleccionados = array_map('trim', $ejesSeleccionados);
             @endphp
 
             @foreach (explode(',', $plan->ejes_estrategicos) as $eje)
@@ -74,22 +75,30 @@
     <div class="mb-4">
         <label class="block font-medium">Actividades</label>
         <div id="contenedorActividades">
-            <input type="text" name="nombre_actividades[]" class="w-full border rounded px-3 py-2 mb-2" required>
+            <div class="input-con-x mb-2">
+                <input type="text" name="nombre_actividades[]" class="border rounded px-3 py-2" required>
+                <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+            </div>
         </div>
         <div class="flex items-center gap-4 mt-2">
             <button type="button"
-                onclick="agregarActividad('contenedorActividades', 'btnEliminarActividad')"
+                onclick="agregarActividad('contenedorActividades')"
                 class="text-sm text-blue-600 underline hover:text-blue-800 transition">
                 + Agregar otra actividad
             </button>
-
-            <button type="button"
-                onclick="eliminarUltimaActividad('contenedorActividades', 'btnEliminarActividad')"
-                id="btnEliminarActividad"
-                class="text-sm text-red-600 underline hover:text-red-800 transition hidden">
-                🗑 Eliminar última actividad
-            </button>
         </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium">Resultados</label>
+        <input type="text" name="resultados_esperados"
+            class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium">Indicador</label>
+        <input type="text" name="indicador_resultados"
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="flex gap-4 mb-4">
@@ -122,3 +131,30 @@
         </button>
     </div>
 </form>
+
+<style>
+    .input-con-x {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .input-con-x input {
+        width: 100%;
+        padding-right: 2rem; /* espacio para la 'x' */
+    }
+
+    .input-con-x button {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: red;
+        font-size: 1rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+</style>

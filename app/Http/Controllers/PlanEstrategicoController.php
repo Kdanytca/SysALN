@@ -141,11 +141,6 @@ class PlanEstrategicoController extends Controller
             'idUsuario' => $request->responsable,
         ]);
 
-        // Actualizar metas relacionadas si aplica (opcional)
-        DB::table('metas')
-            ->where('idPlanEstrategico', $plan->id)
-            ->update(['ejes_estrategicos' => $plan->ejes_estrategicos]);
-
         $institucion_id = $plan->departamento->idInstitucion;
 
         return redirect()->route('institucion.planes', [

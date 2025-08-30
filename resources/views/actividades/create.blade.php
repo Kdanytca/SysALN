@@ -1,9 +1,5 @@
-<form method="POST"
-    action="{{ $actividad->id ?? false ? route('actividades.update', $actividad) : route('actividades.store') }}">
+<form method="POST" action="{{ route('actividades.store') }}">
     @csrf
-    @if($actividad->id ?? false)
-    @method('PUT')
-    @endif
 
     <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
 
@@ -32,30 +28,32 @@
         </div>
 
         {{-- Nombre Actividad --}}
-        <div>
+        <div class="mb-4">
             <label class="block font-medium">Nombre Actividad</label>
-            <input type="text" name="nombre_actividad" class="w-full border rounded px-3 py-2"
-                value="{{ old('nombre_actividad', $actividad->nombre_actividad ?? '') }}" required>
+            <select name="nombre_actividad" class="w-full border rounded px-3 py-2" required>
+                <option value="">Seleccione una actividad</option>
+                @foreach($actividadesDisponibles as $actividadDisponible)
+                    <option value="{{ $actividadDisponible }}">
+                        {{ $actividadDisponible }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         {{-- Objetivos --}}
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">Objetivos</label>
+            <label class="block font-medium">Objetivos</label>
             <div id="contenedorObjetivos">
-                <input type="text" name="objetivos[]" class="w-full border rounded px-3 py-2 mb-2" required>
+                <div class="input-con-x mb-2">
+                    <input type="text" name="objetivos[]" class="border rounded px-3 py-2" required>
+                    <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+                </div>
             </div>
             <div class="flex items-center gap-4 mt-2">
                 <button type="button"
                     onclick="agregarCampo('contenedorObjetivos', 'objetivos[]', 'btnEliminarObjetivo')"
                     class="text-sm text-blue-600 underline hover:text-blue-800 transition">
                     + Agregar otro objetivo
-                </button>
-
-                <button type="button" 
-                    onclick="eliminarUltimoCampo('contenedorObjetivos', 'btnEliminarObjetivo')"
-                    id="btnEliminarObjetivo"
-                    class="text-sm text-red-600 underline hover:text-red-800 transition hidden">
-                    🗑 Eliminar último objetivo
                 </button>
             </div>
         </div>
@@ -64,31 +62,28 @@
         <div class="flex gap-4">
             <div class="w-1/2">
                 <label class="block font-medium">Fecha de Inicio</label>
-                <input type="date" name="fecha_inicio" class="w-full border rounded px-3 py-2"
-                    value="{{ old('fecha_inicio', $actividad->fecha_inicio ?? '') }}" required>
+                <input type="date" name="fecha_inicio" class="w-full border rounded px-3 py-2" required>
             </div>
             <div class="w-1/2">
                 <label class="block font-medium">Fecha de Fin</label>
-                <input type="date" name="fecha_fin" class="w-full border rounded px-3 py-2"
-                    value="{{ old('fecha_fin', $actividad->fecha_fin ?? '') }}" required>
+                <input type="date" name="fecha_fin" class="w-full border rounded px-3 py-2" required>
             </div>
         </div>
 
-        {{-- Resultados esperados --}}
-        <div>
-            <label class="block font-medium">Resultados Esperados</label>
-            <input type="text" name="resultados_esperados" class="w-full border rounded px-3 py-2"
-                value="{{ old('resultados_esperados', $actividad->resultados_esperados ?? '') }}" required>
+        {{-- Comentario --}}
+        <div class="mb-4">
+            <label class="block font-medium">Comentario</label>
+            <textarea name="comentario" class="w-full border rounded px-3 py-2" required>{{ old('comentario', $actividad->comentario ?? '') }}</textarea>
         </div>
 
         {{-- Unidad Encargada --}}
-        <div>
+        <div class="mb-4">
             <label class="block font-medium mt-4">Unidad Encargada</label>
             <select id="unidad_encargada_display_nuevo"
                 class="w-full border rounded px-3 py-2">
                 <option value="">Sin Departamento</option>
                 @foreach($departamentos as $departamento)
-                <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
+                    <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
                 @endforeach
             </select>
             <input type="hidden" name="unidad_encargada" id="unidad_encargada_nuevo" x-model="unidad">
@@ -132,6 +127,30 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 });
-
-
 </script>
+
+<style>
+    .input-con-x {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .input-con-x input {
+        width: 100%;
+        padding-right: 2rem; /* espacio para la 'x' */
+    }
+
+    .input-con-x button {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: red;
+        font-size: 1rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+</style>

@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('idMetas')->constrained('metas')->onDelete('cascade');
             $table->foreignId('idEncargadoActividad')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->string('nombre_actividad', 255);
-            $table->string('objetivos', 255);
+            $table->text('objetivos');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->string('resultados_esperados', 255);
+            $table->text('comentario');
             $table->string('unidad_encargada', 255)->nullable();
             $table->timestamps();
         });

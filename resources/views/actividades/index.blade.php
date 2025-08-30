@@ -98,7 +98,7 @@
                             <th class="w-1/9 px-4 py-3 text-left">Objetivos</th>
                             <th class="w-1/9 px-4 py-3 text-left">Inicio</th>
                             <th class="w-1/9 px-4 py-3 text-left">Fin</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Resultados Esperados</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Comentario</th>
                             <th class="w-1/9 px-4 py-3 text-left">Unidad Encargada</th>
 
                             {{-- Solo mostrar columna Acciones a roles permitidos --}}
@@ -132,7 +132,7 @@
                                     {{ \Carbon\Carbon::parse($actividad->fecha_inicio)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-3">
                                     {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3">{{ $actividad->resultados_esperados }}</td>
+                                <td class="px-4 py-3">{{ $actividad->comentario }}</td>
                                 <td class="px-4 py-3">{{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
 
                                 {{-- Acciones solo para roles permitidos --}}
@@ -542,33 +542,34 @@
             }
         }
 
-        function agregarCampo(contenedorId, name, botonEliminarId) {
+        function agregarCampo(contenedorId, name) {
             const contenedor = document.getElementById(contenedorId);
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-con-x mb-2';
+            
             const input = document.createElement('input');
             input.type = 'text';
             input.name = name;
-            input.className = 'w-full border rounded px-3 py-2 mb-2';
             input.required = true;
-            contenedor.appendChild(input);
+            input.className = 'border rounded px-3 py-2 w-full';
 
-            document.getElementById(botonEliminarId).classList.remove('hidden');
+            const botonEliminar = document.createElement('button');
+            botonEliminar.type = 'button';
+            botonEliminar.innerText = '×';
+            botonEliminar.onclick = function () {
+                eliminarEsteCampo(botonEliminar);
+            };
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(botonEliminar);
+            contenedor.appendChild(wrapper);
         }
 
-        function eliminarUltimoCampo(contenedorId, botonEliminarId) {
-            const contenedor = document.getElementById(contenedorId);
-            const inputs = contenedor.querySelectorAll('input');
-            if (inputs.length > 1) {
-                contenedor.removeChild(inputs[inputs.length - 1]);
-            }
-            if (inputs.length <= 2) {
-                document.getElementById(botonEliminarId).classList.add('hidden');
-            }
+        function eliminarEsteCampo(boton) {
+            const wrapper = boton.parentElement;
+            wrapper.remove();
         }
+
     </script>
-
-
-
-
-
-
 </x-app-layout>

@@ -41,9 +41,21 @@
         {{-- Nombre Actividad --}}
         <div class="mb-4">
             <label class="block font-medium">Nombre Actividad</label>
-            <input type="text" name="nombre_actividad" 
-                value="{{ old('nombre_actividad', $actividad->nombre_actividad) }}"
-                class="w-full border rounded px-3 py-2" required>
+            <select name="nombre_actividad" class="w-full border rounded px-3 py-2" required>
+                @if (!$actividad->nombre_actividad) 
+                    <option value="">-- Selecciona una actividad --</option>
+                @else
+                    <option value="{{ $actividad->nombre_actividad }}" selected>
+                        {{ $actividad->nombre_actividad }}
+                    </option>
+                @endif
+
+                @foreach ($actividadesDisponibles as $actividadDisponible)
+                    <option value="{{ $actividadDisponible }}">
+                        {{ $actividadDisponible }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         {{-- Objetivos --}}
@@ -51,8 +63,10 @@
             <label class="block font-medium">Objetivos</label>
             <div id="contenedorObjetivosEdit">
                 @foreach (explode(',', $actividad->objetivos) as $objetivo)
-                    <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}"
-                        class="w-full border rounded px-3 py-2 mb-2" required>
+                    <div class="input-con-x mb-2">
+                        <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}" class="border rounded px-3 py-2" required>
+                        <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+                    </div>
                 @endforeach
             </div>
             <div class="flex items-center gap-4 mt-2">
@@ -60,13 +74,6 @@
                     onclick="agregarCampo('contenedorObjetivosEdit', 'objetivos[]', 'btnEliminarObjetivoEdit')"
                     class="text-sm text-blue-600 underline hover:text-blue-800 transition">
                     + Agregar otro objetivo
-                </button>
-
-                <button type="button"
-                    onclick="eliminarUltimoCampo('contenedorObjetivosEdit', 'btnEliminarObjetivoEdit')"
-                    id="btnEliminarObjetivoEdit"
-                    class="text-sm text-red-600 underline hover:text-red-800 transition {{ count(explode(',', $meta->objetivos)) > 1 ? '' : 'hidden' }}">
-                    🗑 Eliminar último objetivo
                 </button>
             </div>
         </div>
@@ -88,12 +95,10 @@
             </div>
         </div>
 
-        {{-- Resultados Esperados --}}
+        {{-- Comentario --}}
         <div class="mb-4">
-            <label class="block font-medium">Resultados Esperados</label>
-            <input type="text" name="resultados_esperados" 
-                value="{{ old('resultados_esperados', $actividad->resultados_esperados) }}"
-                class="w-full border rounded px-3 py-2" required>
+            <label class="block font-medium">Comentario</label>
+            <textarea name="comentario" class="w-full border rounded px-3 py-2" required>{{ old('comentario', $actividad->comentario) }}</textarea>
         </div>
 
         {{-- Unidad Encargada --}}
@@ -151,3 +156,29 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 </script>
+
+<style>
+    .input-con-x {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .input-con-x input {
+        width: 100%;
+        padding-right: 2rem; /* espacio para la 'x' */
+    }
+
+    .input-con-x button {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: red;
+        font-size: 1rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+</style>

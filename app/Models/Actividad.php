@@ -15,7 +15,7 @@ class Actividad extends Model
         'objetivos',
         'fecha_inicio',
         'fecha_fin',
-        'resultados_esperados',
+        'comentario',
         'unidad_encargada',
     ];
 
@@ -27,7 +27,7 @@ class Actividad extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'idUsuario');
+        return $this->belongsTo(Usuario::class, 'idEncargadoActividad');
     }
 
     public function seguimientos()

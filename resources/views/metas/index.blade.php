@@ -76,6 +76,10 @@
                             <th class="w-1/8 px-4 py-3 text-left">
                                 Actividades</th>
                             <th class="w-1/8 px-4 py-3 text-left">
+                                Resultados</th>
+                            <th class="w-1/8 px-4 py-3 text-left">
+                                Indicador</th>
+                            <th class="w-1/8 px-4 py-3 text-left">
                                 Inicio</th>
                             <th class="w-1/8 px-4 py-3 text-left">
                                 Fin</th>
@@ -93,10 +97,9 @@
                                     {{ $meta->nombre_meta }}</td>
                                 <td class="px-4 py-3 max-w-[200px]">
                                     @if (!empty($meta->ejes_estrategicos))
-                                        @foreach (explode(',', $meta->ejes_estrategicos) as $eje)
-                                            <span
-                                                class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                                {{ trim($eje) }}
+                                        @foreach (json_decode($meta->ejes_estrategicos, true) ?? [] as $eje)
+                                            <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                                {{ $eje }}
                                             </span>
                                         @endforeach
                                     @else
@@ -114,6 +117,16 @@
                                     @else
                                         <span class="text-sm text-red-500">Sin actividades registradas</span>
                                     @endif
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                        {{ $meta->resultados_esperados }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                        {{ $meta->indicador_resultados }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }}</td>
@@ -276,50 +289,69 @@
                     @endauth
 
                 @endif
+            </div>
+        </div>
+    </div>
 
+    <script>
+        function agregarActividad(contenedorId) {
+            const contenedor = document.getElementById(contenedorId);
 
-                <script>
-                    function agregarActividad(contenedorId, botonEliminarId) {
-                        const contenedor = document.getElementById(contenedorId);
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.name = 'nombre_actividades[]';
-                        input.className = 'w-full border rounded px-3 py-2 mb-2';
-                        input.required = true;
-                        contenedor.appendChild(input);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-con-x mb-2';
 
-                        document.getElementById(botonEliminarId).classList.remove('hidden');
-                    }
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'nombre_actividades[]';
+            input.className = 'border rounded px-3 py-2 w-full';
+            input.required = true;
 
-                    function eliminarUltimaActividad(contenedorId, botonEliminarId) {
-                        const contenedor = document.getElementById(contenedorId);
-                        const inputs = contenedor.querySelectorAll('input');
-                        if (inputs.length > 1) {
-                            contenedor.removeChild(inputs[inputs.length - 1]);
-                        }
-                        if (inputs.length <= 2) {
-                            document.getElementById(botonEliminarId).classList.add('hidden');
-                        }
-                    }
+            const botonEliminar = document.createElement('button');
+            botonEliminar.type = 'button';
+            botonEliminar.innerText = '×';
+            botonEliminar.onclick = function () {
+                eliminarEsteCampo(botonEliminar);
+            };
 
-                    function limpiarFormularioCrear() {
-                        const formulario = document.querySelector('[x-ref="formNuevaMeta"]');
-                        if (formulario) formulario.reset();
+            wrapper.appendChild(input);
+            wrapper.appendChild(botonEliminar);
+            contenedor.appendChild(wrapper);
+        }
 
-                        const contenedor = document.getElementById('contenedorActividades');
-                        if (contenedor) {
-                            contenedor.innerHTML = ''; // Elimina todo
-                            const input = document.createElement('input');
-                            input.type = 'text';
-                            input.name = 'nombre_actividades[]';
-                            input.className = 'w-full border rounded px-3 py-2 mb-2';
-                            input.required = true;
-                            contenedor.appendChild(input);
-                        }
+        function eliminarEsteCampo(boton) {
+            const wrapper = boton.parentElement;
+            wrapper.remove();
+        }
 
-                        const btnEliminar = document.getElementById('btnEliminarActividad');
-                        if (btnEliminar) btnEliminar.classList.add('hidden');
-                    }
-                </script>
+        function limpiarFormularioCrear() {
+            const formulario = document.querySelector('[x-ref="formNuevaMeta"]');
+            if (formulario) formulario.reset();
+
+            const contenedor = document.getElementById('contenedorActividades');
+            if (contenedor) {
+                contenedor.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-con-x mb-2';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'nombre_actividades[]';
+                input.className = 'border rounded px-3 py-2 w-full';
+                input.required = true;
+
+                const botonEliminar = document.createElement('button');
+                botonEliminar.type = 'button';
+                botonEliminar.innerText = '×';
+                botonEliminar.onclick = function () {
+                    eliminarEsteCampo(botonEliminar);
+                };
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(botonEliminar);
+                contenedor.appendChild(wrapper);
+            }
+        }
+    </script>
+
 
 </x-app-layout>

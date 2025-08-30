@@ -44,18 +44,18 @@
         <label class="block font-medium mb-2">Ejes Estratégicos</label>
         <div class="flex flex-wrap gap-2">
             @php
-                // Ejes disponibles desde el plan
-                $ejesPlan = explode(',', $plan->ejes_estrategicos);
+                // Ejes disponibles desde el plan (string con comas)
+                $ejesPlan = array_map('trim', explode(',', $plan->ejes_estrategicos));
 
-                // Ejes seleccionados en la meta o por validación
-                $ejesSeleccionados = old('ejes_estrategicos', $meta->ejes_estrategicos ?? []);
+                // Ejes seleccionados de old() o de la meta (decodificados de JSON)
+                $ejesSeleccionados = old('ejes_estrategicos', []);
 
-                // Convertir a array si es string
-                if (is_string($ejesSeleccionados)) {
-                    $ejesSeleccionados = explode(',', $ejesSeleccionados);
+                if (empty($ejesSeleccionados)) {
+                    // Si no hay valores de old(), usamos los ejes de la base de datos (como JSON)
+                    $ejesSeleccionados = json_decode($meta->ejes_estrategicos, true) ?? [];
                 }
 
-                // Limpiar espacios de cada eje seleccionado
+                // Asegurarnos de que los ejes seleccionados estén limpios (array sin espacios)
                 $ejesSeleccionados = array_map('trim', $ejesSeleccionados);
             @endphp
 
@@ -78,27 +78,32 @@
         <label class="block font-medium">Actividades</label>
         <div id="contenedorActividadesEdit">
             @foreach (explode(',', $meta->nombre_actividades) as $actividad)
-                <input type="text"
-                    name="nombre_actividades[]"
-                    value="{{ trim($actividad) }}"
-                    class="w-full border rounded px-3 py-2 mb-2"
-                    required>
+                <div class="input-con-x mb-2">
+                    <input type="text" name="nombre_actividades[]" value="{{ trim($actividad) }}"
+                        class="border rounded px-3 py-2 w-full" required>
+                    <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+                </div>
             @endforeach
         </div>
         <div class="flex items-center gap-4 mt-2">
             <button type="button"
-                onclick="agregarActividad('contenedorActividadesEdit', 'btnEliminarActividadEdit')"
+                onclick="agregarActividad('contenedorActividadesEdit')"
                 class="text-sm text-blue-600 underline hover:text-blue-800 transition">
                 + Agregar otra actividad
             </button>
-
-            <button type="button"
-                onclick="eliminarUltimaActividad('contenedorActividadesEdit', 'btnEliminarActividadEdit')"
-                id="btnEliminarActividadEdit"
-                class="text-sm text-red-600 underline hover:text-red-800 transition {{ count(explode(',', $meta->nombre_actividades)) > 1 ? '' : 'hidden' }}">
-                🗑 Eliminar última actividad
-            </button>
         </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium">Resultados</label>
+        <input type="text" name="resultados_esperados" value="{{ $meta->resultados_esperados }}"
+            class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium">Indicador</label>
+        <input type="text" name="indicador_resultados" value="{{ $meta->indicador_resultados }}"
+            class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="flex gap-4 mb-4">
@@ -131,3 +136,30 @@
         </button>
     </div>
 </form>
+
+<style>
+    .input-con-x {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .input-con-x input {
+        width: 100%;
+        padding-right: 2rem; /* espacio para la 'x' */
+    }
+
+    .input-con-x button {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: red;
+        font-size: 1rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+</style>

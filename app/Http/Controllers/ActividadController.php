@@ -35,20 +35,39 @@ class ActividadController extends Controller
 
         $meta->load('planEstrategico.departamento.institucion');
         $actividades = $meta->actividades()->with('meta')->get();
-        $metas = Meta::all();
         
         $institucion = $meta->planEstrategico->departamento->institucion;
         
+        // 🔹 Filtrar solo las metas de esa institución
+        $metas = Meta::whereHas('planEstrategico.departamento', function ($query) use ($institucion) {
+            $query->where('idInstitucion', $institucion->id);
+        })->get();
+
         $usuarios = Usuario::where('idInstitucion', $meta->planEstrategico->departamento->idInstitucion)
             ->whereIn('tipo_usuario', ['responsable_actividad', 'encargado_institucion'])
             ->get();
 
         $departamentos = Departamento::where('idInstitucion', $institucion->id)->get();
 
+        // TODAS las ya usadas
+        $actividadesUsadas = Actividad::pluck('nombre_actividad')->toArray();
+
+        // Construir disponibles desde TODAS las metas
+        $actividadesDisponibles = collect();
+        foreach ($metas as $unaMeta) {
+            if (!empty($unaMeta->nombre_actividades)) {
+                foreach (explode(',', $unaMeta->nombre_actividades) as $actividadMeta) {
+                    $actividadMeta = trim($actividadMeta);
+                    if ($actividadMeta !== '' && !in_array($actividadMeta, $actividadesUsadas)) {
+                        $actividadesDisponibles->push($actividadMeta);
+                    }
+                }
+            }
+        }
 
         $vistaMetas = true;
 
-        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos', 'institucion', 'vistaMetas'));
+        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos', 'institucion', 'vistaMetas', 'actividadesDisponibles', 'actividadesUsadas'));
     }
 
     // Vista exclusiva para responsables de actividades
@@ -104,7 +123,7 @@ class ActividadController extends Controller
             'objetivos.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'resultados_esperados' => 'required|string|max:255',
+            'comentario' => 'required|string|max:255',
             'unidad_encargada' => 'nullable|string|max:255',
         ]);
 
@@ -115,7 +134,7 @@ class ActividadController extends Controller
             'objetivos' => implode(', ', $request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'resultados_esperados' => $request->resultados_esperados,
+            'comentario' => $request->comentario,
             'unidad_encargada' => $request->unidad_encargada,
         ]);
 
@@ -151,7 +170,7 @@ class ActividadController extends Controller
             'objetivos.*' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'resultados_esperados' => 'required|string|max:255',
+            'comentario' => 'required|string|max:255',
             'unidad_encargada' => 'nullable|string|max:255',
         ]);
 
@@ -163,7 +182,7 @@ class ActividadController extends Controller
             'objetivos' => implode(', ', $request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'resultados_esperados' => $request->resultados_esperados,
+            'comentario' => $request->comentario,
             'unidad_encargada' => $request->unidad_encargada,
         ]);
 

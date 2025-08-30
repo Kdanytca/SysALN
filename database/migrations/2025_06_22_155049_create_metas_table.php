@@ -16,11 +16,13 @@ return new class extends Migration
             $table->foreignId('idPlanEstrategico')->constrained('planes_estrategicos')->onDelete('cascade');
             $table->foreignId('idEncargadoMeta')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->string('nombre_meta', 255);
-            $table->string('ejes_estrategicos', 255);
+            $table->json('ejes_estrategicos')->nullable();
             $table->string('nombre_actividades', 255)->nullable();
+            $table->text('resultados_esperados');
+            $table->text('indicador_resultados')->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->string('comentario', 255);
+            $table->text('comentario');
             $table->timestamps();
         });
     }

@@ -12,6 +12,8 @@ class Meta extends Model
         'nombre_meta',
         'ejes_estrategicos',
         'nombre_actividades',
+        'resultados_esperados',
+        'indicador_resultados',
         'fecha_inicio',
         'fecha_fin',
         'comentario',
@@ -30,7 +32,7 @@ class Meta extends Model
 
     public function responsable()
     {
-        return $this->belongsTo(Usuario::class, 'usuario_responsable', 'nombre_usuario');
+        return $this->belongsTo(Usuario::class, 'idEncargadoMeta', 'id');
     }
 
     public function encargadoMeta()
