@@ -12,14 +12,19 @@
 
             <!-- Botón para agregar un nuevo registro -->
             <div x-data="{ modalDepartamento: false, modalNuevoUsuario: false }">
-                <button @click="modalDepartamento = true"
-                    class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nuevo Departamento
-                </button>
+                @auth
+                    @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'encargado_institucion']))
+                        <button @click="modalDepartamento = true"
+                            class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Nuevo Departamento
+                        </button>
+                    @endif
+                @endauth
+
 
                 <!-- Modal -->
                 <div x-show="modalDepartamento"
@@ -34,8 +39,7 @@
                 </div>
 
                 <!-- Modal de Usuario -->
-                <div x-show="modalNuevoUsuario"
-                    x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                <div x-show="modalNuevoUsuario" x-on:close-modal-usuario.window="modalNuevoUsuario = false"
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
@@ -80,91 +84,93 @@
                                     {{ $departamento->encargadoDepartamento->nombre_usuario }}</td>
                                 <td class="px-4 py-3 text-righ">
                                     <div class="flex flex-wrap justify-center gap-2">
-                                        <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }">
-                                            <button @click="editModalOpen = true"
-                                                class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
-                                                Editar
-                                            </button>
+                                        @auth
+                                            @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'encargado_institucion']))
+                                                <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }">
+                                                    <button @click="editModalOpen = true"
+                                                        class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                        Editar
+                                                    </button>
 
-                                            <!-- Modal de edición -->
-                                            <div x-show="editModalOpen"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-xl font-bold mb-4">Editar Departamento</h2>
-                                                    @include('departamentos.edit', [
-                                                        'action' => route(
-                                                            'departamentos.update',
-                                                            $departamento->id),
-                                                        'isEdit' => true,
-                                                        'departamento' => $departamento,
-                                                        'usuarios' => $usuariosParaEditar,
-                                                    ])
-                                                </div>
-                                            </div>
-
-                                            <!-- Modal de Usuario dentro de editar -->
-                                            <div x-show="modalNuevoUsuario"
-                                                x-on:close-modal-usuario.window="modalNuevoUsuario = false"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
-
-                                                    @include('instituciones.usuario', [
-                                                        'closeModal' => 'modalNuevoUsuario = false',
-                                                        'ocultarCamposRelacionados' => false,
-                                                        'institucion' => $institucion
-                                                    ])
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Eliminar -->
-                                        <div x-data="{ confirmDelete: false }">
-                                            <!-- Botón que abre el modal -->
-                                            <button @click="confirmDelete = true"
-                                                class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
-                                                Eliminar
-                                            </button>
-
-                                            <!-- Modal de confirmación -->
-                                            <div x-show="confirmDelete"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-                                                x-cloak>
-                                                <div
-                                                    class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                        eliminación</h2>
-                                                    <p class="text-gray-600 mb-6">¿Estás seguro de que deseas eliminar
-                                                        este
-                                                        Departamento?</p>
-
-                                                    <div class="flex justify-end items-center gap-3 items-stretch">
-                                                        <div>
-                                                            <button @click="confirmDelete = false"
-                                                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
-                                                                Cancelar
-                                                            </button>
+                                                    <!-- Modal de edición -->
+                                                    <div x-show="editModalOpen"
+                                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                        x-cloak>
+                                                        <div
+                                                            class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                            <h2 class="text-xl font-bold mb-4">Editar Departamento</h2>
+                                                            @include('departamentos.edit', [
+                                                                'action' => route(
+                                                                    'departamentos.update',
+                                                                    $departamento->id),
+                                                                'isEdit' => true,
+                                                                'departamento' => $departamento,
+                                                                'usuarios' => $usuariosParaEditar,
+                                                            ])
                                                         </div>
+                                                    </div>
 
-                                                        <div class="flex items-center">
-                                                            <form method="POST"
-                                                                action="{{ route('departamentos.destroy', $departamento->id) }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
-                                                                    Eliminar
-                                                                </button>
-                                                            </form>
+                                                    <!-- Modal de Usuario dentro de editar -->
+                                                    <div x-show="modalNuevoUsuario"
+                                                        x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                        x-cloak>
+                                                        <div
+                                                            class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                            <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
+
+                                                            @include('instituciones.usuario', [
+                                                                'closeModal' => 'modalNuevoUsuario = false',
+                                                                'ocultarCamposRelacionados' => false,
+                                                                'institucion' => $institucion,
+                                                            ])
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
+                                                <!-- Eliminar -->
+                                                <div x-data="{ confirmDelete: false }">
+                                                    <button @click="confirmDelete = true"
+                                                        class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                        Eliminar
+                                                    </button>
+
+                                                    <!-- Modal de confirmación -->
+                                                    <div x-show="confirmDelete"
+                                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                        x-cloak>
+                                                        <div
+                                                            class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                            <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
+                                                                eliminación</h2>
+                                                            <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
+                                                                eliminar este Departamento?</p>
+
+                                                            <div class="flex justify-end items-center gap-3 items-stretch">
+                                                                <div>
+                                                                    <button @click="confirmDelete = false"
+                                                                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                                                        Cancelar
+                                                                    </button>
+                                                                </div>
+
+                                                                <div class="flex items-center">
+                                                                    <form method="POST"
+                                                                        action="{{ route('departamentos.destroy', $departamento->id) }}">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit"
+                                                                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 align-middle">
+                                                                            Eliminar
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endauth
                                 </td>
                             </tr>
                         @endforeach

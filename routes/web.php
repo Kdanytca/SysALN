@@ -14,12 +14,12 @@ use App\Http\Controllers\SeguimientoActividadController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Middleware\TipoUsuario;
 
-
+// Ruta principal
 Route::get('/', function () {
     return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
-// Dashboard y perfil (acceso general para todos autenticados)
+// Dashboard y perfil (todos los autenticados)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -27,7 +27,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 // =========================
 // ADMINISTRADOR (solo instituciones)
@@ -45,11 +44,20 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador'])->gr
 });
 
 // =========================
-// USUARIOS (todos los roles autenticados)
+// USUARIOS
 // =========================
+
+// Solo administrador puede ver usuarios
+Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador'])->group(function () {
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson'])->name('usuarios.show');
+});
+
+// Todos los roles autenticados pueden crear, editar y eliminar usuarios
 Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador,encargado_institucion,encargado_departamento,responsable_plan,responsable_meta,responsable_actividad'])->group(function () {
-    Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson']);
-    Route::resource('usuarios', UsuarioController::class)->except(['create', 'edit']);
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+    Route::put('/usuarios/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
+    Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 });
 
 // =========================
@@ -97,7 +105,10 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_institucio
     // Rutas por roles
     Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])->name('institucion.ver');
     Route::get('/plan-estrategico/{id}', [PlanEstrategicoController::class, 'verResponsable'])->name('plan.responsable');
-    Route::get('/mi-departamento', [DepartamentoController::class, 'verMiDepartamento'])->name('departamento.ver');
+    Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_departamento'])->group(function () {
+    Route::get('/mi-departamento', [DepartamentoController::class, 'index'])->name('departamento.ver');
+});
+
 });
 
 require __DIR__ . '/auth.php';

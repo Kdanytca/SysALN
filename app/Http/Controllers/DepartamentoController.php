@@ -15,16 +15,43 @@ class DepartamentoController extends Controller
     // Muestra la lista de departamentos
     public function index()
     {
-        // Obtener instituciones y usuarios solo si es admin (opcional)
-        $instituciones = Institucion::all();
-        $usuarios = Usuario::all();
+        $user = Auth::user();
+
+        if ($user->tipo_usuario === 'encargado_departamento') {
+            // Solo su departamento
+            $departamentos = Departamento::with('institucion')
+                ->where('id', $user->idDepartamento)
+                ->get();
+
+            $institucion = $departamentos->first()?->institucion;
+
+            // Enviar un array con la institución para que la vista pueda iterar
+            $instituciones = $institucion ? collect([$institucion]) : collect();
+
+            $usuarios = [];
+            $usuariosParaCrear = [];
+            $usuariosParaEditar = [];
+        } else {
+            // Admin u otros roles
+            $departamentos = Departamento::with('institucion')->get();
+            $institucion = null; // Opcional
+            $instituciones = Institucion::all();
+            $usuarios = Usuario::all();
+            $usuariosParaCrear = [];
+            $usuariosParaEditar = [];
+        }
 
         return view('departamentos.index', compact(
             'departamentos',
+            'institucion',
             'instituciones',
             'usuarios',
+            'usuariosParaCrear',
+            'usuariosParaEditar'
         ));
     }
+
+
 
     // Muestra la lista de departamentos filtrados por institución
     public function indexPorInstitucion(Institucion $institucion)
@@ -52,8 +79,8 @@ class DepartamentoController extends Controller
                 })
                 ->get();
 
-        $usuariosParaEditar[$departamento->id] = $usuariosDisponibles;
-    }
+            $usuariosParaEditar[$departamento->id] = $usuariosDisponibles;
+        }
 
         return view('departamentos.index', compact(
             'departamentos',
@@ -90,8 +117,17 @@ class DepartamentoController extends Controller
                 'idInstitucion' => $request->idInstitucion,
             ]);
 
+        // Aquí detectamos si viene desde fetch/ajax
+        if ($request->expectsJson()) {
+            return response()->json([
+                'departamento' => $departamento
+            ]);
+        }
+
+        // Si es petición normal (desde formulario no-AJAX)
         return redirect()->back()->with('success', 'Departamento creado exitosamente.');
     }
+
 
     //mostrando todos los departamentos
     public function todos()

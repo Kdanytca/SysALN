@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->intended("/dashboard");
 
             case 'encargado_departamento':
-                return redirect()->intended("/departamento/{$user->idDepartamento}");
+                return redirect()->route('departamento.ver');
 
             case 'responsable_plan':
                 $plan = $user->planEstrategico; // usa el nombre correcto

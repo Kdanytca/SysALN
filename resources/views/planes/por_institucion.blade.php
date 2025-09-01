@@ -195,6 +195,12 @@
                         @endforeach
                     </select>
                 </div>
+                <!-- Agregar Departamento -->
+                <button type="button" onclick="abrirModalDepartamento()"
+                    class="mt-2 inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                    + Agregar departamento
+                </button>
+
 
                 <!-- Nombre -->
                 <div class="mb-4">
@@ -206,37 +212,38 @@
                 <!-- Ejes -->
                 <div class="mb-4">
                     <label class="block font-medium">Ejes Estratégicos</label>
+
                     <div id="contenedorEjes">
-                        <input type="text" name="ejes_estrategicos[]" class="w-full border rounded px-3 py-2 mb-2"
-                            required>
+                        <!-- Primer eje SIN X -->
+                        <div class="relative mb-2">
+                            <input type="text" name="ejes_estrategicos[]"
+                                class="w-full border rounded px-3 py-2 pr-10" required>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4 mt-2">
-                        <button type="button" onclick="agregarEje()" class="text-sm text-blue-600 underline">
-                            + Agregar otro eje
-                        </button>
-                        <button id="btnEliminarEje" type="button" onclick="eliminarUltimoEje()"
-                            class="text-sm text-red-600 underline hidden">
-                            🗑 Eliminar último eje
+
+                    <div class="flex items-center gap-3 mt-2">
+                        <button type="button" onclick="agregarEje()"
+                            class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                            + Eje
                         </button>
                     </div>
                 </div>
 
+
                 <!-- Objetivos -->
                 <div class="mb-4">
                     <label class="block font-medium">Objetivos</label>
-                    <div id="contenedorObjetivos">
-                        <!-- Los objetivos se insertarán aquí dinámicamente -->
-                    </div>
-                    <div class="flex items-center gap-4 mt-2">
-                        <button type="button" onclick="agregarObjetivo()" class="text-sm text-blue-600 underline">
-                            + Agregar objetivo
-                        </button>
-                        <button id="btnEliminarObjetivo" type="button" onclick="eliminarUltimoObjetivo()"
-                            class="text-sm text-red-600 underline hidden">
-                            🗑 Eliminar último objetivo
+
+                    <div id="contenedorObjetivos"></div>
+
+                    <div class="mt-2">
+                        <button type="button" onclick="agregarObjetivo()"
+                            class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                            + Objetivo
                         </button>
                     </div>
                 </div>
+
 
 
                 <div class="flex gap-4 mb-4">
@@ -264,24 +271,25 @@
                     </div>
 
                     <!-- Botón para abrir modal de usuario -->
-                    <button type="button" onclick="abrirModalUsuario()" class="mt-2 text-blue-600 underline">
-                        Agregar usuario
-                    </button>
-                </div>
-
-
-                <div class="flex justify-end gap-2">
-                    {{-- Botón Cancelar --}}
-                    <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
-                        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                        Cancelar
+                    <button type="button" onclick="abrirModalUsuario()"
+                        class="mt-2 inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                        + Usuario
                     </button>
 
-                    {{-- Botón Guardar --}}
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Guardar Plan
-                    </button>
-                </div>
+
+
+                    <div class="flex justify-end gap-2">
+                        {{-- Botón Cancelar --}}
+                        <button type="button" onclick="document.getElementById('modal').classList.add('hidden')"
+                            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                            Cancelar
+                        </button>
+
+                        {{-- Botón Guardar --}}
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                            Guardar Plan
+                        </button>
+                    </div>
 
             </form>
         </div>
@@ -362,9 +370,123 @@
         </div>
     </div>
 
+    <!-- Modal Departamento -->
+    <div id="modalDepartamento"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative overflow-y-auto max-h-[90vh]">
+            <button class="absolute top-2 right-2 text-gray-600 hover:text-red-600"
+                onclick="cerrarModalDepartamento()">✕</button>
+
+            <h2 class="text-xl font-bold mb-4">Registrar Departamento</h2>
+
+            <form id="formDepartamento" method="POST" action="{{ route('departamentos.store') }}">
+                @csrf
+
+                <div class="mb-4">
+                    <label class="block font-medium">Institución</label>
+                    <input type="text" value="{{ $institucion->nombre_institucion }}"
+                        class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700" disabled>
+                    <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Nombre del Departamento</label>
+                    <input type="text" name="departamento" class="w-full border rounded px-3 py-2" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-medium">Encargado del Departamento (opcional)</label>
+                    <select name="idEncargadoDepartamento" id="idEncargadoDepartamento"
+                        class="w-full border rounded px-3 py-2">
+                        <option value="">Seleccione un encargado</option>
+                    </select>
+
+                    <button type="button" onclick="abrirModalUsuarioDepto()"
+                        class="mt-2 inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                        + Agregar nuevo usuario
+                    </button>
+
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="cerrarModalDepartamento()"
+                        class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal crear usuarios para departamento -->
+    <div id="modalUsuarioDepto"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <button class="absolute top-2 right-2 text-gray-600 hover:text-red-600"
+                onclick="cerrarModalUsuarioDepto()">✕</button>
+            <h2 class="text-xl font-bold mb-4">Registrar Usuario</h2>
+
+            <form id="formUsuarioDepto" method="POST" action="{{ route('usuarios.store') }}">
+                @csrf
+                <div class="mb-4">
+                    <label class="block font-medium">Nombre</label>
+                    <input type="text" name="nombre_usuario" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block font-medium">Email</label>
+                    <input type="email" name="email" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block font-medium">Contraseña</label>
+                    <input type="password" name="password" class="w-full border rounded px-3 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block font-medium">Tipo</label>
+                    <input type="text" value="Encargado de Departamento"
+                        class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700" disabled>
+                    <input type="hidden" name="tipo_usuario" value="encargado_departamento">
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" onclick="cerrarModalUsuarioDepto()"
+                        class="mr-2 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                    <button type="submit"
+                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // ==================== DATOS BASE ====================
         const departamentos = @json($institucion->departamentos);
+
+        // ==================== HELPERS ====================
+        function crearEntrada(name, value = '', removable = true) {
+            const div = document.createElement('div');
+            div.className = 'relative mb-2';
+
+            const requiredAttr = name.includes('ejes_estrategicos') ? 'required' : '';
+            div.innerHTML = `
+            <input type="text" name="${name}" value="${value ?? ''}"
+                   class="w-full border rounded px-3 py-2 pr-10" ${requiredAttr}>
+            ${removable ? `
+                                                          <button type="button" class="btn-x absolute right-2 top-2 text-gray-500 hover:text-red-600"
+                                                                  aria-label="Eliminar campo">&times;</button>` : ''}
+        `;
+            return div;
+        }
+
+        // Delegado para eliminar con la "X"
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.btn-x')) {
+                const parent = e.target.closest('.relative');
+                if (parent) parent.remove();
+            }
+        });
 
         // ==================== CARGA DE USUARIOS ====================
         async function cargarUsuarios(departamentoId) {
@@ -382,6 +504,8 @@
             const encargadoId = select.dataset.encargadoId;
             const encargadoNombre = select.dataset.encargadoNombre;
 
+            if (!encargadoId) return;
+
             // Evitar duplicados
             if (![...select.options].some(o => o.value == encargadoId)) {
                 const optionEncargado = document.createElement('option');
@@ -392,12 +516,13 @@
             }
         }
 
-        // ==================== EVENTOS ====================
+        // ==================== EVENTOS - RESPONSABLE ====================
         document.getElementById('idDepartamento').addEventListener('change', async function() {
             const departamentoId = this.value;
             const selectResponsable = document.getElementById('responsable');
             const mensaje = document.getElementById('mensajeNoUsuarios');
 
+            // Limpiar select
             selectResponsable.innerHTML = '<option value="">Seleccione un responsable</option>';
             mensaje.style.display = 'none';
 
@@ -416,67 +541,43 @@
                 }
             }
 
-            // SIEMPRE agregar al encargado
+            // Reasignar atributos del usuario logueado y agregarlo
+            selectResponsable.dataset.encargadoId = '{{ Auth::id() }}';
+            selectResponsable.dataset.encargadoNombre =
+                '{{ Auth::user()->name ?? Auth::user()->nombre_usuario }}';
             agregarEncargado(selectResponsable);
         });
 
         document.addEventListener("DOMContentLoaded", function() {
+            // Envolver el primer Eje si viniera como input suelto
+            const contE = document.getElementById('contenedorEjes');
+            if (contE) {
+                const first = contE.querySelector('input[name="ejes_estrategicos[]"]');
+                if (first && !first.closest('.relative')) {
+                    const wrap = crearEntrada('ejes_estrategicos[]', first.value || '', /*removable*/ false);
+                    contE.innerHTML = '';
+                    contE.appendChild(wrap);
+                }
+            }
+
+            // Agregar encargado preseleccionado al cargar
             const selectResponsable = document.getElementById('responsable');
             agregarEncargado(selectResponsable);
-            actualizarBotonEliminar();
         });
 
         // ==================== OBJETIVOS ====================
         function agregarObjetivo() {
             const contenedor = document.getElementById('contenedorObjetivos');
-            const input = document.createElement('div');
-            input.classList.add('relative', 'mb-2');
-            input.innerHTML = `
-            <input type="text" name="objetivos[]" class="w-full border rounded px-3 py-2 pr-10" required>
-        `;
-            contenedor.appendChild(input);
-            document.getElementById('btnEliminarObjetivo').classList.remove('hidden');
-        }
-
-        function eliminarUltimoObjetivo() {
-            const contenedor = document.getElementById('contenedorObjetivos');
-            if (contenedor.children.length > 0) {
-                contenedor.removeChild(contenedor.lastChild);
-            }
-            if (contenedor.children.length === 0) {
-                document.getElementById('btnEliminarObjetivo').classList.add('hidden');
-            }
+            contenedor.appendChild(crearEntrada('objetivos[]', '', true));
         }
 
         // ==================== EJES ====================
-        function actualizarBotonEliminar() {
-            const contenedor = document.getElementById('contenedorEjes');
-            const inputs = contenedor.querySelectorAll('input');
-            const btnEliminar = document.getElementById('btnEliminarEje');
-            btnEliminar.classList.toggle('hidden', inputs.length <= 1);
-        }
-
         function agregarEje() {
             const contenedor = document.getElementById('contenedorEjes');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'ejes_estrategicos[]';
-            input.className = 'w-full border rounded px-3 py-2 mb-2';
-            input.required = true;
-            contenedor.appendChild(input);
-            actualizarBotonEliminar();
+            contenedor.appendChild(crearEntrada('ejes_estrategicos[]', '', true));
         }
 
-        function eliminarUltimoEje() {
-            const contenedor = document.getElementById('contenedorEjes');
-            const inputs = contenedor.querySelectorAll('input');
-            if (inputs.length > 1) {
-                contenedor.removeChild(inputs[inputs.length - 1]);
-            }
-            actualizarBotonEliminar();
-        }
-
-        // ==================== MODALES ====================
+        // ==================== MODAL PLAN ====================
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btnNuevoPlan').addEventListener('click', () => {
                 const modal = document.getElementById('modal');
@@ -491,6 +592,7 @@
             });
         });
 
+        // ==================== MODAL USUARIO (tal cual lo tenías) ====================
         function abrirModalUsuario() {
             document.getElementById('modalUsuario').classList.remove('hidden');
         }
@@ -500,7 +602,6 @@
             document.getElementById('formUsuario').reset();
         }
 
-        // ==================== CREAR USUARIO ====================
         const formUsuario = document.getElementById('formUsuario');
         formUsuario?.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -543,27 +644,7 @@
             }
         });
 
-        // ==================== FILTRAR DEPARTAMENTOS ====================
-        document.getElementById('institucion_usuario')?.addEventListener('change', function() {
-            const institucionId = this.value;
-            const departamentoSelect = document.getElementById('departamento_usuario');
-
-            departamentoSelect.innerHTML = '<option value="">Seleccione un departamento</option>';
-
-            if (!institucionId) return;
-
-            const institucion = instituciones.find(i => i.id == institucionId);
-            if (institucion && institucion.departamentos.length > 0) {
-                institucion.departamentos.forEach(dep => {
-                    const option = document.createElement('option');
-                    option.value = dep.id;
-                    option.textContent = dep.departamento;
-                    departamentoSelect.appendChild(option);
-                });
-            }
-        });
-
-        // ==================== EDITAR PLAN ====================
+        // ==================== EDITAR PLAN (ajustado para usar "X") ====================
         async function openEditModal(plan) {
             const modal = document.getElementById('modal');
             const form = document.getElementById('formPlan');
@@ -588,31 +669,14 @@
             form.querySelector('input[name="institucion_id"]').value = plan.idInstitucion;
             form.querySelector('select[name="idDepartamento"]').value = plan.idDepartamento;
 
-            // Ejes estratégicos
+            // Ejes
             const contenedorEjes = document.getElementById('contenedorEjes');
             contenedorEjes.innerHTML = '';
-            const ejes = plan.ejes_estrategicos.split(',');
-            ejes.forEach(eje => {
-                const div = document.createElement('div');
-                div.className = 'relative mb-2';
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = 'ejes_estrategicos[]';
-                input.className = 'w-full border rounded px-3 py-2 pr-10';
-                input.required = true;
-                input.value = eje.trim();
+            const ejes = plan.ejes_estrategicos.split(',').map(e => e.trim()).filter(Boolean);
 
-                const btnEliminar = document.createElement('button');
-                btnEliminar.type = 'button';
-                btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
-                btnEliminar.innerHTML = '&times;';
-                btnEliminar.onclick = () => div.remove();
-
-                div.appendChild(input);
-                div.appendChild(btnEliminar);
-                contenedorEjes.appendChild(div);
+            ejes.forEach((eje, idx) => {
+                contenedorEjes.appendChild(crearEntrada('ejes_estrategicos[]', eje, /*removable*/ idx > 0));
             });
-            actualizarBotonEliminar();
 
             // Objetivos
             const contenedorObjetivos = document.getElementById('contenedorObjetivos');
@@ -624,27 +688,12 @@
                 } catch {
                     objetivosArray = [];
                 }
-                objetivosArray.forEach(objetivo => {
-                    const div = document.createElement('div');
-                    div.className = 'relative mb-2';
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = 'objetivos[]';
-                    input.className = 'w-full border rounded px-3 py-2 pr-10';
-                    input.value = objetivo ?? '';
-                    const btnEliminar = document.createElement('button');
-                    btnEliminar.type = 'button';
-                    btnEliminar.className = 'absolute right-2 top-2 text-red-600 hover:text-red-800';
-                    btnEliminar.innerHTML = '&times;';
-                    btnEliminar.onclick = () => div.remove();
-
-                    div.appendChild(input);
-                    div.appendChild(btnEliminar);
-                    contenedorObjetivos.appendChild(div);
+                objetivosArray.forEach(obj => {
+                    contenedorObjetivos.appendChild(crearEntrada('objetivos[]', obj ?? '', true));
                 });
             }
 
-            // Usuarios
+            // Usuarios (responsable del plan)
             const selectResponsable = document.getElementById('responsable');
             const mensaje = document.getElementById('mensajeNoUsuarios');
             selectResponsable.innerHTML = '<option value="">Seleccione un responsable</option>';
@@ -670,6 +719,136 @@
 
             modal.classList.remove('hidden');
         }
+
+        // ==================== MODAL DEPARTAMENTO (Nuevo) ====================
+        function abrirModalDepartamento() {
+            const m = document.getElementById('modalDepartamento');
+            m.classList.remove('hidden');
+
+            // Carga opcional de usuarios de la institución para "Encargado"
+            const sel = document.getElementById('idEncargadoDepartamento');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Seleccione un encargado</option>';
+
+            fetch(`/instituciones/{{ $institucion->id }}/usuarios-disponibles`)
+                .then(r => r.ok ? r.json() : Promise.resolve([]))
+                .then(list => {
+                    list.forEach(u => {
+                        const o = document.createElement('option');
+                        o.value = u.id;
+                        o.textContent = `${u.nombre_usuario} (${u.email})`;
+                        sel.appendChild(o);
+                    });
+                })
+                .catch(() => {
+                    /* silencioso */
+                });
+        }
+
+        function cerrarModalDepartamento() {
+            const m = document.getElementById('modalDepartamento');
+            m.classList.add('hidden');
+            document.getElementById('formDepartamento').reset();
+        }
+
+        document.getElementById('formDepartamento')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const data = new FormData(form);
+
+            try {
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: data
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || 'No se pudo crear el departamento');
+                }
+
+                // Esperamos { departamento: { id, departamento, ... } }
+                const out = await res.json();
+
+                // Actualizar el select de Departamentos del Plan
+                const selDepPlan = document.getElementById('idDepartamento');
+                const optPlan = document.createElement('option');
+                optPlan.value = out.departamento.id;
+                optPlan.textContent = out.departamento.departamento;
+                selDepPlan.appendChild(optPlan);
+                selDepPlan.value = out.departamento.id;
+
+                // Actualizar también el select del modalUsuario
+                const selDepUsuario = document.getElementById('departamento_usuario');
+                if (selDepUsuario) {
+                    const optUsuario = document.createElement('option');
+                    optUsuario.value = out.departamento.id;
+                    optUsuario.textContent = out.departamento.departamento;
+                    selDepUsuario.appendChild(optUsuario);
+                }
+
+                cerrarModalDepartamento();
+            } catch (err) {
+                // Si tu controlador devuelve un redirect/HTML, recargamos
+                if (err instanceof SyntaxError) {
+                    window.location.reload();
+                    return;
+                }
+                alert(err.message);
+            }
+        });
+
+
+        // ==================== MODAL USUARIO (desde Departamento) ====================
+        function abrirModalUsuarioDepto() {
+            document.getElementById('modalUsuarioDepto').classList.remove('hidden');
+        }
+
+        function cerrarModalUsuarioDepto() {
+            document.getElementById('modalUsuarioDepto').classList.add('hidden');
+            document.getElementById('formUsuarioDepto').reset();
+        }
+
+        document.getElementById('formUsuarioDepto')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: data
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.message || 'Error al crear usuario');
+                }
+
+                const nuevoUsuario = await response.json();
+
+                // Lo agregamos al select de encargado del Departamento
+                const select = document.getElementById('idEncargadoDepartamento');
+                const option = document.createElement('option');
+                option.value = nuevoUsuario.usuario.id;
+                option.textContent = nuevoUsuario.usuario.nombre_usuario + ' (' + nuevoUsuario.usuario.email +
+                    ')';
+                option.selected = true;
+                select.appendChild(option);
+
+                cerrarModalUsuarioDepto();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
     </script>
 
 

@@ -55,7 +55,7 @@
                                 break;
 
                             case 'encargado_departamento':
-                                $rutaInicio = url("/departamento/{$user->idDepartamento}");
+                                $rutaInicio = url('/mi-departamento');
                                 break;
 
                             case 'responsable_plan':
