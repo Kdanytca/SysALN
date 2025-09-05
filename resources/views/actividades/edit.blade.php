@@ -32,7 +32,7 @@
                 ¿No encuentras al encargado?
                 <button type="button"
                     @click="modalNuevoUsuario = true"
-                    class="ml-2 text-blue-600 hover:underline">
+                    class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                     Agregar nuevo usuario
                 </button>
             </p>
@@ -72,7 +72,7 @@
             <div class="flex items-center gap-4 mt-2">
                 <button type="button"
                     onclick="agregarCampo('contenedorObjetivosEdit', 'objetivos[]', 'btnEliminarObjetivoEdit')"
-                    class="text-sm text-blue-600 underline hover:text-blue-800 transition">
+                    class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                     + Agregar otro objetivo
                 </button>
             </div>
@@ -133,25 +133,39 @@ document.addEventListener('alpine:init', () => {
         usuarioSeleccionado: usuarioInicial,
         unidad: unidadInicial,
 
+        // Autocompleta unidad si se selecciona un usuario
         actualizarUnidad(id) {
             const selectUsuario = document.getElementById('idEncargadoActividad_' + id);
-            const opcion = selectUsuario.options[selectUsuario.selectedIndex];
-            this.unidad = opcion ? (opcion.getAttribute('data-departamento') ?? '') : '';
+            const opcion = selectUsuario?.options[selectUsuario.selectedIndex];
 
-            // actualizar select visible
+            if (opcion && opcion.value) {
+                this.unidad = opcion.getAttribute('data-departamento') ?? '';
+            }
+
+            // Actualiza select visible
             const selectDepartamento = document.getElementById('unidad_encargada_display_' + id);
             for (let option of selectDepartamento.options) {
                 option.selected = option.value === this.unidad;
             }
         },
 
+        // Actualiza unidad cuando el usuario la modifica manualmente
+        unidadManual(id) {
+            const selectDepartamento = document.getElementById('unidad_encargada_display_' + id);
+            this.unidad = selectDepartamento.value;
+        },
+
+        // Inicializa el formulario con los valores existentes
         init(id) {
-            if (this.usuarioSeleccionado) {
-                const selectUsuario = document.getElementById('idEncargadoActividad_' + id);
-                if (!selectUsuario) return; // 👈 evita el error
+            const selectUsuario = document.getElementById('idEncargadoActividad_' + id);
+            if (selectUsuario && this.usuarioSeleccionado) {
                 selectUsuario.value = this.usuarioSeleccionado;
                 this.actualizarUnidad(id);
             }
+
+            // Escucha cambios manuales en departamento
+            const selectDepartamento = document.getElementById('unidad_encargada_display_' + id);
+            selectDepartamento.addEventListener('change', () => this.unidadManual(id));
         }
     }));
 });

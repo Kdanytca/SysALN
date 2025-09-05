@@ -21,7 +21,7 @@
 
             <p class="text-sm text-gray-600 mt-2">
                 ¿No encuentras al encargado?
-                <button type="button" @click="modalNuevoUsuario = true" class="ml-2 text-blue-600 hover:underline">
+                <button type="button" @click="modalNuevoUsuario = true" class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                     Agregar nuevo usuario
                 </button>
             </p>
@@ -52,7 +52,7 @@
             <div class="flex items-center gap-4 mt-2">
                 <button type="button"
                     onclick="agregarCampo('contenedorObjetivos', 'objetivos[]', 'btnEliminarObjetivo')"
-                    class="text-sm text-blue-600 underline hover:text-blue-800 transition">
+                    class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                     + Agregar otro objetivo
                 </button>
             </div>
@@ -79,8 +79,7 @@
         {{-- Unidad Encargada --}}
         <div class="mb-4">
             <label class="block font-medium mt-4">Unidad Encargada</label>
-            <select id="unidad_encargada_display_nuevo"
-                class="w-full border rounded px-3 py-2">
+            <select id="unidad_encargada_display_nuevo" class="w-full border rounded px-3 py-2">
                 <option value="">Sin Departamento</option>
                 @foreach($departamentos as $departamento)
                     <option value="{{ $departamento->departamento }}">{{ $departamento->departamento }}</option>
@@ -110,12 +109,22 @@ document.addEventListener('alpine:init', () => {
         actualizarUnidad(sufijo = 'nuevo') {
             const selectUsuario = document.getElementById('idEncargadoActividad_' + sufijo);
             const opcion = selectUsuario?.options[selectUsuario.selectedIndex];
-            this.unidad = opcion?.getAttribute('data-departamento') ?? '';
+            
+            // Solo autocompleta si hay usuario seleccionado
+            if(opcion && opcion.value) {
+                this.unidad = opcion.getAttribute('data-departamento') ?? '';
+            }
 
             const selectDepartamento = document.getElementById('unidad_encargada_display_' + sufijo);
             for (let option of selectDepartamento.options) {
                 option.selected = option.value === this.unidad;
             }
+        },
+
+        // Actualiza la unidad si el usuario cambia manualmente
+        unidadManual(sufijo = 'nuevo') {
+            const selectDepartamento = document.getElementById('unidad_encargada_display_' + sufijo);
+            this.unidad = selectDepartamento.value;
         },
 
         init(sufijo = 'nuevo') {
@@ -124,6 +133,10 @@ document.addEventListener('alpine:init', () => {
                 selectUsuario.value = this.usuarioSeleccionado;
                 this.actualizarUnidad(sufijo);
             }
+
+            // Escucha cambios manuales en departamento
+            const selectDepartamento = document.getElementById('unidad_encargada_display_' + sufijo);
+            selectDepartamento.addEventListener('change', () => this.unidadManual(sufijo));
         }
     }));
 });

@@ -44,7 +44,7 @@
             ¿No encuentras al encargado?
             <button type="button"
                 @click="modalNuevoUsuario = true"
-                class="ml-2 text-blue-600 hover:underline">
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 Agregar nuevo usuario
             </button>
         </p>

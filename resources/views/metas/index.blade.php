@@ -10,7 +10,7 @@
                 "{{ $plan->nombre_plan_estrategico }}"</h2>
 
             <!-- Botón para agregar un nuevo registro -->
-            <div x-data="{ modalOpen: false, modalNuevoUsuario: false }">
+            <div x-data="{ modalOpen: false, modalNuevoUsuario: false, modalNuevoDepartamento: false }">
                 @php
                     $rol = Auth::user()->tipo_usuario ?? null;
                 @endphp
@@ -25,7 +25,6 @@
                         Nueva Meta
                     </button>
                 @endif
-
 
                 <!-- Modal -->
                 <div x-show="modalOpen"

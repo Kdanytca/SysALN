@@ -60,22 +60,27 @@ class DepartamentoController extends Controller
         $instituciones = Institucion::all();
 
         // Variables necesarias para la vista
-        $usuariosParaCrear = Usuario::where('tipo_usuario', 'encargado_departamento')
+        $usuariosParaCrear = Usuario::whereIn('tipo_usuario', ['encargado_departamento', 'encargado_institucion'])
             ->whereDoesntHave('departamentos')
+            ->whereHas('institucion', function($query) use ($institucion) {
+                $query->where('id', $institucion->id);
+            })
             ->get();
 
         $usuariosParaEditar = [];
 
         foreach ($departamentos as $departamento) {
-            $encargadoActual = $departamento->encargadoDepartamento; // ajusta relación si es otro nombre
+            $encargadoActual = $departamento->encargadoDepartamento; // Ajusta la relación si es otro nombre
 
             $usuariosDisponibles = Usuario::where('tipo_usuario', 'encargado_departamento')
                 ->where(function ($query) use ($encargadoActual) {
                     $query->whereDoesntHave('departamentos');
-
                     if ($encargadoActual) {
                         $query->orWhere('id', $encargadoActual->id);
                     }
+                })
+                ->whereHas('departamentos', function($query) use ($departamento) {
+                    $query->where('idInstitucion', $departamento->idInstitucion);
                 })
                 ->get();
 

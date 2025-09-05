@@ -31,10 +31,13 @@
         </select>
 
         <!-- Botón que usa el mismo modalNuevoUsuario definido en index -->
-        <button type="button" @click="modalNuevoUsuario = true"
-            class="mt-2 text-blue-600 text-sm hover:underline">
-            Agregar nuevo usuario
-        </button>
+        <p class="text-sm text-gray-600 mt-2">
+            ¿No encuentras al encargado?
+            <button type="button" @click="modalNuevoUsuario = true"
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                Agregar nuevo usuario
+            </button>
+        </p>
     </div>
 
     <div class="flex justify-end">

@@ -74,7 +74,7 @@
                                 <td class="px-4 py-3">
                                     {{ $usuario->tipo_usuario_label }}
                                 </td>
-                                <td class="px-4 py-3 text-right">
+                                <td class="px-4 py-3 text-left">
                                     <div class="flex flex-wrap justify-center gap-2">
                                         <!-- Editar -->
                                         <div x-data="{ editModalOpen: false }">
