@@ -13,6 +13,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SeguimientoActividadController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Middleware\TipoUsuario;
+use App\Http\Controllers\ChatController;
+use Illuminate\Support\Facades\Http;
+
+
 
 // Ruta principal
 Route::get('/', function () {
@@ -26,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Ruta para el chat con contexto
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
 });
 
 // =========================
@@ -107,6 +115,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_institucio
     Route::get('/plan-estrategico/{id}', [PlanEstrategicoController::class, 'verResponsable'])->name('plan.responsable');
     Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_departamento'])->group(function () {
     Route::get('/mi-departamento', [DepartamentoController::class, 'index'])->name('departamento.ver');
+
 });
 
 });

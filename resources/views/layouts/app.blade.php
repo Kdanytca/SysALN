@@ -19,6 +19,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
+<!-- Chat -->
+@include('partials.chat-popup')
+
 <body class="flex flex-col min-h-screen font-sans antialiased bg-gray-100">
     <!-- NAVBAR -->
     <nav class="bg-gray-800 text-white">

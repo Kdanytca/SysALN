@@ -290,7 +290,7 @@
                             Guardar Plan
                         </button>
                     </div>
-
+                </div>
             </form>
         </div>
     </div>
@@ -474,8 +474,8 @@
             <input type="text" name="${name}" value="${value ?? ''}"
                    class="w-full border rounded px-3 py-2 pr-10" ${requiredAttr}>
             ${removable ? `
-                                                          <button type="button" class="btn-x absolute right-2 top-2 text-gray-500 hover:text-red-600"
-                                                                  aria-label="Eliminar campo">&times;</button>` : ''}
+                                                              <button type="button" class="btn-x absolute right-2 top-2 text-gray-500 hover:text-red-600"
+                                                                      aria-label="Eliminar campo">&times;</button>` : ''}
         `;
             return div;
         }
@@ -585,9 +585,14 @@
 
                 form.reset();
                 form.institucion_id.value = '{{ $institucion->id }}';
-                document.getElementById('responsable').innerHTML =
-                    '<option value="">Seleccione un responsable</option>';
+
+                const selectResponsable = document.getElementById('responsable');
+                selectResponsable.innerHTML = '<option value="">Seleccione un responsable</option>';
+
                 document.getElementById('mensajeNoUsuarios').style.display = 'none';
+
+                agregarEncargado(selectResponsable);
+
                 modal.classList.remove('hidden');
             });
         });
