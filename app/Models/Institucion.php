@@ -19,7 +19,7 @@ class Institucion extends Model
     {
         return $this->hasMany(Departamento::class, 'idInstitucion');
     }
-    
+
     public function usuarios()
     {
         return $this->hasMany(Usuario::class, 'idInstitucion');
@@ -29,5 +29,15 @@ class Institucion extends Model
     {
         return $this->belongsTo(Usuario::class, 'idEncargadoInstitucion');
     }
-
+    public function planes()
+    {
+        return $this->hasManyThrough(
+            PlanEstrategico::class,   // Modelo destino
+            Departamento::class,      // Modelo intermedio
+            'idInstitucion',          // FK en departamentos
+            'idDepartamento',         // FK en planes
+            'id',                     // PK en instituciones
+            'id'                      // PK en departamentos
+        );
+    }
 }

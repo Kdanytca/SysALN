@@ -33,13 +33,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Ruta para el chat con contexto
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-
 });
 
 // =========================
 // ADMINISTRADOR (solo instituciones)
 // =========================
-Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador'])->group(function () {
+Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador'])->group(function () {
     Route::resource('instituciones', InstitucionController::class)->only([
         'index',
         'store',
@@ -56,13 +55,13 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador'])->gr
 // =========================
 
 // Solo administrador puede ver usuarios
-Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador'])->group(function () {
+Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador'])->group(function () {
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::get('/usuarios/{id}', [UsuarioController::class, 'showJson'])->name('usuarios.show');
 });
 
 // Todos los roles autenticados pueden crear, editar y eliminar usuarios
-Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador,encargado_institucion,encargado_departamento,responsable_plan,responsable_meta,responsable_actividad'])->group(function () {
+Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador,encargado_institucion,encargado_departamento,responsable_plan,responsable_meta,responsable_actividad'])->group(function () {
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
     Route::put('/usuarios/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
     Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
@@ -71,7 +70,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':administrador,encarg
 // =========================
 // OTROS ROLES (excluye administrador en instituciones, pero puede usar usuarios)
 // =========================
-Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_institucion,encargado_departamento,responsable_plan,responsable_meta,responsable_actividad'])->group(function () {
+Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_institucion,encargado_departamento,responsable_plan,responsable_meta,responsable_actividad'])->group(function () {
     // Departamentos
     Route::resource('departamentos', DepartamentoController::class);
     Route::get('/instituciones/{institucion}/departamentos', [DepartamentoController::class, 'indexPorInstitucion'])->name('institucion.departamentos');
@@ -109,15 +108,21 @@ Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_institucio
     Route::post('/planes/{id}/finalizar', [PlanEstrategicoController::class, 'toggleFinalizar'])->name('planes.finalizar');
     Route::get('/planes/{id}/reporte', [ResultadoController::class, 'verReporte'])->name('planes.reporte');
     Route::get('/plan/{id}/reporte-pdf', [ResultadoController::class, 'generarPDF'])->name('plan.reporte.pdf');
+    //Backup de planes
+    Route::post('/planes/{id}/backup', [PlanEstrategicoController::class, 'backup'])->name('planes.backup');
+    Route::get('/planes/backup/{id}', [PlanEstrategicoController::class, 'verBackup'])->name('planes.verBackup');
+    //respaldos
+    Route::get('/respaldo-planes', [PlanEstrategicoController::class, 'respaldoIndex'])->name('planes.backupIndex');
+    Route::get('/respaldo-planes/{id}', [PlanEstrategicoController::class, 'verBackup'])->name('planes.verBackup');
+
+
 
     // Rutas por roles
     Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])->name('institucion.ver');
     Route::get('/plan-estrategico/{id}', [PlanEstrategicoController::class, 'verResponsable'])->name('plan.responsable');
-    Route::middleware(['auth', 'verified', TipoUsuario::class.':encargado_departamento'])->group(function () {
-    Route::get('/mi-departamento', [DepartamentoController::class, 'index'])->name('departamento.ver');
-
-});
-
+    Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_departamento'])->group(function () {
+        Route::get('/mi-departamento', [DepartamentoController::class, 'index'])->name('departamento.ver');
+    });
 });
 
 require __DIR__ . '/auth.php';

@@ -64,4 +64,8 @@ class PlanEstrategico extends Model
             return 'blanco';
         }
     }
+    public function backup()
+    {
+        return $this->hasOne(BackupPlan::class, 'idPlanOriginal');
+    }
 }

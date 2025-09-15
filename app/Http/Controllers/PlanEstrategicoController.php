@@ -7,8 +7,8 @@ use App\Models\Usuario;
 use App\Models\Departamento;
 use App\Models\PlanEstrategico;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\BackupPlan;
 
 class PlanEstrategicoController extends Controller
 {
@@ -34,12 +34,14 @@ class PlanEstrategicoController extends Controller
             return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
+        // Traemos la institución con sus departamentos y usuarios
         $institucion = Institucion::with('departamentos')->findOrFail($id);
 
-        $planes = PlanEstrategico::whereHas('departamento', function ($q) use ($id) {
-            $q->where('idInstitucion', $id);
-        })->with(['departamento', 'responsable'])->get();
+        // Ahora, gracias a la relación hasManyThrough en el modelo Institucion
+        // podemos acceder a todos los planes de esa institución
+        $planes = $institucion->planes()->with(['departamento', 'responsable'])->get();
 
+        // Usuarios disponibles de la institución (para asignar a planes)
         $usuariosDisponibles = Usuario::whereHas('departamento', function ($q) use ($id) {
             $q->where('idInstitucion', $id);
         })->get();
@@ -196,5 +198,82 @@ class PlanEstrategicoController extends Controller
         $plan->save();
 
         return back()->with('status', 'Estado del plan actualizado.');
+    }
+
+    // Crear backup
+    public function backup($id)
+    {
+        $plan = PlanEstrategico::with(['metas.actividades.seguimientos', 'departamento', 'responsable'])->findOrFail($id);
+
+        if (BackupPlan::where('idPlanOriginal', $plan->id)->exists()) {
+            return back()->with('error', 'Ya existe un backup de este plan.');
+        }
+
+        $metasBackup = $plan->metas->map(function ($meta) {
+            return [
+                'id' => $meta->id,
+                'nombre_meta' => $meta->nombre_meta,
+                'ejes_estrategicos' => $meta->ejes_estrategicos,
+                'responsable' => $meta->responsable ? $meta->responsable->nombre_usuario : null,
+                'resultados_esperados' => $meta->resultados_esperados,
+                'indicador_resultados' => $meta->indicador_resultados,
+                'fecha_inicio' => $meta->fecha_inicio,
+                'fecha_fin' => $meta->fecha_fin,
+                'comentario' => $meta->comentario,
+                'actividades' => $meta->actividades->map(function ($actividad) {
+                    return [
+                        'id' => $actividad->id,
+                        'nombre_actividad' => $actividad->nombre_actividad,
+                        'objetivos' => $actividad->objetivos,
+                        'encargado' => $actividad->encargadoActividad ? $actividad->encargadoActividad->nombre_usuario : null,
+                        'fecha_inicio' => $actividad->fecha_inicio,
+                        'fecha_fin' => $actividad->fecha_fin,
+                        'comentario' => $actividad->comentario,
+                        'unidad_encargada' => $actividad->unidad_encargada,
+                        'seguimientos' => $actividad->seguimientos->map(function ($seguimiento) {
+                            return [
+                                'id' => $seguimiento->id,
+                                'periodo_consultar' => $seguimiento->periodo_consultar,
+                                'observaciones' => $seguimiento->observaciones,
+                                'estado' => $seguimiento->estado,
+                                'documento' => $seguimiento->documento,
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        });
+
+        BackupPlan::create([
+            'idPlanOriginal' => $plan->id,
+            'idDepartamento' => $plan->idDepartamento,
+            'idUsuario' => $plan->idUsuario,
+            'nombre_plan_estrategico' => $plan->nombre_plan_estrategico,
+            'nombre_departamento' => $plan->departamento->departamento ?? null,
+            'nombre_responsable' => $plan->responsable->nombre_usuario ?? null,
+            'metas' => json_encode($metasBackup),
+            'ejes_estrategicos' => $plan->ejes_estrategicos,
+            'objetivos' => $plan->objetivos,
+            'fecha_inicio' => $plan->fecha_inicio,
+            'fecha_fin' => $plan->fecha_fin,
+            'indicador' => $plan->indicador,
+            'creado_por' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Backup completo creado correctamente.');
+    }
+
+    // Ver backup
+    public function verBackup($id)
+    {
+        $backup = BackupPlan::findOrFail($id);
+        return view('planes.ver_backup', compact('backup'));
+    }
+
+    // Index de backups
+    public function respaldoIndex()
+    {
+        $backups = BackupPlan::all();
+        return view('planes.backup_index', compact('backups'));
     }
 }

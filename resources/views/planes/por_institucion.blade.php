@@ -4,14 +4,26 @@
             <h2 class="font-semibold text-xl text-gray-800">
                 Planes Estratégicos de: {{ $institucion->nombre_institucion }}
             </h2>
-            <button id="btnNuevoPlan"
-                class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Nuevo Plan
-            </button>
+
+            <div class="flex items-center gap-2">
+                <a href="{{ route('planes.backupIndex') }}"
+                    class="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-200 shadow-sm transition text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m7-7v14" />
+                    </svg>
+                    Ver Respaldos
+                </a>
+
+                <button id="btnNuevoPlan"
+                    class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md hover:bg-green-200 shadow-sm transition text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Plan
+                </button>
+            </div>
         </div>
     </x-slot>
 
@@ -19,9 +31,9 @@
     <br>
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
                 <table
-                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
+                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
                             <th class="px-4 py-3 text-left">Nombre Plan</th>
@@ -32,16 +44,17 @@
                             <th class="px-4 py-3 text-left">Fecha Inicio</th>
                             <th class="px-4 py-3 text-left">Fecha Fin</th>
                             <th class="px-4 py-3 text-center">Indicador</th>
-                            <th class="px-4 py-3 text-center">Acciones</th>
+                            <th class="px-4 py-3 text-center">Funciones del Sistema</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @forelse ($planes as $plan)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium">{{ $plan->nombre_plan_estrategico }}</td>
-                                <td class="px-4 py-3">{{ $plan->departamento->departamento ?? 'N/A' }}</td>
-                                <td class="px-4 py-3">{{ $plan->responsable->nombre_usuario ?? 'Sin responsable' }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 font-medium break-words">{{ $plan->nombre_plan_estrategico }}</td>
+                                <td class="px-4 py-3 break-words">{{ $plan->departamento->departamento ?? 'N/A' }}</td>
+                                <td class="px-4 py-3 break-words">
+                                    {{ $plan->responsable->nombre_usuario ?? 'Sin responsable' }}</td>
+                                <td class="px-4 py-3 break-words">
                                     @foreach (explode(',', $plan->ejes_estrategicos) as $eje)
                                         <span
                                             class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
@@ -49,7 +62,7 @@
                                         </span>
                                     @endforeach
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 break-all whitespace-normal">
                                     @if ($plan->objetivos)
                                         @foreach (json_decode($plan->objetivos) as $objetivo)
                                             <div class="text-gray-800 text-xs mb-1">• {{ $objetivo }}</div>
@@ -58,17 +71,17 @@
                                         <span class="italic text-gray-400">Sin objetivos</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">{{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}
-                                </td>
-                                <td class="px-4 py-3">{{ \Carbon\Carbon::parse($plan->fecha_fin)->format('d-m-Y') }}
-                                </td>
+                                <td class="px-4 py-3 break-words">
+                                    {{ \Carbon\Carbon::parse($plan->fecha_inicio)->format('d-m-Y') }}</td>
+                                <td class="px-4 py-3 break-words">
+                                    {{ \Carbon\Carbon::parse($plan->fecha_fin)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @php
                                         $color = match ($plan->indicador) {
                                             'rojo' => 'bg-red-400',
                                             'amarillo' => 'bg-yellow-300',
                                             'verde' => 'bg-green-400',
-                                            'finalizado' => 'bg-blue-400', // Aquí agregas el azul para finalizado
+                                            'finalizado' => 'bg-blue-400',
                                             default => 'bg-gray-300',
                                         };
                                     @endphp
@@ -76,7 +89,8 @@
                                         title="{{ ucfirst($plan->indicador) }}"></span>
                                 </td>
                                 <td class="px-4 py-3 text-center space-y-2">
-                                    <div class="flex justify-center gap-2">
+                                    <!-- Primer grupo: Editar / Eliminar -->
+                                    <div class="flex justify-center gap-2 border-b border-gray-300 pb-2 mb-2">
                                         <button onclick='openEditModal(@json($plan))'
                                             class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
                                             Editar
@@ -92,7 +106,8 @@
                                         </form>
                                     </div>
 
-                                    <div class="flex justify-center gap-2">
+                                    <!-- Segundo grupo: Metas / Reporte / Finalizar -->
+                                    <div class="flex justify-center gap-2 border-b border-gray-300 pb-2 mb-2">
                                         <a href="{{ route('plan.metas', $plan->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
                                             Ver Metas
@@ -106,8 +121,8 @@
                                             @php
                                                 $esFinalizado = $plan->indicador === 'finalizado';
                                                 $clasesBoton = $esFinalizado
-                                                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' // Reanudar
-                                                    : 'bg-teal-100 text-teal-800 hover:bg-teal-200'; // Finalizar
+                                                    ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                                                    : 'bg-teal-100 text-teal-800 hover:bg-teal-200';
                                             @endphp
                                             <button type="submit"
                                                 class="{{ $clasesBoton }} px-3 py-1.5 rounded-md text-xs transition shadow-sm">
@@ -116,9 +131,24 @@
                                         </form>
                                     </div>
 
-                                </td>
-                                <td>
-
+                                    <!-- Tercer grupo: Respaldo -->
+                                    <div class="flex justify-center gap-2">
+                                        @if (!$plan->backup)
+                                            <form method="POST" action="{{ route('planes.backup', $plan->id) }}"
+                                                onsubmit="return confirm('¿Seguro que quieres crear un respaldo de este plan? Esta acción no se puede repetir.')">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-md text-xs hover:bg-purple-200 transition shadow-sm">
+                                                    Crear Respaldo
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('planes.verBackup', $plan->backup->id) }}"
+                                                class="bg-gray-100 text-gray-800 px-3 py-1.5 rounded-md text-xs hover:bg-gray-200 transition shadow-sm">
+                                                Ver Respaldo
+                                            </a>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -129,6 +159,7 @@
                         @endforelse
                     </tbody>
                 </table>
+
                 <br>
                 @auth
                     @php
@@ -140,7 +171,7 @@
                                 $rutaInicio = route('instituciones.index');
                                 break;
                             default:
-                                $rutaInicio = '#'; // o nada
+                                $rutaInicio = '#';
                         }
                     @endphp
 
@@ -188,7 +219,8 @@
                 <!-- Departamento -->
                 <div class="mb-4">
                     <label for="idDepartamento" class="block font-medium">Departamento</label>
-                    <select name="idDepartamento" id="idDepartamento" class="w-full border rounded px-3 py-2" required>
+                    <select name="idDepartamento" id="idDepartamento" class="w-full border rounded px-3 py-2"
+                        required>
                         <option value="">Seleccione un departamento</option>
                         @foreach ($institucion->departamentos as $dep)
                             <option value="{{ $dep->id }}">{{ $dep->departamento }}</option>
@@ -474,8 +506,8 @@
             <input type="text" name="${name}" value="${value ?? ''}"
                    class="w-full border rounded px-3 py-2 pr-10" ${requiredAttr}>
             ${removable ? `
-                                                              <button type="button" class="btn-x absolute right-2 top-2 text-gray-500 hover:text-red-600"
-                                                                      aria-label="Eliminar campo">&times;</button>` : ''}
+                                                                                              <button type="button" class="btn-x absolute right-2 top-2 text-gray-500 hover:text-red-600"
+                                                                                                      aria-label="Eliminar campo">&times;</button>` : ''}
         `;
             return div;
         }
@@ -854,6 +886,30 @@
                 alert(error.message);
             }
         });
+        // ==================== VALIDACIÓN DE FECHAS (Inicio < Fin) ====================
+        document.getElementById("formPlan").addEventListener("submit", function(e) {
+            const inicio = document.querySelector("[name='fecha_inicio']").value;
+            const fin = document.querySelector("[name='fecha_fin']").value;
+
+            if (inicio && fin && new Date(inicio) > new Date(fin)) {
+                e.preventDefault(); // evita que se envíe el form
+                mostrarAlerta("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.");
+            }
+        });
+
+        function mostrarAlerta(mensaje) {
+            let alerta = document.getElementById("alertaFechas");
+            if (!alerta) {
+                alerta = document.createElement("div");
+                alerta.id = "alertaFechas";
+                alerta.className =
+                    "bg-yellow-100 text-yellow-800 border border-yellow-400 px-4 py-2 rounded mb-4";
+                // Insertar el aviso arriba del formulario, dentro del modal
+                const form = document.getElementById("formPlan");
+                form.insertBefore(alerta, form.firstChild);
+            }
+            alerta.textContent = mensaje;
+        }
     </script>
 
 
