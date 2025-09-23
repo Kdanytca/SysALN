@@ -1,4 +1,4 @@
-<form id="formNuevaMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}">
+<form id="formNuevaMeta" class="formMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}">
     @if ($errors->any())
         <div class="mb-4">
             <ul class="list-disc list-inside text-sm text-red-600">
@@ -10,12 +10,8 @@
     @endif
 
     @csrf
-
     
     <div class="mb-4">
-        <label class="block font-medium">Plan Estrategico</label>
-        <input type="text" disabled value="{{ $plan->nombre_plan_estrategico }}"
-            class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
         <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
     </div>
 

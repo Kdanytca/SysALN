@@ -113,6 +113,14 @@
                         </a>
                     @endif
 
+                    @if ($rol === 'encargado_institucion' || $rol === 'administrador')
+                        <a href="{{ route('historial_sesion.index') }}"
+                            class="inline-flex items-center hover:text-gray-300 {{ request()->routeIs('historial_sesion.*') ? 'underline' : '' }}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Historial de Sesiones</span>
+                        </a>
+                    @endif
+
                     {{-- Botón cerrar sesión con confirmación --}}
                     <form method="POST" action="{{ route('logout') }}"
                         onsubmit="return confirm('¿Estás seguro de que deseas cerrar sesión?');" class="m-0 p-0">

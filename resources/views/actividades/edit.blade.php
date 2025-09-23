@@ -1,4 +1,4 @@
-<form method="POST" action="{{ $action }}">
+<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}">
     @csrf
     @if($isEdit)
         @method('PUT')

@@ -1,15 +1,11 @@
-<form method="POST" action="{{ $action }}">
+<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}">
     @csrf
     @if($isEdit)
     @method('PUT')
     @endif
 
-    <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
-
     <div class="mb-4">
-        <label class="block font-medium">Plan Estrategico</label>
-        <input type="text" disabled value="{{ $plan->nombre_plan_estrategico }}"
-            class="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700">
+        <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
     </div>
 
     <div class="mb-4">

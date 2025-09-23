@@ -8,6 +8,7 @@ use App\Models\Departamento;
 use App\Models\PlanEstrategico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\BackupPlan;
 
 class PlanEstrategicoController extends Controller
@@ -275,5 +276,44 @@ class PlanEstrategicoController extends Controller
     {
         $backups = BackupPlan::all();
         return view('planes.backup_index', compact('backups'));
+    }
+
+    public function eliminarConUsuarios($id)
+    {
+        // 1. Obtener el plan con la relación de departamento e institución
+        $plan = PlanEstrategico::with('departamento.institucion')->findOrFail($id);
+
+        // 2. Buscar usuarios relacionados con metas
+        $usuariosMetas = DB::table('metas')
+            ->where('idPlanEstrategico', $id)
+            ->whereNotNull('idEncargadoMeta')
+            ->pluck('idEncargadoMeta');
+
+        // 3. Buscar usuarios relacionados con actividades
+        $usuariosActividades = DB::table('actividades')
+            ->join('metas', 'actividades.idMetas', '=', 'metas.id')
+            ->where('metas.idPlanEstrategico', $id)
+            ->whereNotNull('actividades.idEncargadoActividad')
+            ->pluck('actividades.idEncargadoActividad');
+
+        // 4. Unir usuarios únicos relacionados
+        $usuariosRelacionados = $usuariosMetas->merge($usuariosActividades)->unique();
+
+        // 5. Obtener usuarios a eliminar (excepto los de tipo encargado_institucion)
+        $usuariosAEliminar = DB::table('usuarios')
+            ->whereIn('id', $usuariosRelacionados)
+            ->where('tipo_usuario', '!=', 'encargado_institucion')
+            ->pluck('id');
+
+        // 6. Eliminar los usuarios filtrados
+        DB::table('usuarios')->whereIn('id', $usuariosAEliminar)->delete();
+
+        // 7. Eliminar el plan (esto eliminará metas, actividades y resultados por cascada)
+        $plan->delete();
+
+        $institucionId = $plan->departamento->institucion->id;
+
+        return redirect()->route('institucion.planes', $institucionId)
+            ->with('success', 'Plan eliminado correctamente.');
     }
 }

@@ -96,7 +96,7 @@
                                             Editar
                                         </button>
 
-                                        <form method="POST" action="{{ route('planes.destroy', $plan->id) }}"
+                                        <form method="POST" action="{{ route('planes.eliminarConUsuarios', $plan->id) }}"
                                             onsubmit="return confirm('¿Está seguro de eliminar este plan?')">
                                             @csrf @method('DELETE')
                                             <button type="submit"

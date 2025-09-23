@@ -72,7 +72,7 @@ class DepartamentoController extends Controller
         foreach ($departamentos as $departamento) {
             $encargadoActual = $departamento->encargadoDepartamento; // Ajusta la relación si es otro nombre
 
-            $usuariosDisponibles = Usuario::where('tipo_usuario', 'encargado_departamento')
+            $usuariosDisponibles = Usuario::where('tipo_usuario', 'encargado_departamento', 'encargado_institucion')
                 ->where(function ($query) use ($encargadoActual) {
                     $query->whereDoesntHave('departamentos');
                     if ($encargadoActual) {

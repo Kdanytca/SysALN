@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InstitucionController extends Controller
 {
@@ -86,12 +87,27 @@ class InstitucionController extends Controller
             'idEncargadoInstitucion' => 'required|exists:usuarios,id',
         ]);
 
-        $institucion = Institucion::find($id);
+        $institucion = Institucion::findOrFail($id);
+
+        // Guardar el encargado anterior antes de actualizar
+        $encargadoAnteriorId = $institucion->idEncargadoInstitucion;
+
+        // Actualizar la institución
         $institucion->update([
             'nombre_institucion' => $request->nombre_institucion,
             'tipo_institucion' => $request->tipo_institucion,
             'idEncargadoInstitucion' => $request->idEncargadoInstitucion,
         ]);
+
+        // Desasignar el encargado anterior, si cambió
+        if ($encargadoAnteriorId !== $request->idEncargadoInstitucion) {
+            Usuario::where('id', $encargadoAnteriorId)
+                ->update(['idInstitucion' => null]);
+        }
+
+        // Asignar la institución al nuevo encargado
+        Usuario::where('id', $request->idEncargadoInstitucion)
+            ->update(['idInstitucion' => $institucion->id]);
 
         return redirect()->route('instituciones.index')->with('success', 'Institución actualizada correctamente.');
     }
@@ -106,6 +122,85 @@ class InstitucionController extends Controller
         $institucion->delete();
 
         return redirect()->route('instituciones.index')->with('success', 'Institución eliminada correctamente.');
+    }
+
+    public function eliminarInstitucionConUsuarios($id)
+    {
+        $institucion = Institucion::with('departamentos.planes.metas.actividades')->findOrFail($id);
+
+        DB::transaction(function () use ($institucion) {
+            $departamentosIds = $institucion->departamentos->pluck('id');
+
+            // 1. Usuarios de metas
+            $usuariosMetas = DB::table('metas')
+                ->join('planes_estrategicos', 'metas.idPlanEstrategico', '=', 'planes_estrategicos.id')
+                ->whereIn('planes_estrategicos.idDepartamento', $departamentosIds)
+                ->whereNotNull('idEncargadoMeta')
+                ->pluck('idEncargadoMeta');
+
+            // 2. Usuarios de actividades
+            $usuariosActividades = DB::table('actividades')
+                ->join('metas', 'actividades.idMetas', '=', 'metas.id')
+                ->join('planes_estrategicos', 'metas.idPlanEstrategico', '=', 'planes_estrategicos.id')
+                ->whereIn('planes_estrategicos.idDepartamento', $departamentosIds)
+                ->whereNotNull('actividades.idEncargadoActividad')
+                ->pluck('actividades.idEncargadoActividad');
+
+            // 3. Usuarios encargados de departamentos
+            $usuariosEncargadosDepartamentos = $institucion->departamentos
+                ->pluck('idEncargadoDepartamento')
+                ->filter(); // quita los null
+
+            // 4. Usuario encargado de la institución
+            $usuarioEncargadoInstitucion = $institucion->idEncargadoInstitucion
+                ? collect([$institucion->idEncargadoInstitucion])
+                : collect([]);
+
+            // 5. Usuario responsable del plan
+            $usuariosResponsablesPlanes = DB::table('planes_estrategicos')
+                ->whereIn('idDepartamento', $departamentosIds)
+                ->whereNotNull('idUsuario')  // Asegurarse de que haya un responsable asignado
+                ->pluck('idUsuario');
+
+            // 6. Unir todos los usuarios a eliminar
+            $usuariosAEliminar = $usuariosMetas
+                ->merge($usuariosActividades)
+                ->merge($usuariosEncargadosDepartamentos)
+                ->merge($usuarioEncargadoInstitucion)
+                ->merge($usuariosResponsablesPlanes)  // Agregar responsables de planes
+                ->unique();
+
+            // 7. Eliminar usuarios
+            DB::table('usuarios')->whereIn('id', $usuariosAEliminar)->delete();
+
+            // 8. Eliminar resultados
+            DB::table('resultados')->whereIn('idPlanEstrategico', function ($query) use ($departamentosIds) {
+                $query->select('id')->from('planes_estrategicos')->whereIn('idDepartamento', $departamentosIds);
+            })->delete();
+
+            // 9. Eliminar actividades
+            DB::table('actividades')->whereIn('idMetas', function ($query) use ($departamentosIds) {
+                $query->select('id')->from('metas')->whereIn('idPlanEstrategico', function ($query) use ($departamentosIds) {
+                    $query->select('id')->from('planes_estrategicos')->whereIn('idDepartamento', $departamentosIds);
+                });
+            })->delete();
+
+            // 10. Eliminar metas
+            DB::table('metas')->whereIn('idPlanEstrategico', function ($query) use ($departamentosIds) {
+                $query->select('id')->from('planes_estrategicos')->whereIn('idDepartamento', $departamentosIds);
+            })->delete();
+
+            // 11. Eliminar planes
+            DB::table('planes_estrategicos')->whereIn('idDepartamento', $departamentosIds)->delete();
+
+            // 12. Eliminar departamentos
+            $institucion->departamentos()->delete();
+
+            // 13. Eliminar institución
+            $institucion->delete();
+        });
+
+        return redirect()->route('instituciones.index');
     }
 
     public function ver($id)

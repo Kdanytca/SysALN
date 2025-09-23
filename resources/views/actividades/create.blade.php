@@ -1,4 +1,4 @@
-<form method="POST" action="{{ route('actividades.store') }}">
+<form id="formNuevaActividad" class="formActividad" method="POST" action="{{ route('actividades.store') }}">
     @csrf
 
     <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
@@ -11,7 +11,6 @@
             <label class="block font-medium">Usuario Responsable</label>
             <select name="idEncargadoActividad" id="idEncargadoActividad_nuevo" x-model="usuarioSeleccionado"
                 @change="actualizarUnidad('nuevo')" class="w-full border rounded px-3 py-2" required>
-                <option value="">Seleccione un usuario</option>
                 @foreach ($usuarios as $usuario)
                 <option value="{{ $usuario->id }}" data-departamento="{{ $usuario->departamento->departamento ?? '' }}">
                     {{ $usuario->nombre_usuario }} ({{ $usuario->email }})

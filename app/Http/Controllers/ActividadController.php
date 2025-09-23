@@ -49,16 +49,13 @@ class ActividadController extends Controller
 
         $departamentos = Departamento::where('idInstitucion', $institucion->id)->get();
 
-        // TODAS las ya usadas
-        $actividadesUsadas = Actividad::pluck('nombre_actividad')->toArray();
-
         // Construir disponibles desde TODAS las metas
         $actividadesDisponibles = collect();
         foreach ($metas as $unaMeta) {
             if (!empty($unaMeta->nombre_actividades)) {
                 foreach (explode(',', $unaMeta->nombre_actividades) as $actividadMeta) {
                     $actividadMeta = trim($actividadMeta);
-                    if ($actividadMeta !== '' && !in_array($actividadMeta, $actividadesUsadas)) {
+                    if ($actividadMeta !== '') {
                         $actividadesDisponibles->push($actividadMeta);
                     }
                 }
@@ -67,7 +64,7 @@ class ActividadController extends Controller
 
         $vistaMetas = true;
 
-        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos', 'institucion', 'vistaMetas', 'actividadesDisponibles', 'actividadesUsadas'));
+        return view('actividades.index', compact('actividades', 'meta', 'metas', 'usuarios', 'departamentos', 'institucion', 'vistaMetas', 'actividadesDisponibles'));
     }
 
     // Vista exclusiva para responsables de actividades
@@ -92,7 +89,20 @@ class ActividadController extends Controller
         $departamentos = Departamento::all(); // opcional
         $institucion = $actividades->first()->meta->planEstrategico->departamento->institucion;
 
-        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos', 'institucion'));
+        // Construir disponibles desde TODAS las metas
+        $actividadesDisponibles = collect();
+        foreach ($metas as $unaMeta) {
+            if (!empty($unaMeta->nombre_actividades)) {
+                foreach (explode(',', $unaMeta->nombre_actividades) as $actividadMeta) {
+                    $actividadMeta = trim($actividadMeta);
+                    if ($actividadMeta !== '') {
+                        $actividadesDisponibles->push($actividadMeta);
+                    }
+                }
+            }
+        }
+
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos', 'institucion', 'actividadesDisponibles'));
     }
 
     // Crear actividad (solo admins o encargados)

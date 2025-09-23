@@ -10,7 +10,7 @@
                 "{{ $plan->nombre_plan_estrategico }}"</h2>
 
             <!-- Botón para agregar un nuevo registro -->
-            <div x-data="{ modalOpen: false, modalNuevoUsuario: false, modalNuevoDepartamento: false }">
+            <div x-data="{ modalOpen: false, modalNuevoUsuario: false }">
                 @php
                     $rol = Auth::user()->tipo_usuario ?? null;
                 @endphp
@@ -59,42 +59,44 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
 
                 <!-- Tabla de metas -->
                 <table
-                    class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
+                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left">
                                 Usuario Responsable</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left">
                                 Nombre de la Meta</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left max-w-[150px]">
                                 Ejes Estrategicos</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left max-w-[150px]">
                                 Actividades</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left break-words max-w-xs">
                                 Resultados</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left break-words max-w-xs">
                                 Indicador</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left">
                                 Inicio</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left">
                                 Fin</th>
-                            <th class="w-1/8 px-4 py-3 text-left">
+                            <th class="px-4 py-3 text-left break-words max-w-xs">
                                 Comentario</th>
-                            <th class="w-1/8 px-4 py-3 text-center">Acciones</th>
+                            <th class="px-4 py-3 text-left">
+                                Estado</th>
+                            <th class="px-4 py-3 text-center">Funciones del Sistema</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($metas as $meta)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium">
+                                <td class="px-4 py-3 font-medium break-words max-w-xs">
                                     {{ $meta->encargadoMeta->nombre_usuario ?? 'Sin asignar' }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 break-words max-w-xs">
                                     {{ $meta->nombre_meta }}</td>
-                                <td class="px-4 py-3 max-w-[200px]">
+                                <td class="px-4 py-3 max-w-[150px] break-words">
                                     @if (!empty($meta->ejes_estrategicos))
                                         @foreach (json_decode($meta->ejes_estrategicos, true) ?? [] as $eje)
                                             <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
@@ -105,7 +107,7 @@
                                         <span class="text-sm text-red-500">Sin ejes seleccionados</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 max-w-[200px]">
+                                <td class="px-4 py-3 max-w-[150px] break-words">
                                     @if (!empty($meta->nombre_actividades))
                                         @foreach (explode(',', $meta->nombre_actividades) as $actividad)
                                             <span
@@ -117,22 +119,47 @@
                                         <span class="text-sm text-red-500">Sin actividades registradas</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                        {{ $meta->resultados_esperados }}
-                                    </span>
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                    {{ $meta->resultados_esperados }}
                                 </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                        {{ $meta->indicador_resultados }}
-                                    </span>
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                    {{ $meta->indicador_resultados }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     {{ \Carbon\Carbon::parse($meta->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3 max-w-xs truncate whitespace-normal break-words">
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     {{ $meta->comentario }}</td>
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                    @php
+                                        $inicio = \Carbon\Carbon::parse($meta->fecha_inicio);
+                                        $fin = \Carbon\Carbon::parse($meta->fecha_fin);
+                                        $hoy = \Carbon\Carbon::now();
+
+                                        $color = 'bg-gray-400'; // Por defecto: gris
+
+                                        if ($hoy->lt($inicio)) {
+                                            $color = 'bg-gray-400'; // Aún no empieza
+                                        } elseif ($hoy->between($inicio, $fin)) {
+                                            $duracionTotal = $inicio->diffInSeconds($fin);
+                                            $duracionTranscurrida = $inicio->diffInSeconds($hoy);
+                                            $porcentaje = ($duracionTranscurrida / $duracionTotal) * 100;
+
+                                            if ($porcentaje < 50) {
+                                                $color = 'bg-green-500';
+                                            } elseif ($porcentaje >= 50 && $porcentaje <= 100) {
+                                                $color = 'bg-yellow-400';
+                                            }
+                                        } elseif ($hoy->gt($fin)) {
+                                            $color = 'bg-red-500'; // Ya pasó el tiempo
+                                        }
+                                    @endphp
+
+                                    <div class="flex justify-center">
+                                        <div class="w-4 h-4 rounded-full {{ $color }}" title="Avance: {{ round($porcentaje ?? 0, 1) }}%"></div>
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3 text-righ">
                                     @php
                                         $rol = Auth::user()->tipo_usuario ?? null;
@@ -229,6 +256,10 @@
                                             </div>
                                         @endif
 
+                                        @if ($rol === 'encargado_institucion' || $rol === 'responsable_plan')
+                                            <div class="border-b border-gray-300 w-16 mx-1"></div>
+                                        @endif
+
                                         {{-- Actividades (lo ven todos) --}}
                                         <a href="{{ route('meta.actividades', $meta->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
@@ -242,7 +273,7 @@
 
                         @if ($metas->isEmpty())
                             <tr>
-                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No hay metas
+                                <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500">No hay metas
                                     registradas.</td>
                             </tr>
                         @endif
@@ -349,6 +380,32 @@
                 wrapper.appendChild(botonEliminar);
                 contenedor.appendChild(wrapper);
             }
+        }
+
+        document.addEventListener("submit", function (e) {
+            const form = e.target;
+
+            // Solo aplicar si es un formulario con clase "formMeta"
+            if (!form.classList.contains("formMeta")) return;
+
+            const inicio = form.querySelector("[name='fecha_inicio']").value;
+            const fin = form.querySelector("[name='fecha_fin']").value;
+
+            if (inicio && fin && new Date(inicio) > new Date(fin)) {
+                e.preventDefault();
+                mostrarAlerta("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.", form);
+            }
+        });
+
+        function mostrarAlerta(mensaje, form) {
+            let alerta = form.querySelector("#alertaFechas");
+            if (!alerta) {
+                alerta = document.createElement("div");
+                alerta.id = "alertaFechas";
+                alerta.className = "bg-yellow-100 text-yellow-800 border border-yellow-400 px-4 py-2 rounded mb-4";
+                form.insertBefore(alerta, form.firstChild);
+            }
+            alerta.textContent = mensaje;
         }
     </script>
 

@@ -82,7 +82,7 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
                 <!-- Tabla de actividades -->
                 @php
                     $rol = Auth::user()->tipo_usuario ?? null;
@@ -90,33 +90,34 @@
                 @endphp
 
                 <table
-                    class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
+                    class="min-w-full border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
                             <th class="w-1/9 px-4 py-3 text-left">Usuario</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Nombre de la Actividad</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Objetivos</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Inicio</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Fin</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Comentario</th>
-                            <th class="w-1/9 px-4 py-3 text-left">Unidad Encargada</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Nombre de la Actividad</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-[200px] break-words">Objetivos</th>
+                            <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Inicio</th>
+                            <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Fin</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Comentario</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Unidad Encargada</th>
+                            <th class="w-1/8 px-4 py-3 text-left">Estado</th>
 
                             {{-- Solo mostrar columna Acciones a roles permitidos --}}
                             @if (in_array($rol, $rolesPermitidos))
-                                <th class="w-1/9 px-4 py-3 text-center">Acciones</th>
+                                <th class="px-4 py-3 text-center whitespace-nowrap">Funciones<br> del Sistema</th>
                             @endif
 
-                            <th class="w-1/9 px-4 py-3 text-center">Seguimiento</th>
+                            <th class="px-4 py-3 text-center whitespace-nowrap">Seguimiento</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($actividades as $actividad)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium">
+                                <td class="px-4 py-3 font-medium break-words max-w-xs">
                                     {{ $actividad->encargadoActividad->nombre_usuario ?? 'Sin asignar' }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 max-w-xs break-words">
                                     {{ $actividad->nombre_actividad }}</td>
-                                <td class="px-4 py-3 max-w-[200px]">
+                                <td class="px-4 py-3 max-w-[200px] break-words">
                                     @if (!empty($actividad->objetivos))
                                         @foreach (explode(',', $actividad->objetivos) as $objetivo)
                                             <span
@@ -128,17 +129,46 @@
                                         <span class="text-sm text-red-500">Sin objetivos registrados</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($actividad->fecha_inicio)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3">{{ $actividad->comentario }}</td>
-                                <td class="px-4 py-3">{{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
+                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->comentario }}</td>
+                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
+                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                    @php
+                                        $inicio = \Carbon\Carbon::parse($actividad->fecha_inicio);
+                                        $fin = \Carbon\Carbon::parse($actividad->fecha_fin);
+                                        $hoy = \Carbon\Carbon::now();
+
+                                        $color = 'bg-gray-400'; // Por defecto: gris
+
+                                        if ($hoy->lt($inicio)) {
+                                            $color = 'bg-gray-400'; // Aún no empieza
+                                        } elseif ($hoy->between($inicio, $fin)) {
+                                            $duracionTotal = $inicio->diffInSeconds($fin);
+                                            $duracionTranscurrida = $inicio->diffInSeconds($hoy);
+                                            $porcentaje = ($duracionTranscurrida / $duracionTotal) * 100;
+
+                                            if ($porcentaje < 50) {
+                                                $color = 'bg-green-500';
+                                            } elseif ($porcentaje >= 50 && $porcentaje <= 100) {
+                                                $color = 'bg-yellow-400';
+                                            }
+                                        } elseif ($hoy->gt($fin)) {
+                                            $color = 'bg-red-500'; // Ya pasó el tiempo
+                                        }
+                                    @endphp
+
+                                    <div class="flex justify-center">
+                                        <div class="w-4 h-4 rounded-full {{ $color }}" title="Avance: {{ round($porcentaje ?? 0, 1) }}%"></div>
+                                    </div>
+                                </td>
 
                                 {{-- Acciones solo para roles permitidos --}}
                                 @if (in_array($rol, $rolesPermitidos))
-                                    <td class="px-4 py-3 text-left">
-                                        <div class="flex flex-wrap justify-center gap-2">
+                                    <td class="px-4 py-3 text-left max-w-xs break-words whitespace-normal">
+                                        <div class="flex flex-col items-center space-y-2">
                                             {{-- Editar --}}
                                             <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }" class="inline-block">
                                                 <button @click="editModalOpen = true"
@@ -229,7 +259,7 @@
                                 @endif
 
                                 {{-- Seguimiento visible para todos --}}
-                                <td class="text-center px-4 py-2">
+                                <td class="text-center px-4 py-2 whitespace-nowrap">
                                     <div class="flex flex-col items-center space-y-2">
                                         <button onclick="abrirModalCrearSeguimiento({{ $actividad->id }})"
                                             class="bg-purple-300 text-purple-800 px-3 py-1 rounded hover:bg-purple-400 transition text-sm">
@@ -246,7 +276,7 @@
 
                         @if ($actividades->isEmpty())
                             <tr>
-                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="{{ in_array($rol, $rolesPermitidos) ? 9 : 8 }}" class="px-6 py-4 text-center text-sm text-gray-500">
                                     No hay actividades registradas.
                                 </td>
                             </tr>
@@ -542,6 +572,7 @@
             }
         }
 
+        // Funciones para agregar/eliminar campos dinámicos (si se usan en el formulario)
         function agregarCampo(contenedorId, name) {
             const contenedor = document.getElementById(contenedorId);
             
@@ -571,5 +602,31 @@
             wrapper.remove();
         }
 
+        // Funcion para validacion de fechas
+        document.addEventListener("submit", function (e) {
+            const form = e.target;
+
+            // Solo aplicar si es un formulario con clase "formActividad"
+            if (!form.classList.contains("formActividad")) return;
+
+            const inicio = form.querySelector("[name='fecha_inicio']").value;
+            const fin = form.querySelector("[name='fecha_fin']").value;
+
+            if (inicio && fin && new Date(inicio) > new Date(fin)) {
+                e.preventDefault();
+                mostrarAlerta("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.", form);
+            }
+        });
+
+        function mostrarAlerta(mensaje, form) {
+            let alerta = form.querySelector("#alertaFechas");
+            if (!alerta) {
+                alerta = document.createElement("div");
+                alerta.id = "alertaFechas";
+                alerta.className = "bg-yellow-100 text-yellow-800 border border-yellow-400 px-4 py-2 rounded mb-4";
+                form.insertBefore(alerta, form.firstChild);
+            }
+            alerta.textContent = mensaje;
+        }
     </script>
 </x-app-layout>

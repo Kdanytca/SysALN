@@ -53,7 +53,7 @@
                                 Institución</th>
                             <th class="w-1/7 px-4 py-3 text-left">
                                 Tipo</th>
-                            <th class="w-2/7 px-4 py-3 text-center">Acciones</th>
+                            <th class="w-2/7 px-4 py-3 text-center">Funciones del Sistema</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">

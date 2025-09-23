@@ -57,11 +57,11 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
 
                 <!-- Tabla de departamentos -->
                 <table
-                    class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
+                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
                             <th class="w-1/5 px-4 py-3 text-left">
@@ -70,17 +70,17 @@
                                 Institucion Perteneciente</th>
                             <th class="w-1/5 px-4 py-3 text-left">
                                 Encargado del Departamento</th>
-                            <th class="w-2/5 px-4 py-3 text-center">Acciones</th>
+                            <th class="w-2/5 px-4 py-3 text-center">Funciones del Sistema</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($departamentos as $departamento)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium truncate">
+                                <td class="px-4 py-3 font-medium break-words max-w-xs">
                                     {{ $departamento->departamento }}</td>
-                                <td class="px-4 py-3 truncate">
+                                <td class="px-4 py-3 break-words max-w-xs">
                                     {{ $departamento->institucion?->nombre_institucion ?? 'Sin institución' }}</td>
-                                <td class="px-4 py-3 truncate">
+                                <td class="px-4 py-3 break-words max-w-xs">
                                     {{ $departamento->encargadoDepartamento->nombre_usuario }}</td>
                                 <td class="px-4 py-3 text-righ">
                                     <div class="flex flex-wrap justify-center gap-2">

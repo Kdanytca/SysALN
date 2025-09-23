@@ -55,33 +55,33 @@
         </div>
     </x-slot>
 
-
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
 
                 <!-- Tabla de instituciones -->
                 <table
-                    class="w-full table-fixed border border-gray-300 rounded-lg overflow-hidden shadow text-sm text-gray-800">
+                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="w-1/5 px-4 py-3 text-left">
+                            <th class="w-1/5 px-4 py-3 text-left break-words max-w-xs">
                                 Nombre</th>
-                            <th class="w-1/5 px-4 py-3 text-left">
+                            <th class="w-1/5 px-4 py-3 text-left break-words max-w-xs">
                                 Tipo</th>
-                            <th class="w-1/5 px-4 py-3 text-left">
+                            <th class="w-1/5 px-4 py-3 text-left break-words max-w-xs">
                                 Encargado</th>
-                            <th class="w-2/5 px-4 py-3 text-center">Acciones</th>
+                            <th class="w-2/5 px-4 py-3 text-left break-words max-w-xs">
+                                Funciones del Sistema</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($instituciones as $institucion)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium truncate">
+                                <td class="px-4 py-3 font-medium break-words max-w-xs">
                                     {{ $institucion->nombre_institucion ?? '-' }}</td>
-                                <td class="px-4 py-3 truncate">
+                                <td class="px-4 py-3 break-words max-w-xs">
                                     {{ $institucion->tipo_institucion ?? '-' }}</td>
-                                <td class="px-4 py-3 truncate">
+                                <td class="px-4 py-3 break-words max-w-xs">
                                     {{ $institucion->encargadoInstitucion->nombre_usuario ?? '-' }}</td>
                                 <td class="px-4 py-3 text-righ">
                                     @php
@@ -89,9 +89,9 @@
                                     @endphp
 
                                     @if ($user && $user->tipo_usuario === 'administrador')
-                                        <div class="flex flex-wrap justify-center gap-2">
+                                        <div class="flex flex-wrap justify-left gap-2">
                                             {{-- Editar --}}
-                                            <div x-data="{ editModalOpen: false }">
+                                            <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }">
                                                 <button @click="editModalOpen = true"
                                                     class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
                                                     Editar
@@ -160,7 +160,7 @@
 
                                                             <div class="flex items-center">
                                                                 <form method="POST"
-                                                                    action="{{ route('instituciones.destroy', $institucion->id) }}">
+                                                                    action="{{ route('instituciones.eliminarInstitucionConUsuarios', $institucion->id) }}">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit"

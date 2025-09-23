@@ -14,6 +14,7 @@ use App\Http\Controllers\SeguimientoActividadController;
 use App\Http\Controllers\ResultadoController;
 use App\Http\Middleware\TipoUsuario;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\HistorialSesionController;
 use Illuminate\Support\Facades\Http;
 
 
@@ -48,6 +49,17 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador'])->
 
     Route::get('instituciones/create', fn() => abort(404));
     Route::get('instituciones/edit', fn() => abort(404));
+
+    // Eliminar una institución con todos sus datos relacionados (departamentos, planes, usuarios, etc.)
+    Route::delete('/instituciones/{id}/eliminarConUsuarios', [InstitucionController::class, 'eliminarInstitucionConUsuarios'])->name('instituciones.eliminarInstitucionConUsuarios');
+});
+
+// =========================
+// HISTORIAL DE SESIONES (solo admins o encargados)
+// =========================
+Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador,encargado_institucion'])->group(function () {
+    // Historial de sesiones
+    Route::get('/historial-sesiones', [HistorialSesionController::class, 'index'])->name('historial_sesion.index');
 });
 
 // =========================
@@ -101,6 +113,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     Route::post('/planes', [PlanEstrategicoController::class, 'store'])->name('planes.store');
     Route::get('/planes', [PlanEstrategicoController::class, 'index'])->name('planes.index');
     Route::delete('/planes/{id}', [PlanEstrategicoController::class, 'destroy'])->name('planes.destroy');
+    Route::delete('/planes/{id}/eliminarConUsuarios', [PlanEstrategicoController::class, 'eliminarConUsuarios'])->name('planes.eliminarConUsuarios');
     Route::put('/planes/{id}', [PlanEstrategicoController::class, 'update'])->name('planes.update');
     Route::get('/departamentos/{id}/usuarios-disponibles', [UsuarioController::class, 'usuariosPorDepartamento']);
     Route::get('/instituciones/{id}/planes', [PlanEstrategicoController::class, 'planesPorInstitucion'])->name('institucion.planes');
@@ -114,8 +127,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     //respaldos
     Route::get('/respaldo-planes', [PlanEstrategicoController::class, 'respaldoIndex'])->name('planes.backupIndex');
     Route::get('/respaldo-planes/{id}', [PlanEstrategicoController::class, 'verBackup'])->name('planes.verBackup');
-
-
+    
 
     // Rutas por roles
     Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])->name('institucion.ver');
