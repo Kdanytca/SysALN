@@ -14,49 +14,57 @@ class GeminiService
     public function __construct()
     {
         $this->apiKey = env('GEMINI_API_KEY');
-        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash'); // ajusta si usas otro
+        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash');
         $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
     }
 
-    /**
-     * Envía la pregunta + historial a Gemini y devuelve la respuesta como string.
-     */
     public function ask(string $question, array $history = []): string
     {
         try {
-            // Combinar historial + pregunta actual en un solo texto
-            $fullText = '';
-            foreach ($history as $m) {
-                $fullText .= ($m['role'] === 'system' ? '[SYSTEM] ' : '[USER] ') . $m['content'] . "\n";
-            }
-            $fullText .= "[USER] " . $question;
+            // Combinar historial y pregunta en un solo bloque de texto
+            $finalText = '';
 
+            foreach ($history as $msg) {
+                $role = strtoupper($msg['role'] ?? 'USER');
+                $finalText .= "[{$role}] {$msg['content']}\n";
+            }
+
+            $finalText .= "[USER] {$question}";
+
+            // Estructura esperada por generateContent
             $payload = [
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => $fullText]
+                            ['text' => $finalText]
                         ]
                     ]
                 ]
             ];
+
+            Log::info('Payload enviado a Gemini:', $payload);
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'X-goog-api-key' => $this->apiKey,
             ])->post($this->apiUrl, $payload);
 
+            if (!$response->successful()) {
+                Log::error('Error HTTP al llamar a Gemini:', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return 'Error al conectar con Gemini (HTTP).';
+            }
+
             $json = $response->json();
+            Log::info('Respuesta cruda de Gemini:', $json);
 
-            // Log para debug si quieres revisar la respuesta completa
-            Log::info('Gemini raw response', $json);
-
-            // Extraer solo el texto de la IA para enviar al chat
-            return $json['candidates'][0]['content']['parts'][0]['text'] ?? 'No se obtuvo respuesta';
-
+            return $json['candidates'][0]['content']['parts'][0]['text']
+                ?? 'No se obtuvo respuesta del modelo.';
         } catch (\Throwable $e) {
-            Log::error('GeminiService error: ' . $e->getMessage());
-            return 'Error al conectar con Gemini.';
+            Log::error('GeminiService Exception: ' . $e->getMessage());
+            return 'Error al conectar con Gemini (excepción).';
         }
     }
 }
