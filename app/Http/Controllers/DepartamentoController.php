@@ -100,7 +100,7 @@ class DepartamentoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'departamento' => 'required|string|max:255',
+            'departamento' => 'required|string',
             'idEncargadoDepartamento' => [
                 'required',
                 'exists:usuarios,id',
@@ -145,8 +145,8 @@ class DepartamentoController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'departamento' => 'required|string|max:255',
-            'idEncargadoDepartamento' => 'required|string|max:45',
+            'departamento' => 'required|string',
+            'idEncargadoDepartamento' => 'required|string',
             'idInstitucion' => 'required|exists:instituciones,id',
         ]);
 

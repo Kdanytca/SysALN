@@ -49,11 +49,12 @@ class ActividadController extends Controller
 
         $departamentos = Departamento::where('idInstitucion', $institucion->id)->get();
 
-        // Construir disponibles desde TODAS las metas
+        // Construir disponibles solo desde la meta actual
         $actividadesDisponibles = collect();
-        foreach ($metas as $unaMeta) {
-            if (!empty($unaMeta->nombre_actividades)) {
-                foreach (explode(',', $unaMeta->nombre_actividades) as $actividadMeta) {
+        if (!empty($meta->nombre_actividades)) {
+            $actividadesArray = json_decode($meta->nombre_actividades, true);
+            if (is_array($actividadesArray)) {
+                foreach ($actividadesArray as $actividadMeta) {
                     $actividadMeta = trim($actividadMeta);
                     if ($actividadMeta !== '') {
                         $actividadesDisponibles->push($actividadMeta);
@@ -88,12 +89,14 @@ class ActividadController extends Controller
         $usuarios = Usuario::all(); // opcional
         $departamentos = Departamento::all(); // opcional
         $institucion = $actividades->first()->meta->planEstrategico->departamento->institucion;
+        $meta = $metas->first();
 
         // Construir disponibles desde TODAS las metas
         $actividadesDisponibles = collect();
-        foreach ($metas as $unaMeta) {
-            if (!empty($unaMeta->nombre_actividades)) {
-                foreach (explode(',', $unaMeta->nombre_actividades) as $actividadMeta) {
+        if (!empty($meta->nombre_actividades)) {
+            $actividadesArray = json_decode($meta->nombre_actividades, true);
+            if (is_array($actividadesArray)) {
+                foreach ($actividadesArray as $actividadMeta) {
                     $actividadMeta = trim($actividadMeta);
                     if ($actividadMeta !== '') {
                         $actividadesDisponibles->push($actividadMeta);
@@ -102,7 +105,7 @@ class ActividadController extends Controller
             }
         }
 
-        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos', 'institucion', 'actividadesDisponibles'));
+        return view('actividades.index', compact('actividades', 'metas', 'usuarios', 'departamentos', 'institucion', 'actividadesDisponibles', 'meta'));
     }
 
     // Crear actividad (solo admins o encargados)
@@ -128,20 +131,30 @@ class ActividadController extends Controller
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
-            'nombre_actividad' => 'required|string|max:255',
+            'nombre_actividad' => 'required|string',
             'objetivos' => 'required|array|min:1',
-            'objetivos.*' => 'required|string|max:255',
+            'objetivos.*' => 'required|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'comentario' => 'required|string|max:255',
-            'unidad_encargada' => 'nullable|string|max:255',
+            'comentario' => 'required|string',
+            'unidad_encargada' => 'nullable|string',
         ]);
+
+        $meta = Meta::find($request->idMetas);
+
+        // Verificar que las fechas de la actividad estén dentro del rango de la meta
+        if ($request->fecha_inicio < $meta->fecha_inicio) {
+            return back()->withErrors(['fecha_inicio' => 'La fecha de inicio de la actividad no puede ser anterior a la de la meta.']);
+        }
+        if ($request->fecha_fin > $meta->fecha_fin) {
+            return back()->withErrors(['fecha_fin' => 'La fecha de fin de la actividad no puede ser posterior a la de la meta.']);
+        }
 
         Actividad::create([
             'idMetas' => $request->idMetas,
             'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => implode(', ', $request->objetivos),
+            'objetivos' => json_encode($request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'comentario' => $request->comentario,
@@ -172,24 +185,34 @@ class ActividadController extends Controller
             return redirect()->back()->with('error', 'No tienes permiso para actualizar actividades.');
         }
 
+        $meta = Meta::findOrFail($request->idMetas);
+
         $request->validate([
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
-            'nombre_actividad' => 'required|string|max:255',
+            'nombre_actividad' => 'required|string',
             'objetivos' => 'required|array|min:1',
-            'objetivos.*' => 'required|string|max:255',
+            'objetivos.*' => 'required|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'comentario' => 'required|string|max:255',
-            'unidad_encargada' => 'nullable|string|max:255',
+            'comentario' => 'required|string',
+            'unidad_encargada' => 'nullable|string',
         ]);
+
+        // Verificar que las fechas de la actividad estén dentro del rango de la meta
+        if ($request->fecha_inicio < $meta->fecha_inicio) {
+            return back()->withErrors(['fecha_inicio' => 'La fecha de inicio de la actividad no puede ser anterior a la de la meta.']);
+        }
+        if ($request->fecha_fin > $meta->fecha_fin) {
+            return back()->withErrors(['fecha_fin' => 'La fecha de fin de la actividad no puede ser posterior a la de la meta.']);
+        }
 
         $actividad = Actividad::find($id);
         $actividad->update([
             'idMetas' => $request->idMetas,
             'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => implode(', ', $request->objetivos),
+            'objetivos' => json_encode($request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'comentario' => $request->comentario,

@@ -23,8 +23,8 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_usuario' => 'required|string|max:255|unique:usuarios,nombre_usuario',
-            'email' => 'required|email|max:255|unique:usuarios,email',
+            'nombre_usuario' => 'required|string|unique:usuarios,nombre_usuario',
+            'email' => 'required|email|unique:usuarios,email',
             'password' => 'required|string|min:8',
             'idDepartamento' => 'nullable|exists:departamentos,id',
             'idInstitucion' => 'nullable|exists:instituciones,id',
@@ -72,8 +72,8 @@ class UsuarioController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'nombre_usuario' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:usuarios,email,' . $id,
+            'nombre_usuario' => 'required|string|unique:usuarios,nombre_usuario,' . $id,
+            'email' => 'required|email|unique:usuarios,email,' . $id,
             'password' => 'nullable|string|min:8',
             'idDepartamento' => 'nullable|exists:departamentos,id',
             'idInstitucion' => 'nullable|exists:instituciones,id',
@@ -93,6 +93,8 @@ class UsuarioController extends Controller
         if (!empty($request->password)) {
             $data['password'] = Hash::make($request->password);
         }
+
+        $usuario->update($data);
 
         // Obtener el nombre del nuevo departamento
         $nuevoDepartamento = $usuario->departamento->departamento ?? 'Sin departamento';

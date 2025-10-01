@@ -49,6 +49,7 @@
                             'instituciones' => $instituciones ?? collect(),
                             'departamentos' => $departamentos ?? collect(),
                             'vistaMetas' => $vistaMetas ?? true,
+                            'origen' => 'metas',
                         ])
                     </div>
                 </div>
@@ -109,9 +110,8 @@
                                 </td>
                                 <td class="px-4 py-3 max-w-[150px] break-words">
                                     @if (!empty($meta->nombre_actividades))
-                                        @foreach (explode(',', $meta->nombre_actividades) as $actividad)
-                                            <span
-                                                class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                        @foreach (json_decode($meta->nombre_actividades, true) as $actividad)
+                                            <span>
                                                 {{ trim($actividad) }}
                                             </span>
                                         @endforeach
@@ -206,6 +206,7 @@
                                                             'instituciones' => $instituciones ?? collect(),
                                                             'departamentos' => $departamentos ?? collect(),
                                                             'vistaMetas' => $vistaMetas ?? true,
+                                                            'origen' => 'metas',
                                                         ])
                                                     </div>
                                                 </div>
@@ -382,22 +383,43 @@
             }
         }
 
+        // Validación de fechas al enviar el formulario
         document.addEventListener("submit", function (e) {
             const form = e.target;
 
-            // Solo aplicar si es un formulario con clase "formMeta"
             if (!form.classList.contains("formMeta")) return;
 
             const inicio = form.querySelector("[name='fecha_inicio']").value;
             const fin = form.querySelector("[name='fecha_fin']").value;
 
-            if (inicio && fin && new Date(inicio) > new Date(fin)) {
+            // Fechas del plan desde los atributos data-*
+            const planInicio = form.dataset.fechaInicioPlan;
+            const planFin = form.dataset.fechaFinPlan;
+
+            let errores = [];
+
+            if (!inicio || !fin) return;
+
+            // Validaciones
+            if (new Date(inicio) > new Date(fin)) {
+                errores.push("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.");
+            }
+
+            if (new Date(inicio) < new Date(planInicio)) {
+                errores.push(`⚠️ La fecha de inicio no puede ser anterior al inicio del plan (${planInicio}).`);
+            }
+
+            if (new Date(fin) > new Date(planFin)) {
+                errores.push(`⚠️ La fecha de fin no puede ser posterior al fin del plan (${planFin}).`);
+            }
+
+            if (errores.length > 0) {
                 e.preventDefault();
-                mostrarAlerta("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.", form);
+                mostrarAlerta(errores, form);
             }
         });
 
-        function mostrarAlerta(mensaje, form) {
+        function mostrarAlerta(mensajes, form) {
             let alerta = form.querySelector("#alertaFechas");
             if (!alerta) {
                 alerta = document.createElement("div");
@@ -405,8 +427,10 @@
                 alerta.className = "bg-yellow-100 text-yellow-800 border border-yellow-400 px-4 py-2 rounded mb-4";
                 form.insertBefore(alerta, form.firstChild);
             }
-            alerta.textContent = mensaje;
+
+            alerta.innerHTML = mensajes.map(msg => `<div>${msg}</div>`).join('');
         }
+
     </script>
 
 

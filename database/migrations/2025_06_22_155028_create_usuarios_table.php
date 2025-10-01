@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('idInstitucion')->nullable();
             $table->unsignedBigInteger('idDepartamento')->nullable();
-            $table->string('nombre_usuario', 255)->unique();
-            $table->string('password', 255);
-            $table->string('tipo_usuario', 255);
-            $table->string('email', 255)->unique();
+            $table->text('nombre_usuario')->unique();
+            $table->text('password');
+            $table->text('tipo_usuario');
+            $table->text('email')->unique();
             $table->rememberToken();
             $table->timestamps();
         });

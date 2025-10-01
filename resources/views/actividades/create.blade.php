@@ -1,4 +1,4 @@
-<form id="formNuevaActividad" class="formActividad" method="POST" action="{{ route('actividades.store') }}">
+<form id="formNuevaActividad" class="formActividad" method="POST" action="{{ route('actividades.store') }}" x-ref="formNuevaActividad" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}">
     @csrf
 
     <input type="hidden" name="idMetas" value="{{ $meta->id ?? '' }}">
@@ -31,7 +31,7 @@
             <label class="block font-medium">Nombre Actividad</label>
             <select name="nombre_actividad" class="w-full border rounded px-3 py-2" required>
                 <option value="">Seleccione una actividad</option>
-                @foreach($actividadesDisponibles as $actividadDisponible)
+                @foreach($actividadesDisponibles->unique() as $actividadDisponible)
                     <option value="{{ $actividadDisponible }}">
                         {{ $actividadDisponible }}
                     </option>
@@ -89,7 +89,7 @@
 
         {{-- Botones --}}
         <div class="flex justify-end gap-2">
-            <button type="button" @click="modalOpen = false"
+            <button type="button" @click="modalOpen = false; limpiarFormularioCrearActividad()"
                 class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                 Guardar

@@ -1,4 +1,4 @@
-<form id="formNuevaMeta" class="formMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}">
+<form id="formNuevaMeta" class="formMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}">
     @if ($errors->any())
         <div class="mb-4">
             <ul class="list-disc list-inside text-sm text-red-600">

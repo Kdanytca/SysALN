@@ -54,8 +54,8 @@ class InstitucionController extends Controller
         }
 
         $request->validate([
-            'nombre_institucion' => 'required|string|max:255',
-            'tipo_institucion' => 'required|string|max:255',
+            'nombre_institucion' => 'required|string',
+            'tipo_institucion' => 'required|string',
             'idEncargadoInstitucion' => [
                 'required',
                 'exists:usuarios,id',
@@ -82,8 +82,8 @@ class InstitucionController extends Controller
         }
 
         $request->validate([
-            'nombre_institucion' => 'required|string|max:255',
-            'tipo_institucion' => 'required|string|max:255',
+            'nombre_institucion' => 'required|string',
+            'tipo_institucion' => 'required|string',
             'idEncargadoInstitucion' => 'required|exists:usuarios,id',
         ]);
 

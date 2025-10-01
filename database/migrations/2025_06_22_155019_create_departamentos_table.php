@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('departamentos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('idInstitucion')->nullable();
-            $table->string('departamento', 255);
+            $table->text('departamento');
             $table->unsignedBigInteger('idEncargadoDepartamento')->nullable();
             $table->timestamps();
         });

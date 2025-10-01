@@ -48,6 +48,7 @@
                             'closeModal' => 'modalNuevoUsuario = false',
                             'ocultarCamposRelacionados' => false,
                             'institucion' => $institucion,
+                            'origen' => 'departamentos',
                         ])
                     </div>
                 </div>
@@ -123,6 +124,7 @@
                                                                 'closeModal' => 'modalNuevoUsuario = false',
                                                                 'ocultarCamposRelacionados' => false,
                                                                 'institucion' => $institucion,
+                                                                'origen' => 'departamentos',
                                                             ])
                                                         </div>
                                                     </div>

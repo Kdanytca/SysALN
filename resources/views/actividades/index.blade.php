@@ -59,6 +59,7 @@
                                 'instituciones' => $instituciones ?? collect(),
                                 'departamentos' => $departamentos ?? collect(),
                                 'vistaMetas' => $vistaMetas ?? true,
+                                'origen' => 'actividades',
                             ])
                         </div>
                     </div>
@@ -119,9 +120,8 @@
                                     {{ $actividad->nombre_actividad }}</td>
                                 <td class="px-4 py-3 max-w-[200px] break-words">
                                     @if (!empty($actividad->objetivos))
-                                        @foreach (explode(',', $actividad->objetivos) as $objetivo)
-                                            <span
-                                                class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                        @foreach (json_decode($actividad->objetivos, true) as $objetivo)
+                                            <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
                                                 {{ trim($objetivo) }}
                                             </span>
                                         @endforeach
@@ -208,6 +208,7 @@
                                                             'instituciones' => $instituciones ?? collect(),
                                                             'departamentos' => $departamentos ?? collect(),
                                                             'vistaMetas' => $vistaMetas ?? true,
+                                                            'origen' => 'actividades',
                                                         ])
                                                     </div>
                                                 </div>
@@ -606,19 +607,39 @@
         document.addEventListener("submit", function (e) {
             const form = e.target;
 
-            // Solo aplicar si es un formulario con clase "formActividad"
             if (!form.classList.contains("formActividad")) return;
 
             const inicio = form.querySelector("[name='fecha_inicio']").value;
             const fin = form.querySelector("[name='fecha_fin']").value;
 
-            if (inicio && fin && new Date(inicio) > new Date(fin)) {
+            // Fechas de la meta desde los atributos data-*
+            const metaInicio = form.dataset.fechaInicioMeta;
+            const metaFin = form.dataset.fechaFinMeta;
+
+            let errores = [];
+
+            if (!inicio || !fin) return;
+
+            // Validaciones
+            if (new Date(inicio) > new Date(fin)) {
+                errores.push("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.");
+            }
+
+            if (new Date(inicio) < new Date(metaInicio)) {
+                errores.push(`⚠️ La fecha de inicio no puede ser anterior al inicio de la meta (${metaInicio}).`);
+            }
+
+            if (new Date(fin) > new Date(metaFin)) {
+                errores.push(`⚠️ La fecha de fin no puede ser posterior al fin de la meta (${metaFin}).`);
+            }
+
+            if (errores.length > 0) {
                 e.preventDefault();
-                mostrarAlerta("⚠️ La fecha de inicio no puede ser mayor que la fecha de fin.", form);
+                mostrarAlerta(errores, form);
             }
         });
 
-        function mostrarAlerta(mensaje, form) {
+        function mostrarAlerta(mensajes, form) {
             let alerta = form.querySelector("#alertaFechas");
             if (!alerta) {
                 alerta = document.createElement("div");
@@ -626,7 +647,58 @@
                 alerta.className = "bg-yellow-100 text-yellow-800 border border-yellow-400 px-4 py-2 rounded mb-4";
                 form.insertBefore(alerta, form.firstChild);
             }
-            alerta.textContent = mensaje;
+
+            alerta.innerHTML = mensajes.map(msg => `<div>${msg}</div>`).join('');
         }
+
+        // Limpiar formulario al cerrar modal
+        function limpiarFormularioCrearActividad() {
+            const formulario = document.querySelector('[x-ref="formNuevaActividad"]');
+            if (formulario) formulario.reset();
+
+            // Limpiar contenedor de objetivos
+            const contenedorObjetivos = document.getElementById('contenedorObjetivos');
+            if (contenedorObjetivos) {
+                contenedorObjetivos.innerHTML = '';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-con-x mb-2';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'objetivos[]';
+                input.className = 'border rounded px-3 py-2';
+                input.required = true;
+
+                const botonEliminar = document.createElement('button');
+                botonEliminar.type = 'button';
+                botonEliminar.innerText = '×';
+                botonEliminar.onclick = function () {
+                    eliminarEsteCampo(botonEliminar);
+                };
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(botonEliminar);
+                contenedorObjetivos.appendChild(wrapper);
+            }
+
+            // Restaurar select de unidad encargada a su valor por defecto
+            const unidadDisplay = document.getElementById('unidad_encargada_display_nuevo');
+            const unidadHidden = document.getElementById('unidad_encargada_nuevo');
+            if (unidadDisplay && unidadHidden) {
+                unidadDisplay.selectedIndex = 0; // Seleccionar "Sin Departamento"
+                unidadHidden.value = '';
+            }
+
+            // Reiniciar model Alpine si aplica (usuario seleccionado y unidad)
+            if (typeof Alpine !== 'undefined') {
+                const alpineComponent = formulario.__x;
+                if (alpineComponent && alpineComponent.$data) {
+                    alpineComponent.$data.usuarioSeleccionado = '';
+                    alpineComponent.$data.unidad = '';
+                }
+            }
+        }
+
     </script>
 </x-app-layout>

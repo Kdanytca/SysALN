@@ -1,4 +1,4 @@
-<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}">
+<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}">
     @csrf
     @if($isEdit)
     @method('PUT')
@@ -73,7 +73,7 @@
     <div class="mb-4">
         <label class="block font-medium">Actividades</label>
         <div id="contenedorActividadesEdit">
-            @foreach (explode(',', $meta->nombre_actividades) as $actividad)
+            @foreach (json_decode($meta->nombre_actividades, true) as $actividad)
                 <div class="input-con-x mb-2">
                     <input type="text" name="nombre_actividades[]" value="{{ trim($actividad) }}"
                         class="border rounded px-3 py-2 w-full" required>

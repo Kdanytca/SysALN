@@ -19,6 +19,11 @@ class Meta extends Model
         'comentario',
     ];
 
+    protected $casts = [
+        'ejes_estrategicos' => 'array',
+        'nombre_actividades' => 'array',
+    ];
+
     // Relaciones
     public function planEstrategico()
     {

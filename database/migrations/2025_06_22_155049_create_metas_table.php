@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('idPlanEstrategico')->constrained('planes_estrategicos')->onDelete('cascade');
             $table->foreignId('idEncargadoMeta')->nullable()->constrained('usuarios')->nullOnDelete();
-            $table->string('nombre_meta', 255);
+            $table->text('nombre_meta');
             $table->json('ejes_estrategicos')->nullable();
-            $table->string('nombre_actividades', 255)->nullable();
+            $table->json('nombre_actividades')->nullable();
             $table->text('resultados_esperados');
             $table->text('indicador_resultados')->nullable();
             $table->date('fecha_inicio');

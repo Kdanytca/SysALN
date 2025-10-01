@@ -112,24 +112,32 @@ class MetaController extends Controller
         $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
             'idEncargadoMeta' => 'required|exists:usuarios,id',
-            'nombre_meta' => 'required|string|max:255',
+            'nombre_meta' => 'required|string',
             'ejes_estrategicos' => 'required|array|min:1',
             'ejes_estrategicos.*' => 'required|string',
             'nombre_actividades' => 'required|array|min:1',
-            'nombre_actividades.*' => 'required|string|max:255',
-            'resultados_esperados' => 'required|string|max:255',
-            'indicador_resultados' => 'required|string|max:255',
+            'nombre_actividades.*' => 'required|string',
+            'resultados_esperados' => 'required|string',
+            'indicador_resultados' => 'required|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'comentario' => 'nullable|string|max:255',
+            'comentario' => 'nullable|string',
         ]);
+
+        if ($request->fecha_inicio < $plan->fecha_inicio) {
+            return back()->withErrors(['fecha_inicio' => 'La fecha de inicio de la meta no puede ser anterior a la del plan.']);
+        }
+
+        if ($request->fecha_fin > $plan->fecha_fin) {
+            return back()->withErrors(['fecha_fin' => 'La fecha de fin de la meta no puede ser posterior a la del plan.']);
+        }
 
         Meta::create([
             'idPlanEstrategico' => $request->idPlanEstrategico,
             'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
             'ejes_estrategicos' => json_encode($request->ejes_estrategicos),
-            'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'nombre_actividades' => json_encode($request->nombre_actividades),
             'resultados_esperados' => $request->resultados_esperados,
             'indicador_resultados' => $request->indicador_resultados,
             'fecha_inicio' => $request->fecha_inicio,
@@ -154,24 +162,31 @@ class MetaController extends Controller
         $request->validate([
             'idPlanEstrategico' => 'required|exists:planes_estrategicos,id',
             'idEncargadoMeta' => 'required|exists:usuarios,id',
-            'nombre_meta' => 'required|string|max:255',
+            'nombre_meta' => 'required|string',
             'ejes_estrategicos' => 'required|array|min:1',
             'ejes_estrategicos.*' => 'required|string',
             'nombre_actividades' => 'required|array|min:1',
-            'nombre_actividades.*' => 'required|string|max:255',
-            'resultados_esperados' => 'required|string|max:255',
-            'indicador_resultados' => 'nullable|string|max:255',
+            'nombre_actividades.*' => 'required|string',
+            'resultados_esperados' => 'required|string',
+            'indicador_resultados' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'comentario' => 'nullable|string|max:255',
+            'comentario' => 'nullable|string',
         ]);
 
+        if ($request->fecha_inicio < $plan->fecha_inicio) {
+            return back()->withErrors(['fecha_inicio' => 'La fecha de inicio de la meta no puede ser anterior a la del plan.']);
+        }
+        if ($request->fecha_fin > $plan->fecha_fin) {
+            return back()->withErrors(['fecha_fin' => 'La fecha de fin de la meta no puede ser posterior a la del plan.']);
+        }
+        
         $meta->update([
             'idPlanEstrategico' => $request->idPlanEstrategico,
             'idEncargadoMeta' => $request->idEncargadoMeta,
             'nombre_meta' => $request->nombre_meta,
             'ejes_estrategicos' => json_encode($request->ejes_estrategicos),
-            'nombre_actividades' => implode(',', $request->nombre_actividades),
+            'nombre_actividades' => json_encode($request->nombre_actividades),
             'resultados_esperados' => $request->resultados_esperados,
             'indicador_resultados' => $request->indicador_resultados,
             'fecha_inicio' => $request->fecha_inicio,

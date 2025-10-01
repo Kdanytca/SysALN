@@ -1,4 +1,4 @@
-<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}">
+<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}">
     @csrf
     @if($isEdit)
         @method('PUT')
@@ -62,7 +62,7 @@
         <div class="mb-4">
             <label class="block font-medium">Objetivos</label>
             <div id="contenedorObjetivosEdit">
-                @foreach (explode(',', $actividad->objetivos) as $objetivo)
+                @foreach (json_decode($actividad->objetivos, true) as $objetivo)
                     <div class="input-con-x mb-2">
                         <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}" class="border rounded px-3 py-2" required>
                         <button type="button" onclick="eliminarEsteCampo(this)">×</button>

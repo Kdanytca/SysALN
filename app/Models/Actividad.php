@@ -19,6 +19,10 @@ class Actividad extends Model
         'unidad_encargada',
     ];
 
+    protected $casts = [
+        'objetivos' => 'array',
+    ];
+
     // Relaciones
     public function meta()
     {

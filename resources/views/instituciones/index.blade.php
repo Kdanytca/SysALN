@@ -48,6 +48,7 @@
                         @include('instituciones.usuario', [
                             'closeModal' => 'modalNuevoUsuario = false',
                             'ocultarCamposRelacionados' => true,
+                            'origen' => 'instituciones',
                         ])
                     </div>
                 </div>
@@ -126,6 +127,7 @@
                                                         @include('instituciones.usuario', [
                                                             'closeModal' => 'modalNuevoUsuario = false',
                                                             'ocultarCamposRelacionados' => true,
+                                                            'origen' => 'instituciones',
                                                         ])
                                                     </div>
                                                 </div>
