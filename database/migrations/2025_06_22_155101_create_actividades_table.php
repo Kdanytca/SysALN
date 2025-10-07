@@ -19,6 +19,7 @@ return new class extends Migration
             $table->json('objetivos');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
+            $table->json('imagenes')->nullable()->onDelete('cascade');
             $table->text('comentario');
             $table->text('unidad_encargada')->nullable();
             $table->timestamps();

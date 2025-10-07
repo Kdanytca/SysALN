@@ -31,7 +31,6 @@
                         </button>
                     @endif
 
-
                     <!-- Modal -->
                     <div x-show="modalOpen"
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
@@ -277,7 +276,7 @@
 
                         @if ($actividades->isEmpty())
                             <tr>
-                                <td colspan="{{ in_array($rol, $rolesPermitidos) ? 9 : 8 }}" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="{{ in_array($rol, $rolesPermitidos) ? 10 : 9 }}" class="px-6 py-4 text-center text-sm text-gray-500">
                                     No hay actividades registradas.
                                 </td>
                             </tr>
@@ -690,15 +689,103 @@
                 unidadHidden.value = '';
             }
 
-            // Reiniciar model Alpine si aplica (usuario seleccionado y unidad)
+            // Reiniciar model Alpine si aplica (usuario seleccionado, unidad, imágenes, etc.)
             if (typeof Alpine !== 'undefined') {
                 const alpineComponent = formulario.__x;
                 if (alpineComponent && alpineComponent.$data) {
-                    alpineComponent.$data.usuarioSeleccionado = '';
-                    alpineComponent.$data.unidad = '';
+                    const data = alpineComponent.$data;
+
+                    // Campos de datos generales
+                    if ('usuarioSeleccionado' in data) data.usuarioSeleccionado = '';
+                    if ('unidad' in data) data.unidad = '';
+
+                    // 🔹 LIMPIAR PREVISUALIZACIÓN DE IMÁGENES
+                    if ('nuevasImagenes' in data) data.nuevasImagenes = [];
+                    if ('modalVisible' in data) data.modalVisible = false;
+                    if ('imagenActual' in data) data.imagenActual = '';
+
+                    // 🔹 Limpiar el input file
+                    const inputFile = formulario.querySelector('input[type="file"][name="imagenes[]"]');
+                    if (inputFile) inputFile.value = '';
                 }
             }
         }
 
+        // Alpine.js para previsualización de imágenes
+        function previsualizacionImagenes(config = {}) {
+            return {
+                nuevasImagenes: [],
+                imagenesExistentes: config.existentes || [],
+                imagenesEliminadas: [],
+                modalVisible: false,
+                imagenActual: '',
+
+                init() {
+                    this.nuevasImagenes = [];
+                    this.imagenesExistentes = this.imagenesExistentes || [];
+                },
+
+                // Manejar archivos seleccionados
+                manejarArchivos(event) {
+                    const archivos = Array.from(event.target.files);
+                    for (let archivo of archivos) {
+                        if (!archivo.type.startsWith('image/')) continue;
+                        const previewUrl = URL.createObjectURL(archivo);
+                        this.nuevasImagenes.push({ file: archivo, preview: previewUrl });
+                    }
+
+                    // Reconstruir el input para mantener todos los archivos
+                    this.actualizarInput();
+                },
+
+                eliminarNueva(index) {
+                    if (index >= 0 && index < this.nuevasImagenes.length) {
+                        URL.revokeObjectURL(this.nuevasImagenes[index].preview);
+                        this.nuevasImagenes.splice(index, 1);
+                    }
+
+                    // Reconstruir input
+                    this.actualizarInput();
+                },
+
+                eliminarExistente(index) {
+                    const imagen = this.imagenesExistentes[index];
+                    if (imagen) {
+                        if (!this.imagenesEliminadas.includes(imagen)) {
+                            this.imagenesEliminadas.push(imagen);
+                        }
+                        this.imagenesExistentes.splice(index, 1);
+
+                        // Inputs ocultos para eliminar
+                        this.$nextTick(() => {
+                            let contenedor = document.getElementById('inputs-eliminar');
+                            if (contenedor) {
+                                contenedor.innerHTML = '';
+                                this.imagenesEliminadas.forEach(img => {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'eliminar_imagenes[]';
+                                    input.value = img;
+                                    contenedor.appendChild(input);
+                                });
+                            }
+                        });
+                    }
+                },
+
+                actualizarInput() {
+                    if (this.$refs.inputImagenes) {
+                        const dt = new DataTransfer();
+                        this.nuevasImagenes.forEach(img => dt.items.add(img.file));
+                        this.$refs.inputImagenes.files = dt.files;
+                    }
+                },
+
+                verImagen(url) {
+                    this.imagenActual = url;
+                    this.modalVisible = true;
+                }
+            };
+        }
     </script>
 </x-app-layout>

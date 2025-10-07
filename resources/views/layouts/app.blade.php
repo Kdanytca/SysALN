@@ -219,8 +219,8 @@
                     </a>
                 </div>
                 <div class="text-gray-400 leading-relaxed">
-                    <p>CARRETERA A SANTA TECLA KM. 11, LA LIBERTAD, EL SALVADOR C.A</p>
-                    <p>TEL. (503) 2132-7400. FAX (503) 2132-7406</p>
+                    <p>KM. 64 1/2, DESVÍO HACIENDA EL NILO, SOBRE AUTOPISTA A ZACATECOLUCA Y USULUTÁN., ZACATECOLUCA, EL SALVADOR</p>
+                    <p>TEL. (503) 2334 0763.</p>
                 </div>
             </div>
 

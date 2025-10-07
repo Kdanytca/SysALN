@@ -1,4 +1,4 @@
-<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}">
+<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}" enctype="multipart/form-data">
     @csrf
     @if($isEdit)
         @method('PUT')
@@ -92,6 +92,78 @@
                 <input type="date" name="fecha_fin" 
                     value="{{ old('fecha_fin', $actividad->fecha_fin) }}"
                     class="w-full border rounded px-3 py-2" required>
+            </div>
+        </div>
+
+        {{-- Imágenes --}}
+        <div class="mb-4" x-data="previsualizacionImagenes({ existentes: {{ isset($actividad) ? json_encode(json_decode($actividad->imagenes ?? '[]')) : '[]' }} })" x-init="init()">
+
+            <label class="block font-medium mb-2">Imágenes actuales</label>
+
+            {{-- Previsualización de imágenes existentes --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2" x-show="imagenesExistentes.length > 0">
+                <template x-for="(imagen, index) in imagenesExistentes" :key="'existente-' + index">
+                    <div class="relative group">
+                        <img :src="'/' + imagen" @click="verImagen('/' + imagen)"
+                            class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
+                        <button type="button" @click="eliminarExistente(index)"
+                            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
+                            ✕
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Inputs ocultos dinámicos para eliminar imágenes --}}
+            <div id="inputs-eliminar"></div>
+
+            <template x-if="imagenesExistentes.length === 0 && imagenesEliminadas.length === 0">
+                <p class="text-sm text-gray-500 mt-2">No hay imágenes agregadas actualmente.</p>
+            </template>
+
+            {{-- Agregar nuevas imágenes --}}
+            <label class="block font-medium mt-4 mb-2">Agregar nuevas imágenes</label>
+            <input type="file" name="imagenes_nuevas[]" multiple accept="image/*"
+                @change="manejarArchivos($event)" class="w-full border rounded px-3 py-2" x-ref="inputImagenes">
+
+            {{-- Previsualización de nuevas imágenes --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <template x-for="(imagen, index) in nuevasImagenes" :key="'nueva-' + index">
+                    <div class="relative group">
+                        <img :src="imagen.preview" @click="verImagen(imagen.preview)"
+                            class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
+
+                        <button type="button" @click="eliminarNueva(index)"
+                            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
+                            ✕
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Modal pantalla completa --}}
+            <div x-show="modalVisible" x-transition
+                class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center"
+                @click.away="modalVisible = false" 
+                @keydown.escape.window="modalVisible = false">
+
+                <div class="relative">
+                    {{-- Imagen ampliada --}}
+                    <img :src="imagenActual" class="max-h-[80vh] max-w-[90vw] rounded shadow-lg">
+
+                    {{-- Botón cerrar --}}
+                    <button type="button" 
+                            @click="modalVisible = false"
+                            class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-50">
+                        &times;
+                    </button>
+
+                    {{-- Botón descargar --}}
+                    <a :href="imagenActual" download 
+                    class="absolute bottom-2 right-2 bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-200 z-50">
+                        Descargar
+                    </a>
+                </div>
             </div>
         </div>
 
