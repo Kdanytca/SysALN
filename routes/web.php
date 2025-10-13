@@ -99,6 +99,9 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     Route::resource('actividades', ActividadController::class)->except(['show']);
     Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
     Route::get('/actividades/responsable', [ActividadController::class, 'indexResponsable'])->name('actividades.indexResponsable');
+    //Rango de fechas para seguimientos
+    Route::get('/actividades/{id}/rango-fechas', [ActividadController::class, 'rangoFechas']);
+
 
     // Seguimiento de Actividades
     Route::get('/actividades/{actividad}/seguimientos', [SeguimientoActividadController::class, 'listarPorActividad']);
@@ -128,7 +131,11 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     //respaldos
     Route::get('/respaldo-planes', [PlanEstrategicoController::class, 'respaldoIndex'])->name('planes.backupIndex');
     Route::get('/respaldo-planes/{id}', [PlanEstrategicoController::class, 'verBackup'])->name('planes.verBackup');
-    
+    //Descargar backup pdf
+    Route::get('/planes/backup/{id}/descargar', [PlanEstrategicoController::class, 'descargarBackup'])
+        ->name('planes.descargarBackup');
+
+
 
     // Rutas por roles
     Route::get('/institucion/{id}', [InstitucionController::class, 'ver'])->name('institucion.ver');

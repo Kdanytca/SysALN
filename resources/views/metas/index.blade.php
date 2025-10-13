@@ -290,7 +290,7 @@
                                         {{-- Actividades (lo ven todos) --}}
                                         <a href="{{ route('meta.actividades', $meta->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
-                                            Actividades
+                                            Actividades/Lineas de Acción
                                         </a>
                                     </div>
 

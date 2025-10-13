@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\BackupPlan;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PlanEstrategicoController extends Controller
 {
@@ -213,7 +214,7 @@ class PlanEstrategicoController extends Controller
         $metasBackup = $plan->metas->map(function ($meta) {
             return [
                 'id' => $meta->id,
-                'nombre_meta' => $meta->nombre_meta,
+                'nombre' => $meta->nombre,
                 'ejes_estrategicos' => $meta->ejes_estrategicos,
                 'responsable' => $meta->responsable ? $meta->responsable->nombre_usuario : null,
                 'resultados_esperados' => $meta->resultados_esperados,
@@ -231,6 +232,7 @@ class PlanEstrategicoController extends Controller
                         'fecha_fin' => $actividad->fecha_fin,
                         'comentario' => $actividad->comentario,
                         'unidad_encargada' => $actividad->unidad_encargada,
+                        'evidencia' => $actividad->evidencia,
                         'seguimientos' => $actividad->seguimientos->map(function ($seguimiento) {
                             return [
                                 'id' => $seguimiento->id,
@@ -315,5 +317,18 @@ class PlanEstrategicoController extends Controller
 
         return redirect()->route('institucion.planes', $institucionId)
             ->with('success', 'Plan eliminado correctamente.');
+    }
+    // Descargar backup en PDF
+    public function descargarBackup($id)
+    {
+        $backup = BackupPlan::findOrFail($id);
+
+        // Carga la vista que ya usas para mostrarlo, o una nueva adaptada a PDF
+        $pdf = Pdf::loadView('planes.ver_backup_pdf', compact('backup'));
+
+        // Nombre del archivo de salida
+        $nombreArchivo = 'Respaldo_' . preg_replace('/\s+/', '_', $backup->nombre_plan_estrategico) . '.pdf';
+
+        return $pdf->download($nombreArchivo);
     }
 }

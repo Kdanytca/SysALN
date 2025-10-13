@@ -16,7 +16,7 @@ class ActividadController extends Controller
     // Vista general (solo admins o encargados)
     public function index()
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
@@ -31,15 +31,15 @@ class ActividadController extends Controller
     // Vista de actividades filtradas por meta (solo admins o encargados)
     public function indexPorMeta(Meta $meta)
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
         }
 
         $meta->load('planEstrategico.departamento.institucion');
         $actividades = $meta->actividades()->with('meta')->get();
-        
+
         $institucion = $meta->planEstrategico->departamento->institucion;
-        
+
         // Filtrar solo las metas de esa institución
         $metas = Meta::whereHas('planEstrategico.departamento', function ($query) use ($institucion) {
             $query->where('idInstitucion', $institucion->id);
@@ -113,7 +113,7 @@ class ActividadController extends Controller
     // Crear actividad (solo admins o encargados)
     public function create()
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan','responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para crear actividades.');
         }
 
@@ -126,7 +126,7 @@ class ActividadController extends Controller
 
     public function store(Request $request)
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para crear actividades.');
         }
 
@@ -197,7 +197,7 @@ class ActividadController extends Controller
     // Editar actividad (solo admins o encargados)
     public function edit(Actividad $actividad)
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan','responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para editar actividades.');
         }
 
@@ -211,7 +211,7 @@ class ActividadController extends Controller
 
     public function update(Request $request, string $id)
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan','responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para actualizar actividades.');
         }
 
@@ -304,7 +304,7 @@ class ActividadController extends Controller
     // Eliminar actividad (solo admins o encargados)
     public function destroy(string $id)
     {
-        if (!in_array(Auth::user()->tipo_usuario, ['administrador','encargado_institucion','responsable_plan', 'responsable_meta'])) {
+        if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion', 'responsable_plan', 'responsable_meta'])) {
             return redirect()->back()->with('error', 'No tienes permiso para eliminar actividades.');
         }
 
@@ -332,5 +332,14 @@ class ActividadController extends Controller
         $actividad->delete();
 
         return redirect()->back()->with('success', 'Actividad eliminada exitosamente.');
+    }
+    public function rangoFechas($id)
+    {
+        $actividad = \App\Models\Actividad::findOrFail($id);
+
+        return response()->json([
+            'fecha_inicio' => $actividad->fecha_inicio,
+            'fecha_fin' => $actividad->fecha_fin,
+        ]);
     }
 }

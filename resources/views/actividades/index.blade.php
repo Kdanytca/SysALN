@@ -45,8 +45,7 @@
                     </div>
 
                     <!-- Modal de Usuario -->
-                    <div x-show="modalNuevoUsuario"
-                        x-on:close-modal-usuario.window="modalNuevoUsuario = false"
+                    <div x-show="modalNuevoUsuario" x-on:close-modal-usuario.window="modalNuevoUsuario = false"
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                         <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                             <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
@@ -89,12 +88,12 @@
                     $rolesPermitidos = ['encargado_institucion', 'responsable_plan', 'responsable_meta'];
                 @endphp
 
-                <table
-                    class="min-w-full border border-gray-300 rounded-lg shadow text-sm text-gray-800">
+                <table class="min-w-full border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
                             <th class="w-1/9 px-4 py-3 text-left">Usuario</th>
-                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Actividad/<br>Linea de Acción</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Actividad/<br>Linea de Acción
+                            </th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-[200px] break-words">Objetivos</th>
                             <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Fechas</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Comentario</th>
@@ -121,15 +120,17 @@
                                     @php
                                         $objetivos = json_decode($actividad->objetivos, true);
                                         // Asegurarse de que sea un array antes de filtrar
-                                        $objetivos_filtrados = collect(is_array($objetivos) ? $objetivos : [])
-                                            ->filter(function($item) {
+                                        $objetivos_filtrados = collect(is_array($objetivos) ? $objetivos : [])->filter(
+                                            function ($item) {
                                                 return !is_null($item) && trim($item) !== '';
-                                            });
+                                            },
+                                        );
                                     @endphp
 
                                     @if ($objetivos_filtrados->isNotEmpty())
                                         @foreach ($objetivos_filtrados as $objetivo)
-                                            <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                            <span
+                                                class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
                                                 {{ trim($objetivo) }}
                                             </span>
                                         @endforeach
@@ -148,8 +149,10 @@
                                         {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->comentario ?? 'N/A' }}</td>
-                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
+                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">
+                                    {{ $actividad->comentario ?? 'N/A' }}</td>
+                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">
+                                    {{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @php
                                         // Convertir el JSON en array
@@ -191,7 +194,8 @@
                                     @endphp
 
                                     <div class="flex justify-center">
-                                        <div class="w-4 h-4 rounded-full {{ $color }}" title="Avance: {{ round($porcentaje ?? 0, 1) }}%"></div>
+                                        <div class="w-4 h-4 rounded-full {{ $color }}"
+                                            title="Avance: {{ round($porcentaje ?? 0, 1) }}%"></div>
                                     </div>
                                 </td>
 
@@ -212,7 +216,8 @@
                                                     x-cloak>
                                                     <div
                                                         class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                        <h2 class="text-lg font-semibold mb-4">Editar Actividad / Linea de Acción</h2>
+                                                        <h2 class="text-lg font-semibold mb-4">Editar Actividad / Linea
+                                                            de Acción</h2>
                                                         @include('actividades.edit', [
                                                             'action' => route(
                                                                 'actividades.update',
@@ -227,8 +232,10 @@
                                                 <!-- Modal de Usuario -->
                                                 <div x-show="modalNuevoUsuario"
                                                     x-on:close-modal-usuario.window="modalNuevoUsuario = false"
-                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-                                                    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                                    x-cloak>
+                                                    <div
+                                                        class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
                                                         <h2 class="text-xl font-bold mb-4">Registrar Nuevo Usuario</h2>
 
                                                         @include('instituciones.usuario', [
@@ -260,7 +267,8 @@
                                                         <h2 class="text-lg font-semibold text-gray-800 mb-4">
                                                             Confirmar eliminación</h2>
                                                         <p class="text-gray-600 mb-6">
-                                                            ¿Estás seguro de que deseas eliminar esta Actividad / Linea de Acción?</p>
+                                                            ¿Estás seguro de que deseas eliminar esta Actividad / Linea
+                                                            de Acción?</p>
                                                         <div class="flex justify-end items-center gap-3 items-stretch">
                                                             <div>
                                                                 <button @click="confirmDelete = false"
@@ -305,7 +313,8 @@
 
                         @if ($actividades->isEmpty())
                             <tr>
-                                <td colspan="{{ in_array($rol, $rolesPermitidos) ? 10 : 9 }}" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="{{ in_array($rol, $rolesPermitidos) ? 10 : 9 }}"
+                                    class="px-6 py-4 text-center text-sm text-gray-500">
                                     No hay actividades registradas.
                                 </td>
                             </tr>
@@ -315,7 +324,12 @@
 
                 <br>
                 @auth
-                    @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_meta', 'encargado_institucion', 'responsable_plan']))
+                    @if (in_array(auth()->user()->tipo_usuario, [
+                            'administrador',
+                            'responsable_meta',
+                            'encargado_institucion',
+                            'responsable_plan',
+                        ]))
                         @php
                             switch (auth()->user()->tipo_usuario) {
                                 case 'responsable_meta':
@@ -339,7 +353,8 @@
                             <div class="mb-6">
                                 <div
                                     class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
-                                    <a href="{{ $rutaInicio }}" class="flex items-center space-x-1 text-sm font-medium">
+                                    <a href="{{ $rutaInicio }}"
+                                        class="flex items-center space-x-1 text-sm font-medium">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -446,7 +461,6 @@
             document.getElementById('modalVerSeguimientos').classList.add('hidden');
         }
 
-        // Abrir modal crear seguimiento
         function abrirModalCrearSeguimiento(idActividad) {
             modoEdicion = false;
 
@@ -458,6 +472,9 @@
             if (methodInput) methodInput.remove();
 
             document.getElementById('actividad_id_modal').value = idActividad;
+
+            // Llamar para limitar fechas del input según la actividad
+            establecerRangoFechasSeguimiento(idActividad);
 
             document.getElementById('modalSeguimiento').classList.remove('hidden');
         }
@@ -604,10 +621,10 @@
         // Funciones para agregar/eliminar campos dinámicos (si se usan en el formulario)
         function agregarCampo(contenedorId, name) {
             const contenedor = document.getElementById(contenedorId);
-            
+
             const wrapper = document.createElement('div');
             wrapper.className = 'input-con-x mb-2';
-            
+
             const input = document.createElement('input');
             input.type = 'text';
             input.name = name;
@@ -617,7 +634,7 @@
             const botonEliminar = document.createElement('button');
             botonEliminar.type = 'button';
             botonEliminar.innerText = '×';
-            botonEliminar.onclick = function () {
+            botonEliminar.onclick = function() {
                 eliminarEsteCampo(botonEliminar);
             };
 
@@ -632,7 +649,7 @@
         }
 
         // Funcion para validacion de fechas
-        document.addEventListener("submit", function (e) {
+        document.addEventListener("submit", function(e) {
             const form = e.target;
 
             if (!form.classList.contains("formActividad")) return;
@@ -701,7 +718,7 @@
                 const botonEliminar = document.createElement('button');
                 botonEliminar.type = 'button';
                 botonEliminar.innerText = '×';
-                botonEliminar.onclick = function () {
+                botonEliminar.onclick = function() {
                     eliminarEsteCampo(botonEliminar);
                 };
 
@@ -816,6 +833,20 @@
                 }
             };
         }
+        // === Limitar rango de fechas del seguimiento según la actividad seleccionada ===
+        async function establecerRangoFechasSeguimiento(idActividad) {
+            try {
+                const response = await fetch(`/actividades/${idActividad}/rango-fechas`);
+                const data = await response.json();
 
+                if (data.fecha_inicio && data.fecha_fin) {
+                    const inputFecha = document.getElementById('periodo_consultar_modal');
+                    inputFecha.min = data.fecha_inicio;
+                    inputFecha.max = data.fecha_fin;
+                }
+            } catch (error) {
+                console.error('Error al obtener rango de fechas:', error);
+            }
+        }
     </script>
 </x-app-layout>

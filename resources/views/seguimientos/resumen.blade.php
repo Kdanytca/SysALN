@@ -17,7 +17,7 @@
 
         <h1 class="text-2xl font-bold text-gray-700 mb-6">
             Resumen de Seguimientos de la Meta:
-            <span class="text-indigo-500">"{{ $meta->nombre_meta }}"</span>
+            <span class="text-indigo-500">"{{ $meta->nombre }}"</span>
         </h1>
 
         @if ($actividades->isEmpty())

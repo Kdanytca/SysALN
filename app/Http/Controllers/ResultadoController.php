@@ -65,7 +65,7 @@ class ResultadoController extends Controller
             $seguimientosFinalizadosGlobal += $seguimientosFinalizados;
 
             $data[] = [
-                'meta' => $meta->nombre_meta,
+                'meta' => $meta->nombre,
                 'descripcion' => "$totalSeguimientos seguimientos - $seguimientosFinalizados finalizados",
                 'porcentaje' => $porcentajeMeta,
                 'comentario' => $meta->comentario ?? '',
@@ -76,7 +76,7 @@ class ResultadoController extends Controller
                 },
             ];
 
-            $descripcionGeneral .= $meta->nombre_meta . ': ' . $meta->descripcion . '. ';
+            $descripcionGeneral .= $meta->nombre . ': ' . $meta->descripcion . '. ';
             $comentarios[] = $meta->comentario ?? '';
         }
 
@@ -134,7 +134,7 @@ class ResultadoController extends Controller
             $seguimientosFinalizadosGlobal += $seguimientosFinalizados;
 
             $data[] = [
-                'meta' => $meta->nombre_meta,
+                'meta' => $meta->nombre,
                 'descripcion' => "$totalSeguimientos seguimientos - $seguimientosFinalizados finalizados",
                 'porcentaje' => $porcentajeMeta,
                 'comentario' => $meta->comentario ?? '',

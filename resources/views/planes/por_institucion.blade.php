@@ -110,7 +110,7 @@
                                     <div class="flex justify-center gap-2 border-b border-gray-300 pb-2 mb-2">
                                         <a href="{{ route('plan.metas', $plan->id) }}"
                                             class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
-                                            Ver Metas
+                                            Metas/Objetivos Estratégicos
                                         </a>
                                         <a href="{{ route('planes.reporte', $plan->id) }}"
                                             class="bg-indigo-100 text-indigo-800 px-3 py-1.5 rounded-md text-xs hover:bg-indigo-200 transition shadow-sm">
