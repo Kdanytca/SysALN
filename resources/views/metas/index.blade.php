@@ -6,7 +6,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800">Lista de Metas del Plan Estrategico:
+            <h2 class="font-semibold text-xl text-gray-800">Lista de Metas / Estrategias del Plan Estrategico:
                 "{{ $plan->nombre_plan_estrategico }}"</h2>
 
             <!-- Botón para agregar un nuevo registro -->
@@ -30,7 +30,7 @@
                 <div x-show="modalOpen"
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                        <h2 class="text-xl font-bold mb-4">Registrar Nueva Meta</h2>
+                        <h2 class="text-xl font-bold mb-4">Registrar Nueva Meta / Estrategia</h2>
                         @include('metas.create')
                     </div>
                 </div>
@@ -71,6 +71,8 @@
                                 Usuario Responsable</th>
                             <th class="px-4 py-3 text-left">
                                 Nombre de la Meta</th>
+                            <th class="px-4 py-3 text-left break-words max-w-xs">
+                                Objetivos Estrategicos</th>
                             <th class="px-4 py-3 text-left max-w-[150px]">
                                 Ejes Estrategicos</th>
                             <th class="px-4 py-3 text-left max-w-[150px]">
@@ -80,9 +82,7 @@
                             <th class="px-4 py-3 text-left break-words max-w-xs">
                                 Indicador</th>
                             <th class="px-4 py-3 text-left">
-                                Inicio</th>
-                            <th class="px-4 py-3 text-left">
-                                Fin</th>
+                                Fechas</th>
                             <th class="px-4 py-3 text-left break-words max-w-xs">
                                 Comentario</th>
                             <th class="px-4 py-3 text-left">
@@ -96,7 +96,26 @@
                                 <td class="px-4 py-3 font-medium break-words max-w-xs">
                                     {{ $meta->encargadoMeta->nombre_usuario ?? 'Sin asignar' }}</td>
                                 <td class="px-4 py-3 break-words max-w-xs">
-                                    {{ $meta->nombre_meta }}</td>
+                                    {{ $meta->nombre }}</td>
+                                <td class="px-4 py-3 break-words max-w-xs">
+                                    @php
+                                        $objetivos = json_decode($meta->objetivos_estrategias);
+                                        // Filtra los objetivos no nulos y no vacíos
+                                        $objetivos_filtrados = collect($objetivos)->filter(function($item) {
+                                            return !is_null($item) && $item !== '';
+                                        });
+                                    @endphp
+
+                                    @if ($objetivos_filtrados->isNotEmpty())
+                                        @foreach ($objetivos_filtrados as $obj)
+                                            <span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
+                                                {{ $obj }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-sm text-red-500">Sin objetivos</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 max-w-[150px] break-words">
                                     @if (!empty($meta->ejes_estrategicos))
                                         @foreach (json_decode($meta->ejes_estrategicos, true) ?? [] as $eje)
@@ -111,26 +130,33 @@
                                 <td class="px-4 py-3 max-w-[150px] break-words">
                                     @if (!empty($meta->nombre_actividades))
                                         @foreach (json_decode($meta->nombre_actividades, true) as $actividad)
-                                            <span>
-                                                {{ trim($actividad) }}
-                                            </span>
+                                            <div class="text-gray-800 text-xs mb-1">
+                                                • {{ trim($actividad) }}
+                                            </div>
                                         @endforeach
                                     @else
                                         <span class="text-sm text-red-500">Sin actividades registradas</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
-                                    {{ $meta->resultados_esperados }}
+                                    {{ $meta->resultados_esperados ?? 'N/A' }}
                                 </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     {{ $meta->indicador_resultados }}
                                 </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
-                                    {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }}</td>
+                                    Inicio:<br>
+                                    <div class="font-semibold text-indigo-600">
+                                        {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }}
+                                    </div>
+                                    <br>
+                                    Fin:<br>
+                                    <div class="font-semibold text-indigo-600">
+                                        {{ \Carbon\Carbon::parse($meta->fecha_fin)->format('d-m-Y') }}
+                                    </div>
+                                </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
-                                    {{ \Carbon\Carbon::parse($meta->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
-                                    {{ $meta->comentario }}</td>
+                                    {{ $meta->comentario ?? 'N/A' }}</td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     @php
                                         $inicio = \Carbon\Carbon::parse($meta->fecha_inicio);
@@ -181,7 +207,7 @@
                                                     x-cloak>
                                                     <div
                                                         class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                        <h2 class="text-lg font-semibold mb-4">Editar Meta</h2>
+                                                        <h2 class="text-lg font-semibold mb-4">Editar Meta / Estrategia</h2>
                                                         @include('metas.edit', [
                                                             'action' => route('metas.update', $meta->id),
                                                             'isEdit' => true,
@@ -325,7 +351,7 @@
     </div>
 
     <script>
-        function agregarActividad(contenedorId) {
+        function agregarCampo(contenedorId, inputName) {
             const contenedor = document.getElementById(contenedorId);
 
             const wrapper = document.createElement('div');
@@ -333,7 +359,7 @@
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.name = 'nombre_actividades[]';
+            input.name = inputName;
             input.className = 'border rounded px-3 py-2 w-full';
             input.required = true;
 

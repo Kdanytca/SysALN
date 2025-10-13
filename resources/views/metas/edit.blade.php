@@ -1,4 +1,4 @@
-<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}">
+<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}" x-data="{ tipo: '{{ $meta->tipo ?? 'meta' }}' }">
     @csrf
     @if($isEdit)
     @method('PUT')
@@ -6,10 +6,11 @@
 
     <div class="mb-4">
         <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
+        <input type="hidden" name="tipo" x-model="tipo">
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Usuario Responsable</label>
+        <label class="block font-medium">Usuario Responsable<i class="text-red-500">*</i></label>
         <select name="idEncargadoMeta" class="w-full border rounded px-3 py-2" required>
             <option value="" disabled>Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
@@ -30,14 +31,84 @@
         </p>
     </div>
 
+    {{-- Selector de tipo --}}
     <div class="mb-4">
-        <label class="block font-medium">Nombre de la Meta</label>
-        <input type="text" name="nombre_meta" value="{{ $meta->nombre_meta }}"
-            class="w-full border rounded px-3 py-2" required>
+        <label class="block font-medium mb-2">Tipo de Registro<i class="text-red-500">*</i></label>
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2">
+                <input type="radio" name="tipo_radio" value="meta" x-model="tipo">
+                <span>Meta</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="radio" name="tipo_radio" value="estrategia" x-model="tipo">
+                <span>Estrategia</span>
+            </label>
+        </div>
+    </div>
+
+    {{-- Campo dinámico según el tipo --}}
+    <div class="mb-4">
+        <label class="block font-medium" 
+               x-text="tipo === 'meta' ? 'Nombre de la Meta' : 'Nombre de la Estrategia'">
+        </label>
+        <input type="text" name="nombre" value="{{ $meta->nombre }}" class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    @php
+        // Si estamos en edición, $meta debería existir; si es create, $meta puede ser null.
+        // 1) Primero intentamos recuperar valores viejos (old) en caso de validación fallida
+        $objetivosOld = old('objetivos_estrategias');
+
+        if (!empty($objetivosOld) && is_array($objetivosOld)) {
+            $objetivos = $objetivosOld;
+        } else {
+            // 2) Si hay $meta y viene como array (por cast), lo usamos; si viene como JSON lo decodificamos
+            if (isset($meta)) {
+                if (is_array($meta->objetivos_estrategias)) {
+                    $objetivos = $meta->objetivos_estrategias;
+                } elseif (is_string($meta->objetivos_estrategias) && !empty($meta->objetivos_estrategias)) {
+                    $objetivos = json_decode($meta->objetivos_estrategias, true) ?: [];
+                } else {
+                    $objetivos = [];
+                }
+            } else {
+                $objetivos = [];
+            }
+        }
+
+        // Asegurarnos que siempre sea array
+        if (!is_array($objetivos)) {
+            $objetivos = [];
+        }
+
+        // Si no hay objetivos, añadimos un input vacío para que el usuario pueda escribir al menos uno
+        if (empty($objetivos)) {
+            $objetivos[] = '';
+        }
+    @endphp
+
+    <div class="mb-4">
+        <label class="block font-medium">Objetivos de la Estrategia</label>
+        <div id="contenedorObjetivosEditar">
+            @foreach(json_decode($meta->objetivos_estrategias, true) ?? $objetivos as $obj)
+                <div class="input-con-x mb-2">
+                    <input type="text" name="objetivos_estrategias[]" value="{{ trim($obj) }}"
+                        class="border rounded px-3 py-2 w-full">
+                    <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+                </div>
+            @endforeach
+        </div>
+        <div class="flex items-center gap-4 mt-2">
+            <button type="button"
+                onclick="agregarCampo('contenedorObjetivosEditar', 'objetivos_estrategias[]')" 
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                + Agregar otro objetivo
+            </button>
+        </div>
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium mb-2">Ejes Estratégicos</label>
+        <label class="block font-medium mb-2">Ejes Estratégicos<i class="text-red-500"> (Minimo 1)</i></label>
         <div class="flex flex-wrap gap-2">
             @php
                 // Ejes disponibles desde el plan (string con comas)
@@ -71,7 +142,7 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Actividades</label>
+        <label class="block font-medium">Actividades / Lineas de Acción<i class="text-red-500">*</i></label>
         <div id="contenedorActividadesEdit">
             @foreach (json_decode($meta->nombre_actividades, true) as $actividad)
                 <div class="input-con-x mb-2">
@@ -83,7 +154,7 @@
         </div>
         <div class="flex items-center gap-4 mt-2">
             <button type="button"
-                onclick="agregarActividad('contenedorActividadesEdit')"
+                onclick="agregarCampo('contenedorActividadesEdit', 'nombre_actividades[]')"
                 class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 + Agregar otra actividad
             </button>
@@ -91,26 +162,26 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Resultados</label>
+        <label class="block font-medium">Resultados Esperados</label>
         <input type="text" name="resultados_esperados" value="{{ $meta->resultados_esperados }}"
-            class="w-full border rounded px-3 py-2" required>
+            class="w-full border rounded px-3 py-2">
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Indicador</label>
+        <label class="block font-medium">Indicador de Resultados<i class="text-red-500">*</i></label>
         <input type="text" name="indicador_resultados" value="{{ $meta->indicador_resultados }}"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="flex gap-4 mb-4">
         <div class="w-1/2">
-            <label class="block font-medium">Fecha de Inicio</label>
+            <label class="block font-medium">Fecha de Inicio<i class="text-red-500">*</i></label>
             <input type="date" name="fecha_inicio" value="{{ $meta->fecha_inicio }}"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     
         <div class="w-1/2">
-            <label class="block font-medium">Fecha de Fin</label>
+            <label class="block font-medium">Fecha de Fin<i class="text-red-500">*</i></label>
             <input type="date" name="fecha_fin" value="{{ $meta->fecha_fin }}"
                 class="w-full border rounded px-3 py-2" required>
         </div>

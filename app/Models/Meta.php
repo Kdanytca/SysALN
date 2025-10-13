@@ -9,7 +9,9 @@ class Meta extends Model
     protected $fillable = [
         'idPlanEstrategico',
         'idEncargadoMeta',
-        'nombre_meta',
+        'tipo',
+        'nombre',
+        'objetivos_estrategias',
         'ejes_estrategicos',
         'nombre_actividades',
         'resultados_esperados',
@@ -20,6 +22,7 @@ class Meta extends Model
     ];
 
     protected $casts = [
+        'objetivos_estrategias' => 'array',
         'ejes_estrategicos' => 'array',
         'nombre_actividades' => 'array',
     ];

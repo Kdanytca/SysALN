@@ -66,8 +66,6 @@ class UsuarioController extends Controller
         return response()->json($usuarios);
     }
 
-
-
     // Se encarga de editar un usuario
     public function update(Request $request, string $id)
     {
@@ -89,17 +87,21 @@ class UsuarioController extends Controller
             'tipo_usuario' => $request->tipo_usuario,
         ]);
 
-        // Solo actualiza el password si se proporcionó uno nuevo
+        // Initialize the $data array
+        $data = [];
+
+        // Only update the password if a new one is provided
         if (!empty($request->password)) {
             $data['password'] = Hash::make($request->password);
         }
 
+        // Update the user with any new data, including password if it was provided
         $usuario->update($data);
 
-        // Obtener el nombre del nuevo departamento
+        // Get the name of the new department
         $nuevoDepartamento = $usuario->departamento->departamento ?? 'Sin departamento';
 
-        // Actualizar todas las actividades del usuario con el nuevo nombre del departamento
+        // Update all the activities assigned to this user with the new department name
         \App\Models\Actividad::where('idEncargadoActividad', $usuario->id)
             ->update(['unidad_encargada' => $nuevoDepartamento]);
 
@@ -119,5 +121,26 @@ class UsuarioController extends Controller
     {
         $usuario = Usuario::findOrFail($id);
         return response()->json($usuario);
+    }
+
+    // Verifica si un nombre de usuario o correo electrónico ya existe
+    public function verificarUnico(Request $request)
+    {
+        $campo = $request->input('campo');
+        $valor = $request->input('valor');
+        $id = $request->input('id'); // <- ID del usuario en edición
+
+        if (!in_array($campo, ['nombre_usuario', 'email'])) {
+            return response()->json(['error' => 'Campo no permitido'], 400);
+        }
+
+        $query = \App\Models\Usuario::where($campo, $valor);
+        if ($id) {
+            $query->where('id', '!=', $id); // ignorar el usuario actual
+        }
+
+        $existe = $query->exists();
+
+        return response()->json(['existe' => $existe]);
     }
 }

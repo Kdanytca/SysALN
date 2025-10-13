@@ -134,12 +134,12 @@ class ActividadController extends Controller
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string',
-            'objetivos' => 'required|array|min:1',
-            'objetivos.*' => 'required|string',
+            'objetivos' => 'nullable|array|min:1',
+            'objetivos.*' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'imagenes.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-            'comentario' => 'required|string',
+            'evidencia.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx|max:5120',
+            'comentario' => 'nullable|string',
             'unidad_encargada' => 'nullable|string',
         ]);
 
@@ -153,19 +153,29 @@ class ActividadController extends Controller
             return back()->withErrors(['fecha_fin' => 'La fecha de fin de la actividad no puede ser posterior a la de la meta.']);
         }
 
-        $rutasImagenes = [];
+        $rutasEvidencia = [];
 
-        if ($request->hasFile('imagenes')) {
-            $carpetaDestino = public_path('uploads/actividades');
+        if ($request->hasFile('evidencia')) {
+            foreach ($request->file('evidencia') as $archivo) {
+                if (!$archivo) continue;
 
-            if (!File::exists($carpetaDestino)) {
-                File::makeDirectory($carpetaDestino, 0755, true);
-            }
+                $extension = $archivo->getClientOriginalExtension();
+                $nombreArchivo = Str::uuid() . '.' . $extension;
 
-            foreach ($request->file('imagenes') as $imagen) {
-                $nombreArchivo = Str::uuid() . '.' . $imagen->getClientOriginalExtension();
-                $imagen->move($carpetaDestino, $nombreArchivo);
-                $rutasImagenes[] = 'uploads/actividades/' . $nombreArchivo;
+                // Determinar la carpeta destino según el tipo
+                if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])) {
+                    $carpeta = 'uploads/actividades/imagenes';
+                } else {
+                    $carpeta = 'uploads/actividades/documentos';
+                }
+
+                $carpetaDestino = public_path($carpeta);
+                if (!File::exists($carpetaDestino)) {
+                    File::makeDirectory($carpetaDestino, 0755, true);
+                }
+
+                $archivo->move($carpetaDestino, $nombreArchivo);
+                $rutasEvidencia[] = $carpeta . '/' . $nombreArchivo;
             }
         }
 
@@ -176,7 +186,7 @@ class ActividadController extends Controller
             'objetivos' => json_encode($request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'imagenes' => json_encode($rutasImagenes),
+            'evidencia' => json_encode($rutasEvidencia),
             'comentario' => $request->comentario,
             'unidad_encargada' => $request->unidad_encargada,
         ]);
@@ -212,14 +222,14 @@ class ActividadController extends Controller
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string',
-            'objetivos' => 'required|array|min:1',
-            'objetivos.*' => 'required|string',
+            'objetivos' => 'nullable|array|min:1',
+            'objetivos.*' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'imagenes_nuevas' => 'nullable|array',
-            'imagenes_nuevas.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-            'eliminar_imagenes' => 'nullable|array',
-            'comentario' => 'required|string',
+            'evidencia_nueva' => 'nullable|array',
+            'evidencia_nueva.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx|max:5120',
+            'eliminar_evidencia' => 'nullable|array',
+            'comentario' => 'nullable|string',
             'unidad_encargada' => 'nullable|string',
         ]);
 
@@ -231,54 +241,49 @@ class ActividadController extends Controller
             return back()->withErrors(['fecha_fin' => 'La fecha de fin de la actividad no puede ser posterior a la de la meta.']);
         }
 
-        // Imágenes actuales guardadas
-        $imagenesActuales = json_decode($actividad->imagenes, true) ?? [];
-        $imagenesAEliminar = $request->input('eliminar_imagenes', []);
+        $evidenciaActual = json_decode($actividad->evidencia, true) ?? [];
+        $evidenciaAEliminar = $request->input('eliminar_evidencia', []);
 
-        // Eliminar físicamente las imágenes seleccionadas
-        foreach ($imagenesAEliminar as $ruta) {
+        foreach ($evidenciaAEliminar as $ruta) {
             if (empty($ruta)) continue;
 
             $rutaCompleta = public_path($ruta);
 
-            // Evitar intentar borrar la carpeta public o rutas inválidas
+            // Evitar eliminar archivos fuera del directorio previsto
             if (is_file($rutaCompleta) && str_contains($rutaCompleta, 'uploads/actividades')) {
                 try {
                     @unlink($rutaCompleta);
                 } catch (\Exception $e) {
-                    \Log::warning("No se pudo eliminar la imagen: {$rutaCompleta}. Error: " . $e->getMessage());
+                    \Log::warning("No se pudo eliminar el archivo: {$rutaCompleta}. Error: " . $e->getMessage());
                 }
             }
         }
 
-        // Construir el nuevo arreglo de imágenes
-        $imagenesFinales = array_values(array_diff($imagenesActuales, $imagenesAEliminar));
+        $evidenciaFinal = array_values(array_diff($evidenciaActual, $evidenciaAEliminar));
 
-        // Subir nuevas imágenes (si las hay)
-        $imagenesNuevas = $request->file('imagenes_nuevas');
+        $evidenciaNueva = $request->file('evidencia_nueva');
+        if ($evidenciaNueva && is_array($evidenciaNueva)) {
+            foreach ($evidenciaNueva as $archivo) {
+                if (!$archivo) continue;
 
-        if ($imagenesNuevas && is_array($imagenesNuevas)) {
-            $carpetaDestino = public_path('uploads/actividades');
+                $extension = $archivo->getClientOriginalExtension();
+                $nombreArchivo = Str::uuid() . '.' . $extension;
 
-            if (!File::exists($carpetaDestino)) {
-                File::makeDirectory($carpetaDestino, 0755, true);
-            }
+                $carpeta = in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])
+                    ? 'uploads/actividades/imagenes'
+                    : 'uploads/actividades/documentos';
 
-            foreach ($imagenesNuevas as $imagen) {
-                if (!$imagen) continue;
+                $carpetaDestino = public_path($carpeta);
+                if (!File::exists($carpetaDestino)) {
+                    File::makeDirectory($carpetaDestino, 0755, true);
+                }
 
-                $nombreArchivo = Str::uuid() . '.' . $imagen->getClientOriginalExtension();
-                $imagen->move($carpetaDestino, $nombreArchivo);
-                $imagenesFinales[] = 'uploads/actividades/' . $nombreArchivo;
+                $archivo->move($carpetaDestino, $nombreArchivo);
+                $evidenciaFinal[] = $carpeta . '/' . $nombreArchivo;
             }
         }
 
-        // Si el usuario eliminó todas las imágenes (ya no quedan ni nuevas ni actuales)
-        if (empty($imagenesFinales)) {
-            $actividad->imagenes = json_encode([]); // Guardar campo vacío
-        } else {
-            $actividad->imagenes = json_encode($imagenesFinales);
-        }
+        $actividad->evidencia = json_encode($evidenciaFinal);
 
         // Actualizar el resto de los campos
         $actividad->update([
@@ -288,7 +293,7 @@ class ActividadController extends Controller
             'objetivos' => json_encode($request->objetivos),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'imagenes' => $actividad->imagenes,
+            'evidencia' => $actividad->evidencia,
             'comentario' => $request->comentario,
             'unidad_encargada' => $request->unidad_encargada,
         ]);
@@ -305,12 +310,11 @@ class ActividadController extends Controller
 
         $actividad = Actividad::findOrFail($id);
 
-        // Obtener las imágenes asociadas a la actividad
-        $imagenes = json_decode($actividad->imagenes, true) ?? [];
+        // Obtener las evidencias (imágenes y documentos)
+        $evidencias = json_decode($actividad->evidencia, true) ?? [];
 
-        // Eliminar físicamente cada imagen
-        foreach ($imagenes as $ruta) {
-            // Validar ruta antes de eliminar
+        // Eliminar físicamente cada archivo
+        foreach ($evidencias as $ruta) {
             if (!empty($ruta) && str_starts_with($ruta, 'uploads/actividades/')) {
                 $rutaCompleta = public_path($ruta);
 
@@ -318,7 +322,7 @@ class ActividadController extends Controller
                     try {
                         unlink($rutaCompleta);
                     } catch (\Exception $e) {
-                        \Log::error("❌ No se pudo eliminar la imagen: {$rutaCompleta}. Error: " . $e->getMessage());
+                        \Log::error("❌ No se pudo eliminar el archivo: {$rutaCompleta}. Error: " . $e->getMessage());
                     }
                 }
             }

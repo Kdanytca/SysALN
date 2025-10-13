@@ -15,14 +15,14 @@ class Actividad extends Model
         'objetivos',
         'fecha_inicio',
         'fecha_fin',
-        'imagenes',
+        'evidencia',
         'comentario',
         'unidad_encargada',
     ];
 
     protected $casts = [
         'objetivos' => 'array',
-        'imagenes' => 'array',
+        'evidencia' => 'array',
     ];
 
     // Relaciones

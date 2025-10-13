@@ -98,12 +98,14 @@
         <table class="tabla">
             <thead>
                 <tr>
-                    <th colspan="2">Meta: {{ $meta->nombre_meta }}</th>
+                    <th colspan="2">
+                        {{ ucfirst($meta->tipo) }}: {{ $meta->nombre }}
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Responsable de Meta</td>
+                    <td>Responsable de {{ ucfirst($meta->tipo) }}</td>
                     <td>{{ optional($meta->responsable)->nombre_usuario ?? 'No asignado' }}</td>
                 </tr>
                 <tr>

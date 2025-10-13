@@ -29,13 +29,13 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Nombre del Departamento</label>
+        <label class="block font-medium">Nombre del Departamento <i class="text-red-500">*</i></label>
         <input type="text" name="departamento"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Encargado del Departamento</label>
+        <label class="block font-medium">Encargado del Departamento <i class="text-red-500">*</i></label>
 
         <select name="idEncargadoDepartamento"
                 class="w-full border rounded px-3 py-2" required>

@@ -21,15 +21,14 @@
     </div>
 
     <div class="mb-4">
-        <label for="departamento" class="block font-medium">Nombre del Departamento</label>
+        <label for="departamento" class="block font-medium">Nombre del Departamento <i class="text-red-500">*</i></label>
         <input type="text" name="departamento"
             class="w-full border rounded px-3 py-2"
             value="{{ $departamento->departamento }}" required>
     </div>
 
     <div class="mb-4">
-        <label for="encargado_departamento" class="block font-medium">Encargado del
-            Departamento</label>
+        <label for="encargado_departamento" class="block font-medium">Encargado del Departamento <i class="text-red-500">*</i></label>
         <select name="idEncargadoDepartamento" class="w-full border rounded px-3 py-2" required>
             <option value="">Seleccione un encargado</option>
             @foreach ($usuariosParaEditar[$departamento->id] ?? [] as $usuario)

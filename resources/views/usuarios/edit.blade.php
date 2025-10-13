@@ -16,12 +16,12 @@
 
 
     <div class="mb-4">
-        <label class="block font-medium">Nombre del Usuario</label>
+        <label class="block font-medium">Nombre del Usuario <i class="text-red-500">*</i></label>
         <input type="text" name="nombre_usuario" value="{{ $usuario->nombre_usuario}}"
             class="w-full border rounded px-3 py-2" required>
     </div>
     <div class="mb-4">
-        <label class="block font-medium">Correo Electronico</label>
+        <label class="block font-medium">Correo Electronico <i class="text-red-500">*</i></label>
         <input type="email" name="email" value="{{ $usuario->email}}"
             class="w-full border rounded px-3 py-2" required>
     </div>
@@ -29,6 +29,7 @@
         <label class="block font-medium">Contraseña</label>
         <input type="password" name="password" value=""
             class="w-full border rounded px-3 py-2">
+        <p>Dejar el campo en blanco si no desea cambiar la contraseña</p>
     </div>
     
     <div class="mb-4">
@@ -65,7 +66,7 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Tipo de Usuario</label>
+        <label class="block font-medium">Tipo de Usuario <i class="text-red-500">*</i></label>
         <select name="tipo_usuario" required class="w-full border rounded px-3 py-2">
             <option value="administrador" {{ $usuario->tipo_usuario == 'administrador' ? 'selected' : '' }}>Administrador</option>
             <option value="encargado_institucion" {{ $usuario->tipo_usuario == 'encargado_institucion' ? 'selected' : '' }}>Encargado de Institución</option>

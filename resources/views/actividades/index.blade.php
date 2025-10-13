@@ -7,7 +7,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             @if (isset($meta))
-                <h1>Lista de Actividades de la Meta: "{{ $meta->nombre_meta }}"</h1>
+                <h1>Lista de Actividades / Lineas de Acción de la Meta / Estrategia: "{{ $meta->nombre }}"</h1>
             @else
                 <h1>Lista de Tus Actividades</h1>
             @endif
@@ -35,7 +35,7 @@
                     <div x-show="modalOpen"
                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
                         <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                            <h2 class="text-xl font-bold mb-4">Registrar Nueva Actividad</h2>
+                            <h2 class="text-xl font-bold mb-4">Registrar Nueva Actividad / Linea de Acción</h2>
                             @include('actividades.create', [
                                 'departamentos' => $departamentos,
                                 'metas' => $metas,
@@ -94,12 +94,12 @@
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
                             <th class="w-1/9 px-4 py-3 text-left">Usuario</th>
-                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Nombre de la Actividad</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Actividad/<br>Linea de Acción</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-[200px] break-words">Objetivos</th>
-                            <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Inicio</th>
-                            <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Fin</th>
+                            <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Fechas</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Comentario</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Unidad Encargada</th>
+                            <th class="px-4 py-3 text-center whitespace-nowrap">Archivos <br>Adjuntos</th>
                             <th class="w-1/8 px-4 py-3 text-left">Estado</th>
 
                             {{-- Solo mostrar columna Acciones a roles permitidos --}}
@@ -118,8 +118,17 @@
                                 <td class="px-4 py-3 max-w-xs break-words">
                                     {{ $actividad->nombre_actividad }}</td>
                                 <td class="px-4 py-3 max-w-[200px] break-words">
-                                    @if (!empty($actividad->objetivos))
-                                        @foreach (json_decode($actividad->objetivos, true) as $objetivo)
+                                    @php
+                                        $objetivos = json_decode($actividad->objetivos, true);
+                                        // Asegurarse de que sea un array antes de filtrar
+                                        $objetivos_filtrados = collect(is_array($objetivos) ? $objetivos : [])
+                                            ->filter(function($item) {
+                                                return !is_null($item) && trim($item) !== '';
+                                            });
+                                    @endphp
+
+                                    @if ($objetivos_filtrados->isNotEmpty())
+                                        @foreach ($objetivos_filtrados as $objetivo)
                                             <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
                                                 {{ trim($objetivo) }}
                                             </span>
@@ -129,11 +138,33 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    {{ \Carbon\Carbon::parse($actividad->fecha_inicio)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->comentario }}</td>
+                                    Inicio: <br>
+                                    <div class="font-semibold text-indigo-600">
+                                        {{ \Carbon\Carbon::parse($actividad->fecha_inicio)->format('d-m-Y') }}
+                                    </div>
+                                    <br>
+                                    Fin: <br>
+                                    <div class="font-semibold text-indigo-600">
+                                        {{ \Carbon\Carbon::parse($actividad->fecha_fin)->format('d-m-Y') }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->comentario ?? 'N/A' }}</td>
                                 <td class="px-4 py-3 max-w-xs break-words whitespace-normal">{{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    @php
+                                        // Convertir el JSON en array
+                                        $archivos = json_decode($actividad->evidencia, true);
+
+                                        // Asegurar que sea un array válido
+                                        $totalArchivos = is_array($archivos) ? count($archivos) : 0;
+                                    @endphp
+
+                                    @if ($totalArchivos > 0)
+                                        <span class="text-green-600 font-semibold">{{ $totalArchivos }}</span>
+                                    @else
+                                        <span class="text-gray-400 italic">0</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     @php
                                         $inicio = \Carbon\Carbon::parse($actividad->fecha_inicio);
@@ -181,7 +212,7 @@
                                                     x-cloak>
                                                     <div
                                                         class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                        <h2 class="text-lg font-semibold mb-4">Editar Actividad</h2>
+                                                        <h2 class="text-lg font-semibold mb-4">Editar Actividad / Linea de Acción</h2>
                                                         @include('actividades.edit', [
                                                             'action' => route(
                                                                 'actividades.update',
@@ -226,12 +257,10 @@
                                                     x-cloak>
                                                     <div
                                                         class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar
-                                                            eliminación</h2>
-                                                        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
-                                                            eliminar esta
-                                                            Actividad?</p>
-
+                                                        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                                                            Confirmar eliminación</h2>
+                                                        <p class="text-gray-600 mb-6">
+                                                            ¿Estás seguro de que deseas eliminar esta Actividad / Linea de Acción?</p>
                                                         <div class="flex justify-end items-center gap-3 items-stretch">
                                                             <div>
                                                                 <button @click="confirmDelete = false"
@@ -699,12 +728,12 @@
                     if ('usuarioSeleccionado' in data) data.usuarioSeleccionado = '';
                     if ('unidad' in data) data.unidad = '';
 
-                    // 🔹 LIMPIAR PREVISUALIZACIÓN DE IMÁGENES
+                    // LIMPIAR PREVISUALIZACIÓN DE IMÁGENES
                     if ('nuevasImagenes' in data) data.nuevasImagenes = [];
                     if ('modalVisible' in data) data.modalVisible = false;
                     if ('imagenActual' in data) data.imagenActual = '';
 
-                    // 🔹 Limpiar el input file
+                    // Limpiar el input file
                     const inputFile = formulario.querySelector('input[type="file"][name="imagenes[]"]');
                     if (inputFile) inputFile.value = '';
                 }
@@ -712,60 +741,60 @@
         }
 
         // Alpine.js para previsualización de imágenes
-        function previsualizacionImagenes(config = {}) {
+        function previsualizacionEvidencia(config = {}) {
             return {
-                nuevasImagenes: [],
-                imagenesExistentes: config.existentes || [],
-                imagenesEliminadas: [],
+                formId: config.formId,
+                nuevosArchivos: [],
+                archivosExistentes: config.existentes || [],
+                archivosEliminados: [],
                 modalVisible: false,
-                imagenActual: '',
+                archivoActual: '',
 
                 init() {
-                    this.nuevasImagenes = [];
-                    this.imagenesExistentes = this.imagenesExistentes || [];
+                    this.nuevosArchivos = [];
                 },
 
-                // Manejar archivos seleccionados
                 manejarArchivos(event) {
                     const archivos = Array.from(event.target.files);
                     for (let archivo of archivos) {
-                        if (!archivo.type.startsWith('image/')) continue;
-                        const previewUrl = URL.createObjectURL(archivo);
-                        this.nuevasImagenes.push({ file: archivo, preview: previewUrl });
+                        const tipo = archivo.type.startsWith('image/') ? 'imagen' : 'documento';
+                        const preview = tipo === 'imagen' ? URL.createObjectURL(archivo) : '';
+                        this.nuevosArchivos.push({
+                            file: archivo,
+                            tipo,
+                            preview,
+                            nombre: archivo.name
+                        });
                     }
-
-                    // Reconstruir el input para mantener todos los archivos
                     this.actualizarInput();
                 },
 
-                eliminarNueva(index) {
-                    if (index >= 0 && index < this.nuevasImagenes.length) {
-                        URL.revokeObjectURL(this.nuevasImagenes[index].preview);
-                        this.nuevasImagenes.splice(index, 1);
+                eliminarNuevo(index) {
+                    const archivo = this.nuevosArchivos[index];
+                    if (archivo.tipo === 'imagen') {
+                        URL.revokeObjectURL(archivo.preview);
                     }
-
-                    // Reconstruir input
+                    this.nuevosArchivos.splice(index, 1);
                     this.actualizarInput();
                 },
 
                 eliminarExistente(index) {
-                    const imagen = this.imagenesExistentes[index];
-                    if (imagen) {
-                        if (!this.imagenesEliminadas.includes(imagen)) {
-                            this.imagenesEliminadas.push(imagen);
+                    const archivo = this.archivosExistentes[index];
+                    if (archivo) {
+                        if (!this.archivosEliminados.includes(archivo)) {
+                            this.archivosEliminados.push(archivo);
                         }
-                        this.imagenesExistentes.splice(index, 1);
+                        this.archivosExistentes.splice(index, 1);
 
-                        // Inputs ocultos para eliminar
                         this.$nextTick(() => {
-                            let contenedor = document.getElementById('inputs-eliminar');
+                            const contenedor = document.getElementById('inputs-eliminar-' + this.formId);
                             if (contenedor) {
                                 contenedor.innerHTML = '';
-                                this.imagenesEliminadas.forEach(img => {
+                                this.archivosEliminados.forEach(archivo => {
                                     const input = document.createElement('input');
                                     input.type = 'hidden';
-                                    input.name = 'eliminar_imagenes[]';
-                                    input.value = img;
+                                    input.name = 'eliminar_evidencia[]';
+                                    input.value = archivo;
                                     contenedor.appendChild(input);
                                 });
                             }
@@ -774,18 +803,19 @@
                 },
 
                 actualizarInput() {
-                    if (this.$refs.inputImagenes) {
+                    if (this.$refs.inputEvidencia) {
                         const dt = new DataTransfer();
-                        this.nuevasImagenes.forEach(img => dt.items.add(img.file));
-                        this.$refs.inputImagenes.files = dt.files;
+                        this.nuevosArchivos.forEach(item => dt.items.add(item.file));
+                        this.$refs.inputEvidencia.files = dt.files;
                     }
                 },
 
-                verImagen(url) {
-                    this.imagenActual = url;
+                verArchivo(url) {
+                    this.archivoActual = url;
                     this.modalVisible = true;
                 }
             };
         }
+
     </script>
 </x-app-layout>

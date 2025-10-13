@@ -1,4 +1,4 @@
-<form id="formEditarActividad" class="formActividad" method="POST" action="{{ $action }}" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}" enctype="multipart/form-data">
+<form id="formEditarActividad_{{ $actividad->id }}" class="formActividad" method="POST" action="{{ $action }}" data-fecha-inicio-meta="{{ $meta->fecha_inicio }}" data-fecha-fin-meta="{{ $meta->fecha_fin }}" enctype="multipart/form-data">
     @csrf
     @if($isEdit)
         @method('PUT')
@@ -13,7 +13,7 @@
 
         {{-- Usuario Responsable --}}
         <div class="mb-4">
-            <label for="idEncargadoActividad_{{ $actividad->id }}" class="block font-medium">Usuario Responsable</label>
+            <label for="idEncargadoActividad_{{ $actividad->id }}" class="block font-medium">Usuario Responsable<i class="text-red-500">*</i></label>
             <select name="idEncargadoActividad" id="idEncargadoActividad_{{ $actividad->id }}" 
                 class="w-full border rounded px-3 py-2" 
                 x-model="usuarioSeleccionado"
@@ -40,10 +40,10 @@
 
         {{-- Nombre Actividad --}}
         <div class="mb-4">
-            <label class="block font-medium">Nombre Actividad</label>
+            <label class="block font-medium">Nombre Actividad / Linea de Acción<i class="text-red-500">*</i></label>
             <select name="nombre_actividad" class="w-full border rounded px-3 py-2" required>
                 @if (!$actividad->nombre_actividad) 
-                    <option value="">-- Selecciona una actividad --</option>
+                    <option value="">-- Selecciona una Actividad / Linea de Acción --</option>
                 @else
                     <option value="{{ $actividad->nombre_actividad }}" selected>
                         {{ $actividad->nombre_actividad }}
@@ -81,60 +81,79 @@
         {{-- Fechas --}}
         <div class="flex gap-4 mb-4">
             <div class="w-1/2">
-                <label class="block font-medium">Fecha de Inicio</label>
+                <label class="block font-medium">Fecha de Inicio<i class="text-red-500">*</i></label>
                 <input type="date" name="fecha_inicio" 
                     value="{{ old('fecha_inicio', $actividad->fecha_inicio) }}"
                     class="w-full border rounded px-3 py-2" required>
             </div>
         
             <div class="w-1/2">
-                <label class="block font-medium">Fecha de Fin</label>
+                <label class="block font-medium">Fecha de Fin<i class="text-red-500">*</i></label>
                 <input type="date" name="fecha_fin" 
                     value="{{ old('fecha_fin', $actividad->fecha_fin) }}"
                     class="w-full border rounded px-3 py-2" required>
             </div>
         </div>
 
-        {{-- Imágenes --}}
-        <div class="mb-4" x-data="previsualizacionImagenes({ existentes: {{ isset($actividad) ? json_encode(json_decode($actividad->imagenes ?? '[]')) : '[]' }} })" x-init="init()">
+        {{-- Evidencia actual (imágenes y documentos) --}}
+        <div class="mb-4" 
+            x-data="previsualizacionEvidencia({ 
+                existentes: {{ json_encode(json_decode($actividad->evidencia ?? '[]')) }}, 
+                formId: {{ $actividad->id }} 
+            })" 
+            x-init="init()">
 
-            <label class="block font-medium mb-2">Imágenes actuales</label>
+            <label class="block font-medium mb-2">Evidencia actual</label>
 
-            {{-- Previsualización de imágenes existentes --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2" x-show="imagenesExistentes.length > 0">
-                <template x-for="(imagen, index) in imagenesExistentes" :key="'existente-' + index">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2" x-show="archivosExistentes.length > 0">
+                <template x-for="(archivo, index) in archivosExistentes" :key="'existente-' + index">
                     <div class="relative group">
-                        <img :src="'/' + imagen" @click="verImagen('/' + imagen)"
-                            class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
+                        <template x-if="archivo.match(/\.(jpg|jpeg|png|gif)$/)">
+                            <img :src="'/' + archivo" @click="verArchivo('/' + archivo)"
+                                class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
+                        </template>
+                        <template x-if="!archivo.match(/\.(jpg|jpeg|png|gif)$/)">
+                            <div class="bg-gray-200 p-4 rounded flex items-center justify-between">
+                                <a :href="'/' + archivo" target="_blank" class="text-xs font-medium underline">
+                                    Ver documento
+                                </a>
+                            </div>
+                        </template>
                         <button type="button" @click="eliminarExistente(index)"
-                            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
+                                class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
                             ✕
                         </button>
                     </div>
                 </template>
             </div>
 
-            {{-- Inputs ocultos dinámicos para eliminar imágenes --}}
-            <div id="inputs-eliminar"></div>
+            {{-- Inputs ocultos para eliminar archivos --}}
+            <div :id="'inputs-eliminar-' + formId"></div>
 
-            <template x-if="imagenesExistentes.length === 0 && imagenesEliminadas.length === 0">
-                <p class="text-sm text-gray-500 mt-2">No hay imágenes agregadas actualmente.</p>
+            <template x-if="archivosExistentes.length === 0 && archivosEliminados.length === 0">
+                <p class="text-sm text-gray-500 mt-2">No hay evidencia agregada actualmente.</p>
             </template>
 
-            {{-- Agregar nuevas imágenes --}}
-            <label class="block font-medium mt-4 mb-2">Agregar nuevas imágenes</label>
-            <input type="file" name="imagenes_nuevas[]" multiple accept="image/*"
-                @change="manejarArchivos($event)" class="w-full border rounded px-3 py-2" x-ref="inputImagenes">
+            {{-- Agregar nueva evidencia --}}
+            <label class="block font-medium mt-4 mb-2">Agregar nueva evidencia</label>
+            <input type="file" name="evidencia_nueva[]" multiple 
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                @change="manejarArchivos($event)" class="w-full border rounded px-3 py-2" x-ref="inputEvidencia">
 
-            {{-- Previsualización de nuevas imágenes --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                <template x-for="(imagen, index) in nuevasImagenes" :key="'nueva-' + index">
+                <template x-for="(item, index) in nuevosArchivos" :key="'nuevo-' + index">
                     <div class="relative group">
-                        <img :src="imagen.preview" @click="verImagen(imagen.preview)"
-                            class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
-
-                        <button type="button" @click="eliminarNueva(index)"
-                            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
+                        <template x-if="item.tipo === 'imagen'">
+                            <img :src="item.preview" @click="verArchivo(item.preview)"
+                                class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
+                        </template>
+                        <template x-if="item.tipo === 'documento'">
+                            <div class="bg-gray-200 p-4 rounded flex items-center justify-between">
+                                <span class="text-xs font-medium" x-text="item.nombre"></span>
+                            </div>
+                        </template>
+                        <button type="button" @click="eliminarNuevo(index)"
+                                class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
                             ✕
                         </button>
                     </div>
@@ -146,20 +165,13 @@
                 class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center"
                 @click.away="modalVisible = false" 
                 @keydown.escape.window="modalVisible = false">
-
                 <div class="relative">
-                    {{-- Imagen ampliada --}}
-                    <img :src="imagenActual" class="max-h-[80vh] max-w-[90vw] rounded shadow-lg">
-
-                    {{-- Botón cerrar --}}
-                    <button type="button" 
-                            @click="modalVisible = false"
+                    <img :src="archivoActual" class="max-h-[80vh] max-w-[90vw] rounded shadow-lg">
+                    <button type="button" @click="modalVisible = false"
                             class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-50">
                         &times;
                     </button>
-
-                    {{-- Botón descargar --}}
-                    <a :href="imagenActual" download 
+                    <a :href="archivoActual" download 
                     class="absolute bottom-2 right-2 bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-200 z-50">
                         Descargar
                     </a>
@@ -175,7 +187,7 @@
 
         {{-- Unidad Encargada --}}
         <div class="mb-4">
-            <label class="block font-medium">Unidad Encargada</label>
+            <label class="block font-medium">Unidad Encargada<i class="text-red-500">*</i></label>
             <select id="unidad_encargada_display_{{ $actividad->id }}"
                 class="w-full border rounded px-3 py-2">
                 <option value="">Sin Departamento</option>
@@ -237,7 +249,9 @@ document.addEventListener('alpine:init', () => {
 
             // Escucha cambios manuales en departamento
             const selectDepartamento = document.getElementById('unidad_encargada_display_' + id);
-            selectDepartamento.addEventListener('change', () => this.unidadManual(id));
+            if (selectDepartamento) {
+                selectDepartamento.addEventListener('change', () => this.unidadManual(id));
+            }
         }
     }));
 });

@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('idMetas')->constrained('metas')->onDelete('cascade');
             $table->foreignId('idEncargadoActividad')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->text('nombre_actividad');
-            $table->json('objetivos');
+            $table->json('objetivos')->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->json('imagenes')->nullable()->onDelete('cascade');
-            $table->text('comentario');
+            $table->json('evidencia')->nullable()->onDelete('cascade');
+            $table->text('comentario')->nullable();
             $table->text('unidad_encargada')->nullable();
             $table->timestamps();
         });

@@ -1,4 +1,4 @@
-<form id="formNuevaMeta" class="formMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}">
+<form id="formNuevaMeta" class="formMeta" x-ref="formNuevaMeta" method="POST" action="{{ route('metas.store') }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}" x-data="{ tipo: 'meta' }">
     @if ($errors->any())
         <div class="mb-4">
             <ul class="list-disc list-inside text-sm text-red-600">
@@ -13,10 +13,11 @@
     
     <div class="mb-4">
         <input type="hidden" name="idPlanEstrategico" value="{{ $plan->id }}">
+        <input type="hidden" name="tipo" :value="tipo">
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Usuario Responsable</label>
+        <label class="block font-medium">Usuario Responsable<i class="text-red-500">*</i></label>
         <select name="idEncargadoMeta" required class="w-full rounded-md border border-gray-500 shadow-sm">
             <option value="">Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
@@ -36,14 +37,45 @@
         </p>
     </div>
 
+    {{-- Selector de tipo --}}
     <div class="mb-4">
-        <label class="block font-medium">Nombre de la Meta</label>
-        <input type="text" name="nombre_meta"
-            class="w-full border rounded px-3 py-2" required>
+        <label class="block font-medium mb-2">Tipo de Registro<i class="text-red-500">*</i></label>
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2">
+                <input type="radio" name="tipo_radio" value="meta" x-model="tipo">
+                <span>Meta</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="radio" name="tipo_radio" value="estrategia" x-model="tipo">
+                <span>Estrategia</span>
+            </label>
+        </div>
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium mb-2">Ejes Estratégicos</label>
+        <label class="block font-medium" x-text="tipo === 'meta' ? 'Nombre de la Meta' : 'Nombre de la Estrategia'"></label>
+        <input type="text" name="nombre" class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium">Objetivos de la Estrategia</label>
+        <div id="contenedorObjetivos">
+            <div class="input-con-x mb-2">
+                <input type="text" name="objetivos_estrategias[]" class="border rounded px-3 py-2">
+                <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 mt-2">
+            <button type="button"
+                onclick="agregarCampo('contenedorObjetivos', 'objetivos_estrategias[]')" 
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
+                + Agregar otro objetivo
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="block font-medium mb-2">Ejes Estratégicos<i class="text-red-500"> (Minimo 1)</i></label>
         <div class="flex flex-wrap gap-2">
             @php
                 // Ejes seleccionados previamente, si existen en old() o en el modelo
@@ -69,7 +101,7 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Actividades</label>
+        <label class="block font-medium">Actividades / Lineas de Acción<i class="text-red-500">*</i></label>
         <div id="contenedorActividades">
             <div class="input-con-x mb-2">
                 <input type="text" name="nombre_actividades[]" class="border rounded px-3 py-2" required>
@@ -78,7 +110,7 @@
         </div>
         <div class="flex items-center gap-4 mt-2">
             <button type="button"
-                onclick="agregarActividad('contenedorActividades')"
+                onclick="agregarCampo('contenedorActividades', 'nombre_actividades[]')"
                 class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 + Agregar otra actividad
             </button>
@@ -86,26 +118,26 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Resultados</label>
+        <label class="block font-medium">Resultados Esperados</label>
         <input type="text" name="resultados_esperados"
-            class="w-full border rounded px-3 py-2" required>
+            class="w-full border rounded px-3 py-2">
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Indicador</label>
+        <label class="block font-medium">Indicador de Resultados<i class="text-red-500">*</i></label>
         <input type="text" name="indicador_resultados"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="flex gap-4 mb-4">
         <div class="w-1/2">
-            <label class="block font-medium">Fecha de Inicio</label>
+            <label class="block font-medium">Fecha de Inicio<i class="text-red-500">*</i></label>
             <input type="date" name="fecha_inicio"
                 class="w-full border rounded px-3 py-2" required>
         </div>
     
         <div class="w-1/2">
-            <label class="block font-medium">Fecha de Fin</label>
+            <label class="block font-medium">Fecha de Fin<i class="text-red-500">*</i></label>
             <input type="date" name="fecha_fin"
                 class="w-full border rounded px-3 py-2" required>
         </div>
@@ -114,7 +146,7 @@
     <div class="mb-4">
         <label class="block font-medium">Comentario</label>
         <textarea name="comentario"
-            class="w-full border rounded px-3 py-2" required></textarea>
+            class="w-full border rounded px-3 py-2"></textarea>
     </div>
 
     <div class="flex justify-end">

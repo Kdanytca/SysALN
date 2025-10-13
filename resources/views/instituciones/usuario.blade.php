@@ -12,17 +12,29 @@
         @csrf
     
         <div class="mb-4">
-            <label class="block font-medium">Nombre del Usuario</label>
+            <label class="block font-medium">Nombre del Usuario<i class="text-red-500">*</i></label>
             <input type="text" name="nombre_usuario"
-                class="w-full border rounded px-3 py-2" required>
+                class="w-full border rounded px-3 py-2"
+                @blur="verificarCampo('nombre_usuario', $event.target.value)"
+                required>
+            <template x-if="nombreError">
+                <p class="text-red-500 text-sm mt-1" x-text="nombreError"></p>
+            </template>
         </div>
+
         <div class="mb-4">
-            <label class="block font-medium">Correo Electronico</label>
+            <label class="block font-medium">Correo Electrónico<i class="text-red-500">*</i></label>
             <input type="email" name="email"
-                class="w-full border rounded px-3 py-2" required>
+                class="w-full border rounded px-3 py-2"
+                @blur="verificarCampo('email', $event.target.value)"
+                required>
+            <template x-if="correoError">
+                <p class="text-red-500 text-sm mt-1" x-text="correoError"></p>
+            </template>
         </div>
+
         <div class="mb-4">
-            <label class="block font-medium">Contraseña</label>
+            <label class="block font-medium">Contraseña<i class="text-red-500">*</i></label>
             <input type="password" name="password"
                 class="w-full border rounded px-3 py-2" required>
         </div>
@@ -31,7 +43,7 @@
             @if (isset($institucion))
                 {{-- Institución fija --}}
                 <div class="mb-4">
-                    <label class="block font-medium">Institución</label>
+                    <label class="block font-medium">Institución<i class="text-red-500">*</i></label>
                     <input type="text" disabled value="{{ $institucion->nombre_institucion }}"
                         class="w-full border rounded px-3 py-2 bg-gray-100">
                     <input type="hidden" name="idInstitucion" value="{{ $institucion->id }}">
@@ -40,7 +52,7 @@
                 {{-- Mostrar el campo de departamentos solo si estamos en la vista de metas --}}
                 @if (isset($vistaMetas) && $vistaMetas)
                     <div class="mb-4">
-                        <label class="block font-medium">Departamento</label>
+                        <label class="block font-medium">Departamento<i class="text-red-500">*</i></label>
                         <select name="idDepartamento" class="w-full border rounded px-3 py-2" required>
                             <option value="">Seleccione un departamento</option>
                             @foreach ($departamentos->where('idInstitucion', $institucion->id) as $departamento)
@@ -52,7 +64,7 @@
             @else
                 {{-- Selector de institución --}}
                 <div class="mb-4">
-                    <label class="block font-medium">Institución</label>
+                    <label class="block font-medium">Institución<i class="text-red-500">*</i></label>
                     <select name="idInstitucion" class="w-full border rounded px-3 py-2" required>
                         <option value="">Seleccione una institución</option>
                         @foreach ($instituciones as $institucion)
@@ -66,7 +78,7 @@
         @endunless
     
         <div class="mb-4">
-            <label class="block font-medium">Tipo de Usuario</label>
+            <label class="block font-medium">Tipo de Usuario<i class="text-red-500">*</i></label>
             <select name="tipo_usuario" required class="w-full border rounded px-3 py-2">
                 @if ($origen === 'instituciones')
                     <option value="encargado_institucion">Encargado de Institución</option>
@@ -102,55 +114,89 @@
 </div>
 
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('crearUsuario', () => ({
-            async enviarFormulario(event) {
-                const form = event.target.closest('form');
-                const formData = new FormData(form);
+document.addEventListener('alpine:init', () => {
+    Alpine.data('crearUsuario', () => ({
+        nombreError: '',
+        correoError: '',
 
-                try {
-                    const response = await fetch("{{ route('usuarios.store') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: formData
+        async verificarCampo(campo, valor) {
+            if (!valor) return;
+
+            const response = await fetch("{{ route('usuarios.verificarUnico') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ campo, valor })
+            });
+
+            const data = await response.json();
+
+            if (data.existe) {
+                if (campo === 'nombre_usuario') {
+                    this.nombreError = 'Este nombre de usuario ya está registrado.';
+                }
+                if (campo === 'email') {
+                    this.correoError = 'Este correo electrónico ya está registrado.';
+                }
+            } else {
+                if (campo === 'nombre_usuario') this.nombreError = '';
+                if (campo === 'email') this.correoError = '';
+            }
+        },
+
+        async enviarFormulario(event) {
+            const form = event.target.closest('form');
+            const formData = new FormData(form);
+
+            if (this.nombreError || this.correoError) {
+                alert("Corrige los errores antes de continuar.");
+                return;
+            }
+
+            try {
+                const response = await fetch("{{ route('usuarios.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const nuevoUsuario = data.usuario;
+
+                    // Agregar al select
+                    const selectsEncargado = document.querySelectorAll('select[name="idEncargadoInstitucion"], select[name="idEncargadoDepartamento"], select[name="idEncargadoMeta"], select[name="idEncargadoActividad"]');
+                    selectsEncargado.forEach(selectEncargado => {
+                        const nuevaOpcion = document.createElement('option');
+                        nuevaOpcion.value = nuevoUsuario.id;
+                        nuevaOpcion.textContent = `${nuevoUsuario.nombre_usuario} (${nuevoUsuario.email})`;
+                        nuevaOpcion.selected = true;
+                        selectEncargado.appendChild(nuevaOpcion);
                     });
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        const nuevoUsuario = data.usuario;
+                    this.$dispatch('close-modal-usuario');
+                    form.reset();
 
-                        // 1. Agregar al <select> de encargados
-                        const selectsEncargado = document.querySelectorAll('select[name="idEncargadoInstitucion"], select[name="idEncargadoDepartamento"], select[name="idEncargadoMeta"], select[name="idEncargadoActividad"]');
-                        selectsEncargado.forEach(selectEncargado => {
-                            const nuevaOpcion = document.createElement('option');
-                            nuevaOpcion.value = nuevoUsuario.id;
-                            nuevaOpcion.textContent = `${nuevoUsuario.nombre_usuario} (${nuevoUsuario.email})`;
-                            nuevaOpcion.selected = true;
-                            selectEncargado.appendChild(nuevaOpcion);
-                        });
-
-                        // 2. Cierra el modal
-                        this.$dispatch('close-modal-usuario');
-
-                        // 3. Limpia el formulario
-                        form.reset();
-
-                    } else {
-                        const errorData = await response.json();
-                        let mensaje = 'Errores:\n';
-                        for (const key in errorData.errors) {
-                            mensaje += '- ' + errorData.errors[key][0] + '\n';
-                        }
-                        alert(mensaje);
+                } else {
+                    const errorData = await response.json();
+                    let mensaje = 'Errores:\n';
+                    for (const key in errorData.errors) {
+                        mensaje += '- ' + errorData.errors[key][0] + '\n';
                     }
-                } catch (error) {
-                    console.error("Error al crear usuario:", error);
-                    alert("Ocurrió un error inesperado.");
+                    alert(mensaje);
                 }
+            } catch (error) {
+                console.error("Error al crear usuario:", error);
+                alert("Ocurrió un error inesperado.");
             }
-        }));
-    });
+        }
+    }));
+});
 </script>
+

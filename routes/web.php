@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':administrador,enca
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
     Route::put('/usuarios/{id}', [UsuarioController::class, 'update'])->name('usuarios.update');
     Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+    Route::post('/usuarios/verificar-unico', [UsuarioController::class, 'verificarUnico'])->name('usuarios.verificarUnico');
 });
 
 // =========================

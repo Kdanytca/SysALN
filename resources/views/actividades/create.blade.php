@@ -8,7 +8,7 @@
 
         {{-- Usuario Responsable --}}
         <div>
-            <label class="block font-medium">Usuario Responsable</label>
+            <label class="block font-medium">Usuario Responsable<i class="text-red-500">*</i></label>
             <select name="idEncargadoActividad" id="idEncargadoActividad_nuevo" x-model="usuarioSeleccionado"
                 @change="actualizarUnidad('nuevo')" class="w-full border rounded px-3 py-2" required>
                 @foreach ($usuarios as $usuario)
@@ -28,9 +28,9 @@
 
         {{-- Nombre Actividad --}}
         <div class="mb-4">
-            <label class="block font-medium">Nombre Actividad</label>
+            <label class="block font-medium">Nombre Actividad / Linea de Acción<i class="text-red-500">*</i></label>
             <select name="nombre_actividad" class="w-full border rounded px-3 py-2" required>
-                <option value="">Seleccione una actividad</option>
+                <option value="">Seleccione una Actividad / Linea de Acción</option>
                 @foreach($actividadesDisponibles->unique() as $actividadDisponible)
                     <option value="{{ $actividadDisponible }}">
                         {{ $actividadDisponible }}
@@ -44,7 +44,7 @@
             <label class="block font-medium">Objetivos</label>
             <div id="contenedorObjetivos">
                 <div class="input-con-x mb-2">
-                    <input type="text" name="objetivos[]" class="border rounded px-3 py-2" required>
+                    <input type="text" name="objetivos[]" class="border rounded px-3 py-2">
                     <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                 </div>
             </div>
@@ -60,33 +60,43 @@
         {{-- Fechas --}}
         <div class="flex gap-4">
             <div class="w-1/2">
-                <label class="block font-medium">Fecha de Inicio</label>
+                <label class="block font-medium">Fecha de Inicio<i class="text-red-500">*</i></label>
                 <input type="date" name="fecha_inicio" class="w-full border rounded px-3 py-2" required>
             </div>
             <div class="w-1/2">
-                <label class="block font-medium">Fecha de Fin</label>
+                <label class="block font-medium">Fecha de Fin<i class="text-red-500">*</i></label>
                 <input type="date" name="fecha_fin" class="w-full border rounded px-3 py-2" required>
             </div>
         </div>
 
-        {{-- Imágenes --}}
-        <div class="mb-4" x-data="previsualizacionImagenes({{ isset($actividad) ? json_encode(json_decode($actividad->imagenes ?? '[]')) : '{}' }})" x-init="init()">
-            <label class="block font-medium mb-2">Imágenes</label>
+        {{-- Evidencia (imágenes y documentos) --}}
+        <div class="mb-4" x-data="previsualizacionEvidencia()" x-init="init()">
+            <label class="block font-medium mb-2">Evidencia (imágenes o documentos)</label>
             <input 
-                type="file" name="imagenes[]" multiple accept="image/*" @change="manejarArchivos($event)" 
-                class="w-full border rounded px-3 py-2" x-ref="inputImagenes">
+                type="file" name="evidencia[]" multiple 
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                @change="manejarArchivos($event)" 
+                class="w-full border rounded px-3 py-2" x-ref="inputEvidencia">
+
             <p class="text-sm text-gray-600 mt-1">
-                Puedes subir múltiples imágenes. Cada imagen debe ser menor a 4MB.
+                Puedes subir imágenes y documentos. Cada archivo debe ser menor a 5MB.
             </p>
 
             {{-- Previsualización --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                <template x-for="(imagen, index) in nuevasImagenes" :key="'nueva-' + index">
+                <template x-for="(item, index) in nuevosArchivos" :key="'nuevo-' + index">
                     <div class="relative group">
-                        <img :src="imagen.preview" @click="verImagen(imagen.preview)" 
-                            class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition">
-                        <button type="button" @click="eliminarNueva(index)" 
-                            class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
+                        <template x-if="item.tipo === 'imagen'">
+                            <img :src="item.preview" @click="verArchivo(item.preview)" 
+                                class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition" />
+                        </template>
+                        <template x-if="item.tipo === 'documento'">
+                            <div class="bg-gray-200 p-4 rounded flex items-center justify-between">
+                                <span class="text-xs font-medium" x-text="item.nombre"></span>
+                            </div>
+                        </template>
+                        <button type="button" @click="eliminarNuevo(index)"
+                                class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:opacity-100">
                             ✕
                         </button>
                     </div>
@@ -94,39 +104,32 @@
             </div>
 
             <!-- Modal pantalla completa -->
-        <div x-show="modalVisible" x-transition
-            class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center"
-            @keydown.escape.window="modalVisible = false">
-
-            <div class="relative">
-                <!-- Botón cerrar -->
-                <button type="button" @click="modalVisible = false"
-                        class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-50">
-                    &times;
-                </button>
-
-                <!-- Imagen -->
-                <img :src="imagenActual" class="max-h-[80vh] max-w-[90vw] rounded shadow-lg">
-
-                <!-- Botón descargar -->
-                <a :href="imagenActual" download
-                class="absolute bottom-2 right-2 bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-200">
-                    Descargar
-                </a>
+            <div x-show="modalVisible" x-transition
+                class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center"
+                @keydown.escape.window="modalVisible = false">
+                <div class="relative">
+                    <button type="button" @click="modalVisible = false"
+                            class="absolute top-2 right-2 text-white text-2xl font-bold hover:text-gray-300 z-50">
+                        &times;
+                    </button>
+                    <img :src="archivoActual" class="max-h-[80vh] max-w-[90vw] rounded shadow-lg">
+                    <a :href="archivoActual" download
+                    class="absolute bottom-2 right-2 bg-white text-black px-3 py-1 rounded shadow hover:bg-gray-200">
+                        Descargar
+                    </a>
+                </div>
             </div>
-        </div>
-
         </div>
 
         {{-- Comentario --}}
         <div class="mb-4">
             <label class="block font-medium">Comentario</label>
-            <textarea name="comentario" class="w-full border rounded px-3 py-2" required>{{ old('comentario', $actividad->comentario ?? '') }}</textarea>
+            <textarea name="comentario" class="w-full border rounded px-3 py-2">{{ old('comentario', $actividad->comentario ?? '') }}</textarea>
         </div>
 
         {{-- Unidad Encargada --}}
         <div class="mb-4">
-            <label class="block font-medium mt-4">Unidad Encargada</label>
+            <label class="block font-medium mt-4">Unidad Encargada<i class="text-red-500">*</i></label>
             <select id="unidad_encargada_display_nuevo" class="w-full border rounded px-3 py-2">
                 <option value="">Sin Departamento</option>
                 @foreach($departamentos as $departamento)
