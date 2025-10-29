@@ -27,6 +27,18 @@ class Meta extends Model
         'nombre_actividades' => 'array',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($meta) {
+            // Borrar las actividades antes de eliminar la meta
+            foreach ($meta->actividades as $actividad) {
+                $actividad->delete();
+            }
+        });
+    }
+
     // Relaciones
     public function planEstrategico()
     {

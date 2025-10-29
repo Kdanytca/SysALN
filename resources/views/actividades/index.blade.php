@@ -155,18 +155,37 @@
                                     {{ $actividad->unidad_encargada ?? 'Sin asignar' }}</td>
                                 <td class="px-4 py-3 text-center">
                                     @php
-                                        // Convertir el JSON en array
                                         $archivos = json_decode($actividad->evidencia, true);
-
-                                        // Asegurar que sea un array válido
                                         $totalArchivos = is_array($archivos) ? count($archivos) : 0;
                                     @endphp
 
-                                    @if ($totalArchivos > 0)
-                                        <span class="text-green-600 font-semibold">{{ $totalArchivos }}</span>
-                                    @else
-                                        <span class="text-gray-400 italic">0</span>
-                                    @endif
+                                    <div x-data="{ modalEvidencia: false }">
+                                        @if ($totalArchivos > 0)
+                                            <button @click="modalEvidencia = true"
+                                                class="text-green-600 hover:text-green-800 font-semibold flex items-center justify-center mx-auto space-x-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7s-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <span>{{ $totalArchivos }}</span>
+                                            </button>
+                                        @else
+                                            <span class="text-gray-400 italic">0</span>
+                                        @endif
+
+                                        <!-- Modal de Evidencia -->
+                                        <div x-show="modalEvidencia"
+                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                                            x-cloak>
+                                            <div
+                                                class="bg-white rounded-lg shadow-lg w-full max-w-[95%] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl p-6 max-h-[90vh] overflow-y-auto transition-all duration-300">
+                                                @include('actividades.evidencia', ['actividad' => $actividad])
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     @php

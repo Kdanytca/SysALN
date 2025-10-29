@@ -14,6 +14,21 @@ class Institucion extends Model
         'idEncargadoInstitucion',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($institucion) {
+            // Borrar los departamentos
+            foreach ($institucion->departamentos as $departamento) {
+                // Borrar los planes de cada departamento
+                foreach ($departamento->planes as $plan) {
+                    $plan->delete(); // Esto disparará el deleting() de Plan y luego los demás
+                }
+            }
+        });
+    }
+
     // Relaciones
     public function departamentos()
     {

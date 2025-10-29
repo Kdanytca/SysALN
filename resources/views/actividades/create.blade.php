@@ -44,7 +44,7 @@
             <label class="block font-medium">Objetivos</label>
             <div id="contenedorObjetivos">
                 <div class="input-con-x mb-2">
-                    <input type="text" name="objetivos[]" class="border rounded px-3 py-2">
+                    <input type="text" name="objetivos[]" class="border rounded px-3 py-2" placeholder="Opcional">
                     <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                         </template>
                         <template x-if="item.tipo === 'documento'">
                             <div class="bg-gray-200 p-4 rounded flex items-center justify-between">
-                                <span class="text-xs font-medium" x-text="item.nombre"></span>
+                                <span class="text-xs font-medium truncate" x-text="item.nombre"></span>
                             </div>
                         </template>
                         <button type="button" @click="eliminarNuevo(index)"
@@ -124,7 +124,7 @@
         {{-- Comentario --}}
         <div class="mb-4">
             <label class="block font-medium">Comentario</label>
-            <textarea name="comentario" class="w-full border rounded px-3 py-2">{{ old('comentario', $actividad->comentario ?? '') }}</textarea>
+            <textarea name="comentario" class="w-full border rounded px-3 py-2" placeholder="Opcional">{{ old('comentario', $actividad->comentario ?? '') }}</textarea>
         </div>
 
         {{-- Unidad Encargada --}}

@@ -119,7 +119,7 @@
 
     <div class="mb-4">
         <label class="block font-medium">Resultados Esperados</label>
-        <input type="text" name="resultados_esperados"
+        <input type="text" name="resultados_esperados" placeholder="Opcional"
             class="w-full border rounded px-3 py-2">
     </div>
 
@@ -145,7 +145,7 @@
 
     <div class="mb-4">
         <label class="block font-medium">Comentario</label>
-        <textarea name="comentario"
+        <textarea name="comentario" placeholder="Opcional"
             class="w-full border rounded px-3 py-2"></textarea>
     </div>
 

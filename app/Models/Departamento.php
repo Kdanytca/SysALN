@@ -12,6 +12,17 @@ class Departamento extends Model
         'idInstitucion',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($departamento) {
+            foreach ($departamento->planes as $plan) {
+                $plan->delete();
+            }
+        });
+    }
+
     // Relaciones
     public function institucion()
     {

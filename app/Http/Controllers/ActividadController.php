@@ -138,7 +138,7 @@ class ActividadController extends Controller
             'objetivos.*' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
-            'evidencia.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx|max:5120',
+            'evidencia.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx,zip,rar|max:5120',
             'comentario' => 'nullable|string',
             'unidad_encargada' => 'nullable|string',
         ]);
@@ -159,8 +159,12 @@ class ActividadController extends Controller
             foreach ($request->file('evidencia') as $archivo) {
                 if (!$archivo) continue;
 
+                $nombreOriginal = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                $nombreLimpio = Str::slug($nombreOriginal, '_'); // reemplaza espacios y caracteres especiales
+                $timestamp = now()->format('Ymd_His');
                 $extension = $archivo->getClientOriginalExtension();
-                $nombreArchivo = Str::uuid() . '.' . $extension;
+
+                $nombreArchivo = "{$nombreLimpio}_{$timestamp}.{$extension}";
 
                 // Determinar la carpeta destino según el tipo
                 if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])) {
@@ -227,7 +231,7 @@ class ActividadController extends Controller
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'evidencia_nueva' => 'nullable|array',
-            'evidencia_nueva.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx|max:5120',
+            'evidencia_nueva.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx,zip,rar|max:5120',
             'eliminar_evidencia' => 'nullable|array',
             'comentario' => 'nullable|string',
             'unidad_encargada' => 'nullable|string',
@@ -266,8 +270,12 @@ class ActividadController extends Controller
             foreach ($evidenciaNueva as $archivo) {
                 if (!$archivo) continue;
 
+                $nombreOriginal = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                $nombreLimpio = Str::slug($nombreOriginal, '_'); // reemplaza espacios y caracteres especiales
+                $timestamp = now()->format('Ymd_His');
                 $extension = $archivo->getClientOriginalExtension();
-                $nombreArchivo = Str::uuid() . '.' . $extension;
+
+                $nombreArchivo = "{$nombreLimpio}_{$timestamp}.{$extension}";
 
                 $carpeta = in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])
                     ? 'uploads/actividades/imagenes'

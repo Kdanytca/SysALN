@@ -64,7 +64,7 @@
             <div id="contenedorObjetivosEdit">
                 @foreach (json_decode($actividad->objetivos, true) as $objetivo)
                     <div class="input-con-x mb-2">
-                        <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}" class="border rounded px-3 py-2" required>
+                        <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}" class="border rounded px-3 py-2" placeholder="Opcional">
                         <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                     </div>
                 @endforeach
@@ -149,7 +149,7 @@
                         </template>
                         <template x-if="item.tipo === 'documento'">
                             <div class="bg-gray-200 p-4 rounded flex items-center justify-between">
-                                <span class="text-xs font-medium" x-text="item.nombre"></span>
+                                <span class="text-xs font-medium truncate" x-text="item.nombre"></span>
                             </div>
                         </template>
                         <button type="button" @click="eliminarNuevo(index)"
@@ -182,7 +182,7 @@
         {{-- Comentario --}}
         <div class="mb-4">
             <label class="block font-medium">Comentario</label>
-            <textarea name="comentario" class="w-full border rounded px-3 py-2" required>{{ old('comentario', $actividad->comentario) }}</textarea>
+            <textarea name="comentario" class="w-full border rounded px-3 py-2" placeholder="Opcional">{{ old('comentario', $actividad->comentario) }}</textarea>
         </div>
 
         {{-- Unidad Encargada --}}

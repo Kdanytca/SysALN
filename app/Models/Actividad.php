@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
 class Actividad extends Model
 {
@@ -24,6 +25,28 @@ class Actividad extends Model
         'objetivos' => 'array',
         'evidencia' => 'array',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($actividad) {
+            // Si hay evidencias guardadas en formato JSON
+            if ($actividad->evidencia) {
+                $evidencias = json_decode($actividad->evidencia, true);
+
+                if (is_array($evidencias)) {
+                    foreach ($evidencias as $ruta) {
+                        $rutaCompleta = public_path($ruta);
+
+                        if (File::exists($rutaCompleta)) {
+                            File::delete($rutaCompleta);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     // Relaciones
     public function meta()

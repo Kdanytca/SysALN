@@ -68,4 +68,16 @@ class PlanEstrategico extends Model
     {
         return $this->hasOne(BackupPlan::class, 'idPlanOriginal');
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($plan) {
+            // Borrar las metas asociadas antes de eliminar el plan
+            foreach ($plan->metas as $meta) {
+                $meta->delete(); // Esto activará el deleting() de Meta y luego el de Actividad
+            }
+        });
+    }
 }
