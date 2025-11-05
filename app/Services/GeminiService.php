@@ -5,53 +5,66 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class OpenAIService
+class GeminiService
 {
     protected string $apiKey;
     protected string $model;
+    protected string $apiUrl;
 
     public function __construct()
     {
-        $this->apiKey = env('OPENAI_API_KEY');
-        $this->model = env('OPENAI_MODEL', 'gpt-4o-mini');
+        $this->apiKey = env('GEMINI_API_KEY');
+        $this->model = env('GEMINI_MODEL', 'gemini-2.0-flash');
+        $this->apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent";
     }
 
-    public function ask(string $prompt, array $context = []): string
+    public function ask(string $question, array $history = []): string
     {
         try {
-            $messages = [];
+            // Combinar historial y pregunta en un solo bloque de texto
+            $finalText = '';
 
-            foreach ($context as $msg) {
-                $messages[] = [
-                    'role' => $msg['role'] ?? 'user',
-                    'content' => $msg['content'] ?? ''
-                ];
+            foreach ($history as $msg) {
+                $role = strtoupper($msg['role'] ?? 'USER');
+                $finalText .= "[{$role}] {$msg['content']}\n";
             }
 
-            $messages[] = ['role' => 'user', 'content' => $prompt];
+            $finalText .= "[USER] {$question}";
+
+            // Estructura esperada por generateContent
+            $payload = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $finalText]
+                        ]
+                    ]
+                ]
+            ];
+
+            Log::info('Payload enviado a Gemini:', $payload);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->model,
-                'messages' => $messages,
-            ]);
+                'X-goog-api-key' => $this->apiKey,
+            ])->post($this->apiUrl, $payload);
 
             if (!$response->successful()) {
-                Log::error('Error HTTP al llamar a OpenAI:', [
+                Log::error('Error HTTP al llamar a Gemini:', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
-                return 'Error al conectar con OpenAI.';
+                return 'Error al conectar con Gemini (HTTP).';
             }
 
-            $data = $response->json();
-            return $data['choices'][0]['message']['content'] ?? 'No se obtuvo respuesta.';
+            $json = $response->json();
+            Log::info('Respuesta cruda de Gemini:', $json);
 
+            return $json['candidates'][0]['content']['parts'][0]['text']
+                ?? 'No se obtuvo respuesta del modelo.';
         } catch (\Throwable $e) {
-            Log::error('OpenAIService Exception: ' . $e->getMessage());
-            return 'Error en la conexión con OpenAI.';
+            Log::error('GeminiService Exception: ' . $e->getMessage());
+            return 'Error al conectar con Gemini (excepción).';
         }
     }
 }

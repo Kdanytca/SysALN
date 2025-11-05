@@ -159,33 +159,11 @@
                                         $totalArchivos = is_array($archivos) ? count($archivos) : 0;
                                     @endphp
 
-                                    <div x-data="{ modalEvidencia: false }">
-                                        @if ($totalArchivos > 0)
-                                            <button @click="modalEvidencia = true"
-                                                class="text-green-600 hover:text-green-800 font-semibold flex items-center justify-center mx-auto space-x-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7s-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                <span>{{ $totalArchivos }}</span>
-                                            </button>
-                                        @else
-                                            <span class="text-gray-400 italic">0</span>
-                                        @endif
-
-                                        <!-- Modal de Evidencia -->
-                                        <div x-show="modalEvidencia"
-                                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-                                            x-cloak>
-                                            <div
-                                                class="bg-white rounded-lg shadow-lg w-full max-w-[95%] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl p-6 max-h-[90vh] overflow-y-auto transition-all duration-300">
-                                                @include('actividades.evidencia', ['actividad' => $actividad])
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @if ($totalArchivos > 0)
+                                        <span>{{ $totalArchivos }}</span>
+                                    @else
+                                        <span class="text-gray-400 italic">0</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
                                     @php
@@ -321,7 +299,23 @@
                                             class="bg-purple-300 text-purple-800 px-3 py-1 rounded hover:bg-purple-400 transition text-sm">
                                             Seguimiento
                                         </button>
-                                        <button onclick="mostrarSeguimientos({{ $actividad->id }})"
+                                        <div x-data="{ modalEvidencia: false }">
+                                            <button @click="modalEvidencia = true"
+                                                class="bg-green-300 text-green-800 px-3 py-1 rounded hover:bg-green-400 transition text-sm">
+                                                Ver Evidencias
+                                            </button>
+
+                                            <!-- Modal -->
+                                            <div x-show="modalEvidencia"
+                                                x-init="initEvidenciaModal('{{ $actividad->id }}', false)"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                                                x-cloak>
+                                                <div class="bg-white rounded-lg shadow-lg w-full max-w-[95%] md:max-w-4xl lg:max-w-6xl xl:max-w-7xl p-6 max-h-[90vh] overflow-y-auto transition-all duration-300">
+                                                    @include('actividades.evidencia', ['actividad' => $actividad])
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" onclick="mostrarSeguimientos({{ $actividad->id }})"
                                             class="bg-blue-300 text-blue-800 px-3 py-1 rounded hover:bg-blue-400 transition text-sm">
                                             Ver Seguimientos
                                         </button>
@@ -426,6 +420,25 @@
                     <textarea name="observaciones" id="observaciones_modal" rows="3" class="w-full border rounded px-3 py-2"></textarea>
                 </div>
 
+                <div class="mb-4">
+                    <label class="block font-semibold mb-1">Evidencia (imágenes o documentos)</label>
+                    <input 
+                        type="file" 
+                        name="evidencia[]" 
+                        id="evidencia_modal" 
+                        multiple
+                        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+                        class="w-full border rounded px-3 py-2"
+                    >
+
+                    <p class="text-sm text-gray-600 mt-1">
+                        Puedes subir imágenes y documentos. Cada archivo debe ser menor a 5MB.
+                    </p>
+
+                    <!-- Contenedor de previsualización -->
+                    <div id="previewEvidencias" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"></div>
+                </div>
+
                 <div class="text-right">
                     <button type="submit" id="botonGuardarSeguimiento"
                         class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -526,8 +539,70 @@
             modalVer.style.zIndex = '9998';
 
             modalEdicion.classList.remove('hidden');
+
+            // Mostrar evidencias guardadas si existen
+            const previewContainer = document.getElementById('previewEvidencias');
+            previewContainer.innerHTML = ''; // limpiar antes de insertar
+            archivosSeleccionados = []; // limpiar archivos temporales
+
+            if (seguimiento.evidencia) {
+                let evidencias = [];
+
+                try {
+                    evidencias = JSON.parse(seguimiento.evidencia);
+                } catch (e) {
+                    console.warn("No se pudo parsear evidencia:", e);
+                }
+
+                evidencias.forEach((ruta, index) => {
+                    const extension = ruta.split('.').pop().toLowerCase();
+                    const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+
+                    const item = document.createElement('div');
+                    item.classList.add('relative', 'group');
+
+                    if (isImage) {
+                        item.innerHTML = `
+                            <img src="/${ruta}" 
+                                class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                >
+                            <button type="button" class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
+                                onclick="marcarEvidenciaParaEliminar('${ruta}', this)">✕</button>
+                        `;
+                    } else {
+                        const nombreArchivo = ruta.split('/').pop();
+                        item.innerHTML = `
+                            <div class="bg-gray-200 p-3 rounded text-sm flex items-center justify-between">
+                                <span class="truncate w-32">${nombreArchivo}</span>
+                                <button type="button" class="bg-red-600 text-white text-xs px-2 py-1 rounded"
+                                    onclick="marcarEvidenciaParaEliminar('${ruta}', this)">✕</button>
+                            </div>
+                        `;
+                    }
+
+                    previewContainer.appendChild(item);
+                });
+            }
         }
 
+        let evidenciasAEliminar = [];
+
+        function marcarEvidenciaParaEliminar(ruta, boton) {
+            if (!confirm("¿Eliminar esta evidencia?")) return;
+
+            evidenciasAEliminar.push(ruta);
+
+            // Añadimos inputs ocultos al form para enviar al backend
+            const form = document.getElementById('formSeguimiento');
+            let inputHidden = document.createElement('input');
+            inputHidden.type = 'hidden';
+            inputHidden.name = 'eliminar_evidencia[]';
+            inputHidden.value = ruta;
+            form.appendChild(inputHidden);
+
+            // Quitar del DOM la miniatura
+            boton.closest('.group').remove();
+        }
 
         // Cerrar modal edición
         function cerrarModalSeguimiento() {
@@ -544,9 +619,17 @@
                 recargarTablaSeguimientos();
             }
 
-            document.querySelector('#modalSeguimiento form').reset();
+            const form = document.querySelector('#modalSeguimiento form');
+            form.reset();
+            document.getElementById('previewEvidencias').innerHTML = '';
+            archivosSeleccionados = [];
+
             let methodInput = document.querySelector('#modalSeguimiento input[name="_method"]');
             if (methodInput) methodInput.remove();
+
+            document.getElementById('previewEvidencias').innerHTML = '';
+            archivosSeleccionados = [];
+            evidenciasAEliminar = [];
         }
 
 
@@ -635,6 +718,67 @@
                 boton.disabled = false;
                 boton.textContent = 'Guardar Seguimiento';
             }
+        }
+
+        // ====== Lógica de evidencias en Seguimiento ======
+        let archivosSeleccionados = []; // Array temporal para almacenar los archivos seleccionados
+
+        function previsualizarEvidencias(event) {
+            const input = event.target;
+            const previewContainer = document.getElementById('previewEvidencias');
+            previewContainer.innerHTML = ''; // Limpiar anteriores
+            archivosSeleccionados = []; // Reiniciar
+
+            const files = Array.from(input.files);
+
+            files.forEach((file, index) => {
+                const fileReader = new FileReader();
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+                const previewItem = document.createElement('div');
+                previewItem.classList.add('relative', 'group');
+
+                fileReader.onload = (e) => {
+                    if (isImage) {
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" 
+                                class="w-full h-32 object-cover rounded cursor-pointer hover:scale-105 transition"
+                                >
+                            <button type="button" class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
+                                onclick="eliminarEvidencia(${index})">✕</button>
+                        `;
+                    } else {
+                        previewItem.innerHTML = `
+                            <div class="bg-gray-200 p-3 rounded text-sm flex items-center justify-between">
+                                <span class="truncate w-32">${file.name}</span>
+                                <button type="button" class="bg-red-600 text-white text-xs px-2 py-1 rounded"
+                                    onclick="eliminarEvidencia(${index})">✕</button>
+                            </div>
+                        `;
+                    }
+
+                    previewContainer.appendChild(previewItem);
+                };
+
+                archivosSeleccionados.push(file);
+                fileReader.readAsDataURL(file);
+            });
+        }
+
+        // Eliminar una evidencia antes de enviar el formulario
+        function eliminarEvidencia(index) {
+            archivosSeleccionados.splice(index, 1);
+            actualizarInputEvidencias();
+            previsualizarEvidencias({ target: { files: archivosSeleccionados } });
+        }
+
+        // Actualizar el input de tipo file (porque no se puede modificar directamente)
+        function actualizarInputEvidencias() {
+            const input = document.getElementById('evidencia_modal');
+            const dataTransfer = new DataTransfer();
+            archivosSeleccionados.forEach(file => dataTransfer.items.add(file));
+            input.files = dataTransfer.files;
         }
 
         // Funciones para agregar/eliminar campos dinámicos (si se usan en el formulario)
@@ -867,5 +1011,121 @@
                 console.error('Error al obtener rango de fechas:', error);
             }
         }
+
+        // Función global para inicializar el modal de evidencias (actividades o seguimientos)
+        function initEvidenciaModal(entityId, isSeguimiento) {
+            const suffix = isSeguimiento ? '-seg' : '';
+            const grid = document.getElementById(`evidencias-grid${suffix}-${entityId}`);
+            const filePicker = document.getElementById(`file-picker${suffix}-${entityId}`);
+            const previewNew = document.getElementById(`preview-new${suffix}-${entityId}`);
+            const form = document.getElementById(`form-evidencias${suffix}-${entityId}`);
+            const addCard = document.getElementById(`agregar-tarjeta${suffix}-${entityId}`);
+
+            // Verificación: Si no existen los elementos, salir
+            if (!grid || !filePicker || !previewNew || !form || !addCard) return;
+
+            // Abrir file picker al hacer click en la tarjeta
+            addCard.addEventListener('click', () => filePicker.click());
+
+            // Manejar eliminación de evidencias existentes
+            grid.addEventListener('click', function (e) {
+                const btn = e.target.closest(`.delete-existing${suffix}`);
+                if (!btn) return;
+
+                const card = btn.closest(`.evidencia-card${suffix}`);
+                const ruta = card.dataset.file;
+
+                const existingHidden = form.querySelector(`input[type="hidden"][name="eliminar_evidencia[]"][value="${ruta}"]`);
+                if (existingHidden) {
+                    existingHidden.remove();
+                    card.classList.remove('opacity-40', 'line-through', 'filter', 'grayscale');
+                    return;
+                }
+
+                const inputHidden = document.createElement('input');
+                inputHidden.type = 'hidden';
+                inputHidden.name = 'eliminar_evidencia[]';
+                inputHidden.value = ruta;
+                form.appendChild(inputHidden);
+
+                card.classList.add('opacity-40', 'line-through', 'filter', 'grayscale');
+            });
+
+            // Manejar selección de archivos nuevos
+            filePicker.addEventListener('change', function (e) {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) return;
+
+                files.forEach(file => {
+                    // Crear preview
+                    const previewCard = document.createElement('div');
+                    previewCard.className = 'bg-white p-2 rounded shadow-sm border border-gray-200 flex flex-col items-center justify-between h-28 relative';
+
+                    // Botón para quitar archivo nuevo antes de subir
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.className = 'remove-new absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center';
+                    previewCard.appendChild(removeBtn);
+
+                    if (file.type.startsWith('image/')) {
+                        const imgWrap = document.createElement('div');
+                        imgWrap.className = 'w-full h-20 overflow-hidden flex items-center justify-center bg-gray-100 rounded mb-1';
+                        const img = document.createElement('img');
+                        img.className = 'object-cover w-full h-full';
+                        const reader = new FileReader();
+                        reader.onload = (ev) => img.src = ev.target.result;
+                        reader.readAsDataURL(file);
+                        imgWrap.appendChild(img);
+                        previewCard.appendChild(imgWrap);
+                        const nameP = document.createElement('p');
+                        nameP.className = 'text-xs text-center truncate w-full';
+                        nameP.textContent = file.name;
+                        previewCard.appendChild(nameP);
+                    } else {
+                        const iconWrap = document.createElement('div');
+                        iconWrap.className = 'w-full h-20 overflow-hidden flex items-center justify-center bg-gray-100 rounded mb-1';
+                        iconWrap.innerHTML = '<img src="{{ asset("icons/file.png") }}" class="w-10 h-10 opacity-70">';
+                        previewCard.appendChild(iconWrap);
+                        const nameP = document.createElement('p');
+                        nameP.className = 'text-xs text-center truncate w-full';
+                        nameP.textContent = file.name;
+                        previewCard.appendChild(nameP);
+                    }
+
+                    // Añadir preview al contenedor
+                    previewNew.appendChild(previewCard);
+
+                    // Crear un input[file] oculto para este archivo y añadirlo al form
+                    const newInput = document.createElement('input');
+                    newInput.type = 'file';
+                    newInput.name = 'evidencia_nueva[]';
+                    newInput.className = 'hidden';
+
+                    // Para asignar el File a newInput, usamos DataTransfer
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    newInput.files = dt.files;
+
+                    form.appendChild(newInput);
+
+                    // Asociar el botón de eliminar para quitar el preview y el input asociado
+                    removeBtn.addEventListener('click', () => {
+                        let removed = false;
+                        Array.from(form.querySelectorAll('input[type="file"][name="evidencia_nueva[]"]')).forEach(inp => {
+                            if (!removed && inp.files.length > 0 && inp.files[0].name === file.name && inp.files[0].size === file.size) {
+                                inp.remove();
+                                removed = true;
+                            }
+                        });
+                        previewCard.remove();
+                    });
+                });
+
+                // Resetear el filePicker para permitir volver a seleccionar los mismos archivos si se desea
+                e.target.value = '';
+            });
+        }
+
     </script>
 </x-app-layout>

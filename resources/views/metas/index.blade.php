@@ -60,91 +60,91 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-sm sm:rounded-lg p-6 overflow-x-auto">
+            <div class="bg-white shadow-sm sm:rounded-lg p-6">  <!-- Removí overflow-x-auto aquí -->
 
                 <!-- Tabla de metas -->
-                <table
-                    class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800">
+                <table class="w-full divide-y divide-gray-200 border border-gray-300 rounded-lg shadow text-sm text-gray-800 table-fixed">  <!-- Agregué table-fixed y w-full -->
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="px-4 py-3 text-left">
+                            <th class="px-2 py-3 text-left w-[12%]">  <!-- Ancho fijo porcentual -->
                                 Usuario Responsable</th>
-                            <th class="px-4 py-3 text-left">
+                            <th class="px-2 py-3 text-left w-[12%]">
                                 Nombre de la Meta</th>
-                            <th class="px-4 py-3 text-left break-words max-w-xs">
+                            <th class="px-2 py-3 text-left w-[10%]">
                                 Objetivos Estrategicos</th>
-                            <th class="px-4 py-3 text-left max-w-[150px]">
+                            <th class="px-2 py-3 text-left w-[10%]">
                                 Ejes Estrategicos</th>
-                            <th class="px-4 py-3 text-left max-w-[150px]">
+                            <th class="px-2 py-3 text-left w-[10%]">
                                 Actividades</th>
-                            <th class="px-4 py-3 text-left break-words max-w-xs">
+                            <th class="px-2 py-3 text-left w-[10%]">
                                 Resultados</th>
-                            <th class="px-4 py-3 text-left break-words max-w-xs">
+                            <th class="px-2 py-3 text-left w-[10%]">
                                 Indicador</th>
-                            <th class="px-4 py-3 text-left">
+                            <th class="px-2 py-3 text-left w-[8%]">
                                 Fechas</th>
-                            <th class="px-4 py-3 text-left break-words max-w-xs">
+                            <th class="px-2 py-3 text-left w-[8%]">
                                 Comentario</th>
-                            <th class="px-4 py-3 text-left">
+                            <th class="px-2 py-3 text-left w-[5%]">
                                 Estado</th>
-                            <th class="px-4 py-3 text-center">Funciones del Sistema</th>
+                            <th class="px-2 py-3 text-center w-[15%]">Funciones del Sistema</th>  <!-- Más ancho para botones -->
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach ($metas as $meta)
                             <tr class="hover:bg-indigo-50 transition">
-                                <td class="px-4 py-3 font-medium break-words max-w-xs">
+                                <td class="px-2 py-3 font-medium break-words max-w-xs overflow-hidden text-ellipsis" title="{{ $meta->encargadoMeta->nombre_usuario ?? 'Sin asignar' }}">
                                     {{ $meta->encargadoMeta->nombre_usuario ?? 'Sin asignar' }}</td>
-                                <td class="px-4 py-3 break-words max-w-xs">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis" title="{{ $meta->nombre }}">
                                     {{ $meta->nombre }}</td>
-                                <td class="px-4 py-3 break-words max-w-xs">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis">
                                     @php
                                         $objetivos = json_decode($meta->objetivos_estrategias);
-                                        // Filtra los objetivos no nulos y no vacíos
                                         $objetivos_filtrados = collect($objetivos)->filter(function($item) {
                                             return !is_null($item) && $item !== '';
                                         });
+                                        $objetivos_texto = $objetivos_filtrados->implode(', ');
                                     @endphp
-
                                     @if ($objetivos_filtrados->isNotEmpty())
-                                        @foreach ($objetivos_filtrados as $obj)
-                                            <span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                                {{ $obj }}
-                                            </span>
-                                        @endforeach
+                                        <span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full" title="{{ $objetivos_texto }}">
+                                            {{ $objetivos_filtrados->first() }} @if($objetivos_filtrados->count() > 1)+{{ $objetivos_filtrados->count() - 1 }}@endif
+                                        </span>
                                     @else
                                         <span class="text-sm text-red-500">Sin objetivos</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 max-w-[150px] break-words">
+                                <td class="px-2 py-3 max-w-[150px] break-words overflow-hidden text-ellipsis">
                                     @if (!empty($meta->ejes_estrategicos))
-                                        @foreach (json_decode($meta->ejes_estrategicos, true) ?? [] as $eje)
-                                            <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                                {{ $eje }}
-                                            </span>
-                                        @endforeach
+                                        @php
+                                            $ejes = json_decode($meta->ejes_estrategicos, true) ?? [];
+                                            $ejes_texto = implode(', ', $ejes);
+                                        @endphp
+                                        <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full" title="{{ $ejes_texto }}">
+                                            {{ $ejes[0] ?? '' }} @if(count($ejes) > 1)+{{ count($ejes) - 1 }}@endif
+                                        </span>
                                     @else
-                                        <span class="text-sm text-red-500">Sin ejes seleccionados</span>
+                                        <span class="text-sm text-red-500">Sin ejes</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 max-w-[150px] break-words">
+                                <td class="px-2 py-3 max-w-[150px] break-words overflow-hidden text-ellipsis">
                                     @if (!empty($meta->nombre_actividades))
-                                        @foreach (json_decode($meta->nombre_actividades, true) as $actividad)
-                                            <div class="text-gray-800 text-xs mb-1">
-                                                • {{ trim($actividad) }}
-                                            </div>
-                                        @endforeach
+                                        @php
+                                            $actividades = json_decode($meta->nombre_actividades, true);
+                                            $actividades_texto = implode(', ', array_map('trim', $actividades));
+                                        @endphp
+                                        <div class="text-gray-800 text-xs" title="{{ $actividades_texto }}">
+                                            • {{ trim($actividades[0] ?? '') }} @if(count($actividades) > 1)+{{ count($actividades) - 1 }}@endif
+                                        </div>
                                     @else
-                                        <span class="text-sm text-red-500">Sin actividades registradas</span>
+                                        <span class="text-sm text-red-500">Sin actividades</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis whitespace-normal" title="{{ $meta->resultados_esperados ?? 'N/A' }}">
                                     {{ $meta->resultados_esperados ?? 'N/A' }}
                                 </td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis whitespace-normal" title="{{ $meta->indicador_resultados }}">
                                     {{ $meta->indicador_resultados }}
                                 </td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis whitespace-normal" title="Inicio: {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }} | Fin: {{ \Carbon\Carbon::parse($meta->fecha_fin)->format('d-m-Y') }}">
                                     Inicio:<br>
                                     <div class="font-semibold text-indigo-600">
                                         {{ \Carbon\Carbon::parse($meta->fecha_inicio)->format('d-m-Y') }}
@@ -155,18 +155,18 @@
                                         {{ \Carbon\Carbon::parse($meta->fecha_fin)->format('d-m-Y') }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis whitespace-normal" title="{{ $meta->comentario ?? 'N/A' }}">
                                     {{ $meta->comentario ?? 'N/A' }}</td>
-                                <td class="px-4 py-3 break-words max-w-xs whitespace-normal">
+                                <td class="px-2 py-3 break-words max-w-xs overflow-hidden text-ellipsis whitespace-normal">
                                     @php
                                         $inicio = \Carbon\Carbon::parse($meta->fecha_inicio);
                                         $fin = \Carbon\Carbon::parse($meta->fecha_fin);
                                         $hoy = \Carbon\Carbon::now();
 
-                                        $color = 'bg-gray-400'; // Por defecto: gris
+                                        $color = 'bg-gray-400';
 
                                         if ($hoy->lt($inicio)) {
-                                            $color = 'bg-gray-400'; // Aún no empieza
+                                            $color = 'bg-gray-400';
                                         } elseif ($hoy->between($inicio, $fin)) {
                                             $duracionTotal = $inicio->diffInSeconds($fin);
                                             $duracionTranscurrida = $inicio->diffInSeconds($hoy);
@@ -178,7 +178,7 @@
                                                 $color = 'bg-yellow-400';
                                             }
                                         } elseif ($hoy->gt($fin)) {
-                                            $color = 'bg-red-500'; // Ya pasó el tiempo
+                                            $color = 'bg-red-500';
                                         }
                                     @endphp
 
@@ -186,18 +186,17 @@
                                         <div class="w-4 h-4 rounded-full {{ $color }}" title="Avance: {{ round($porcentaje ?? 0, 1) }}%"></div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-righ">
+                                <td class="px-2 py-3 text-left">
                                     @php
                                         $rol = Auth::user()->tipo_usuario ?? null;
                                     @endphp
 
-                                    <div class="flex flex-wrap justify-center gap-2">
+                                    <div class="flex flex-wrap justify-center gap-1">  <!-- Reduje gap para compactar -->
 
-                                        {{-- Editar (solo encargado_institucion o responsable_plan) --}}
                                         @if ($rol === 'encargado_institucion' || $rol === 'responsable_plan')
                                             <div x-data="{ editModalOpen: false, modalNuevoUsuario: false }" class="inline-block">
                                                 <button @click="editModalOpen = true"
-                                                    class="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
+                                                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md text-xs hover:bg-yellow-200 transition shadow-sm">
                                                     Editar
                                                 </button>
 
@@ -240,9 +239,8 @@
 
                                             <!-- Eliminar -->
                                             <div x-data="{ confirmDelete: false }" class="inline-block">
-                                                <!-- Botón que abre el modal -->
                                                 <button @click="confirmDelete = true"
-                                                    class="bg-red-100 text-red-800 px-3 py-1.5 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
+                                                    class="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs hover:bg-red-200 transition shadow-sm">
                                                     Eliminar
                                                 </button>
 
@@ -284,68 +282,64 @@
                                         @endif
 
                                         @if ($rol === 'encargado_institucion' || $rol === 'responsable_plan')
-                                            <div class="border-b border-gray-300 w-16 mx-1"></div>
+                                            <div class="border-b border-gray-300 w-8 mx-1"></div>  <!-- Reduje ancho -->
                                         @endif
 
-                                        {{-- Actividades (lo ven todos) --}}
                                         <a href="{{ route('meta.actividades', $meta->id) }}"
-                                            class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
+                                            class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs hover:bg-blue-200 transition shadow-sm">
                                             Actividades/Lineas de Acción
                                         </a>
                                     </div>
-
                                 </td>
                             </tr>
                         @endforeach
 
                         @if ($metas->isEmpty())
                             <tr>
-                                <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500">No hay metas
-                                    registradas.</td>
+                                <td colspan="11" class="px-6 py-4 text-center text-sm text-gray-500">No hay metas registradas.</td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
                 <br>
-                @if (isset($plan))
-                    @auth
-                        @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan', 'encargado_institucion']))
-                            @php
-                                switch (auth()->user()->tipo_usuario) {
-                                    case 'responsable_plan':
-                                        $rutaInicio = route('plan.responsable', $plan->id);
-                                        break;
-                                    case 'administrador':
-                                        $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
-                                        break;
-                                    case 'encargado_institucion':
-                                        $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
-                                        break;
-                                    default:
-                                        $rutaInicio = '#';
-                                }
-                            @endphp
+                    @if (isset($plan))
+                        @auth
+                            @if (in_array(auth()->user()->tipo_usuario, ['administrador', 'responsable_plan', 'encargado_institucion']))
+                                @php
+                                    switch (auth()->user()->tipo_usuario) {
+                                        case 'responsable_plan':
+                                            $rutaInicio = route('plan.responsable', $plan->id);
+                                            break;
+                                        case 'administrador':
+                                            $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
+                                            break;
+                                        case 'encargado_institucion':
+                                            $rutaInicio = route('institucion.planes', $plan->departamento->institucion->id);
+                                            break;
+                                        default:
+                                            $rutaInicio = '#';
+                                    }
+                                @endphp
 
-                            @if ($rutaInicio !== '#')
-                                <div class="mb-6">
-                                    <div
-                                        class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
-                                        <a href="{{ $rutaInicio }}"
-                                            class="flex items-center space-x-1 text-sm font-medium">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 19l-7-7 7-7" />
-                                            </svg>
-                                            <span>Volver a planes estratégicos</span>
-                                        </a>
+                                @if ($rutaInicio !== '#')
+                                    <div class="mb-6">
+                                        <div
+                                            class="inline-flex items-center bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-100 transition duration-200">
+                                            <a href="{{ $rutaInicio }}"
+                                                class="flex items-center space-x-1 text-sm font-medium">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 19l-7-7 7-7" />
+                                                </svg>
+                                                <span>Volver a planes estratégicos</span>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             @endif
-                        @endif
-                    @endauth
-
-                @endif
+                        @endauth
+                    @endif
             </div>
         </div>
     </div>

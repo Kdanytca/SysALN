@@ -50,6 +50,23 @@
                                     class="text-red-600 hover:underline text-sm font-medium">
                                     Eliminar
                                 </button>
+
+                                <div x-data="{ modalEvidenciaSeg: false }">
+                                    <button @click="modalEvidenciaSeg = true"
+                                        class="text-green-500 hover:underline text-sm font-medium">
+                                        Ver Evidencias
+                                    </button>
+
+                                    <div x-show="modalEvidenciaSeg"
+                                        x-init="initEvidenciaModal('{{ $seguimiento->id }}', true)"
+                                        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                                        x-cloak>
+                                        <div class="bg-white rounded-lg shadow-lg w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
+                                            @include('seguimientos.evidenciaSeguimiento', ['seguimiento' => $seguimiento])
+                                        </div>
+                                    </div>
+                                </div>
+
                             </td>
                         </tr>
                     @endforeach

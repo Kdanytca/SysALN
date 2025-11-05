@@ -14,6 +14,7 @@ class SeguimientoActividad extends Model
         'estado',
         'documento',
         'idActividades',
+        'evidencia',
     ];
 
     public function actividad()

@@ -341,6 +341,7 @@ class ActividadController extends Controller
 
         return redirect()->back()->with('success', 'Actividad eliminada exitosamente.');
     }
+
     public function rangoFechas($id)
     {
         $actividad = \App\Models\Actividad::findOrFail($id);
@@ -350,4 +351,56 @@ class ActividadController extends Controller
             'fecha_fin' => $actividad->fecha_fin,
         ]);
     }
+
+    public function guardarEvidencias(Request $request, $metaId, $actividadId)
+    {
+        $actividad = Actividad::findOrFail($actividadId);
+
+        $evidenciaActual = json_decode($actividad->evidencia, true) ?? [];
+        $evidenciaAEliminar = $request->input('eliminar_evidencia', []);
+
+        // Eliminar archivos
+        foreach ($evidenciaAEliminar as $ruta) {
+            $rutaCompleta = public_path($ruta);
+            if (is_file($rutaCompleta)) {
+                unlink($rutaCompleta);
+            }
+        }
+
+        $evidenciaFinal = array_values(array_diff($evidenciaActual, $evidenciaAEliminar));
+
+        // Subir nuevas evidencias (con el mismo formato que al crear)
+        if ($request->hasFile('evidencia_nueva')) {
+            foreach ($request->file('evidencia_nueva') as $archivo) {
+                if (!$archivo) continue;
+
+                $nombreOriginal = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                $nombreLimpio = Str::slug($nombreOriginal, '_'); // Reemplaza espacios y caracteres especiales
+                $timestamp = now()->format('Ymd_His');
+                $extension = $archivo->getClientOriginalExtension();
+
+                $nombreArchivo = "{$nombreLimpio}_{$timestamp}.{$extension}";
+
+                // Determinar la carpeta destino según el tipo
+                if (in_array($extension, ['jpeg', 'jpg', 'png', 'gif'])) {
+                    $carpeta = 'uploads/actividades/imagenes';
+                } else {
+                    $carpeta = 'uploads/actividades/documentos';
+                }
+
+                $carpetaDestino = public_path($carpeta);
+                if (!File::exists($carpetaDestino)) {
+                    File::makeDirectory($carpetaDestino, 0755, true);
+                }
+
+                $archivo->move($carpetaDestino, $nombreArchivo);
+                $evidenciaFinal[] = $carpeta . '/' . $nombreArchivo;
+            }
+        }
+
+        $actividad->update(['evidencia' => json_encode($evidenciaFinal)]);
+
+        return redirect()->back()->with('success', 'Evidencias actualizadas correctamente.');
+    }
+   
 }

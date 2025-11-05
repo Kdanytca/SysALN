@@ -99,6 +99,8 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     Route::resource('actividades', ActividadController::class)->except(['show']);
     Route::get('/metas/{meta}/actividades', [ActividadController::class, 'indexPorMeta'])->name('meta.actividades');
     Route::get('/actividades/responsable', [ActividadController::class, 'indexResponsable'])->name('actividades.indexResponsable');
+    Route::post('/metas/{meta}/actividades/{actividad}/evidencias', [ActividadController::class, 'guardarEvidencias'])->name('actividades.guardarEvidencias');
+
     //Rango de fechas para seguimientos
     Route::get('/actividades/{id}/rango-fechas', [ActividadController::class, 'rangoFechas']);
 
@@ -112,6 +114,7 @@ Route::middleware(['auth', 'verified', TipoUsuario::class . ':encargado_instituc
     Route::post('/seguimientos', [SeguimientoActividadController::class, 'store'])->name('seguimientos.store');
     Route::get('/seguimientos/{seguimiento}', [SeguimientoActividadController::class, 'show']);
     Route::put('/seguimientos/{id}', [SeguimientoActividadController::class, 'update'])->name('seguimientos.update');
+    Route::post('/seguimientos/{id}/guardar-evidencias', [SeguimientoActividadController::class, 'guardarEvidencias'])->name('seguimientos.guardarEvidencias');
 
     // Planes Estratégicos
     Route::post('/planes', [PlanEstrategicoController::class, 'store'])->name('planes.store');
