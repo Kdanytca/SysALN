@@ -26,28 +26,6 @@ class Actividad extends Model
         'evidencia' => 'array',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function ($actividad) {
-            // Si hay evidencias guardadas en formato JSON
-            if ($actividad->evidencia) {
-                $evidencias = json_decode($actividad->evidencia, true);
-
-                if (is_array($evidencias)) {
-                    foreach ($evidencias as $ruta) {
-                        $rutaCompleta = public_path($ruta);
-
-                        if (File::exists($rutaCompleta)) {
-                            File::delete($rutaCompleta);
-                        }
-                    }
-                }
-            }
-        });
-    }
-
     // Relaciones
     public function meta()
     {
@@ -67,5 +45,31 @@ class Actividad extends Model
     public function encargadoActividad()
     {
         return $this->belongsTo(Usuario::class, 'idEncargadoActividad');
+    }
+
+    // ⚙️ Boot para eliminación en cascada
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($actividad) {
+            // 1️⃣ Borrar seguimientos antes de eliminar la actividad
+            foreach ($actividad->seguimientos as $seguimiento) {
+                $seguimiento->delete();
+            }
+
+            // 2️⃣ (Opcional) Eliminar archivos de evidencia de la actividad
+            if (!empty($actividad->evidencia)) {
+                $rutas = json_decode($actividad->evidencia, true);
+                if (is_array($rutas)) {
+                    foreach ($rutas as $ruta) {
+                        $archivo = public_path($ruta);
+                        if (file_exists($archivo)) {
+                            @unlink($archivo);
+                        }
+                    }
+                }
+            }
+        });
     }
 }
