@@ -1,33 +1,66 @@
 <x-app-layout>
     @php
+        // Función segura para decodificar valores
         function decodeSafe($value)
         {
-            // Si el valor es nulo
             if (is_null($value)) {
                 return 'N/A';
             }
 
-            // Si ya es array u objeto, lo convertimos en texto legible
             if (is_array($value) || is_object($value)) {
                 return implode(', ', (array) $value);
             }
 
-            // Si es JSON válido o contiene caracteres escapados tipo \u
             if (
                 is_string($value) &&
                 (str_starts_with($value, '{') || str_starts_with($value, '[') || str_contains($value, '\u'))
             ) {
                 $decoded = json_decode($value, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
-                    if (is_array($decoded)) {
-                        return implode(', ', $decoded);
-                    }
-                    return $decoded;
+                    return is_array($decoded) ? implode(', ', $decoded) : $decoded;
                 }
             }
 
-            // Si es texto normal
             return $value;
+        }
+
+        // Función segura para enumerar texto
+        function formatearTextoEnumerado($texto)
+        {
+            if (empty($texto)) {
+                return '<p class="italic text-gray-500">Sin información disponible</p>';
+            }
+
+            if (is_string($texto)) {
+                $decoded = json_decode($texto, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    $items = $decoded;
+                } else {
+                    $textoPlano = trim($texto, "[]\"' \n\r\t");
+                    $textoPlano = str_replace(['•', "\r"], "\n", $textoPlano);
+                    $items = preg_split("/[\n;]+/", $textoPlano);
+                }
+            } else {
+                $items = (array) $texto;
+            }
+
+            $items = array_filter(array_map('trim', $items), fn($v) => $v !== '');
+            if (empty($items)) {
+                return '<p class="italic text-gray-500">Sin información disponible</p>';
+            }
+
+            $html = '';
+            foreach ($items as $index => $item) {
+                $html .= "<p class='mb-2'><strong>" . ($index + 1) . '.</strong> ' . e($item) . '</p>';
+            }
+
+            return $html;
+        }
+
+        // Decodificar metas del backup
+        $metasBackup = $backup->metas;
+        if (is_string($metasBackup)) {
+            $metasBackup = json_decode($metasBackup, true) ?? [];
         }
     @endphp
 
@@ -42,7 +75,7 @@
 
         <!-- Información General -->
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 mb-4">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Información General</h3>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">📋 Información General</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-base text-gray-700">
                 <p><span class="font-bold text-gray-900">📂 Departamento:</span>
                     {{ decodeSafe($backup->nombre_departamento) }}</p>
@@ -53,91 +86,108 @@
             </div>
         </div>
 
-        <!-- Ejes Estratégicos y Objetivos -->
+        <!-- Ejes y Objetivos -->
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 mb-3">🎯 Ejes Estratégicos del Plan</h3>
-                <p class="text-gray-700 leading-relaxed text-base break-words">
-                    @foreach (explode(',', $backup->ejes_estrategicos) as $eje)
-                        • {{ decodeSafe(trim($eje)) }} <br>
-                    @endforeach
-                </p>
+                <div class="text-gray-700 leading-relaxed text-base break-words text-justify">
+                    {!! formatearTextoEnumerado($backup->ejes_estrategicos) !!}
+                </div>
             </div>
 
             <div>
                 <h3 class="text-xl font-semibold text-gray-700 mb-3">📌 Objetivos</h3>
-                @if ($backup->objetivos)
-                    <ul class="list-disc list-inside space-y-2 text-gray-700 text-base break-words">
-                        @foreach (json_decode($backup->objetivos, true) as $objetivo)
-                            <li>{{ decodeSafe($objetivo) }}</li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p class="italic text-gray-500 text-base">Sin objetivos</p>
-                @endif
+                <div class="text-gray-700 leading-relaxed text-base break-words text-justify">
+                    {!! formatearTextoEnumerado($backup->objetivos) !!}
+                </div>
             </div>
         </div>
 
         <!-- Metas -->
-        @if ($backup->metas)
+        @if (!empty($metasBackup))
             <div class="space-y-4">
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">🎯 Metas/Objetivos Estratégicos</h3>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">🎯 Metas / Objetivos Estratégicos</h3>
 
-                @foreach (json_decode($backup->metas) as $index => $meta)
+                @foreach ($metasBackup as $index => $meta)
+                    @php
+                        $actividades = $meta['actividades'] ?? [];
+                        if (is_string($actividades)) {
+                            $actividades = json_decode($actividades, true) ?? [];
+                        }
+
+                        $ejesMeta = $meta['ejes_estrategicos'] ?? [];
+                        if (is_string($ejesMeta)) {
+                            $ejesMeta = json_decode($ejesMeta, true) ?? [];
+                        }
+                    @endphp
+
                     <div x-data="{ open: false }" class="border border-blue-300 rounded-lg bg-blue-50 shadow-sm">
                         <button @click="open = !open"
                             class="w-full px-4 py-3 text-left font-semibold text-blue-800 hover:bg-blue-100 rounded-t-lg">
-                            Meta {{ $index + 1 }}: {{ decodeSafe($meta->nombre) }}
-                            @if ($meta->responsable)
-                                (Encargado: {{ decodeSafe($meta->responsable) }})
+                            Meta {{ $index + 1 }}: {{ decodeSafe($meta['nombre'] ?? '') }}
+                            @if (!empty($meta['responsable']))
+                                (Encargado: {{ decodeSafe($meta['responsable']) }})
                             @endif
                         </button>
 
                         <div x-show="open" class="px-4 py-3 space-y-2">
-                            <p><strong>Ejes Estratégicos:</strong> {{ decodeSafe($meta->ejes_estrategicos) }}</p>
+                            <p><strong>Ejes Estratégicos:</strong></p>
+                            <div class="ml-4">{!! formatearTextoEnumerado($ejesMeta) !!}</div>
+
                             <p><strong>Resultados Esperados:</strong>
-                                {{ decodeSafe($meta->resultados_esperados ?? 'N/A') }}</p>
-                            <p><strong>Indicador:</strong> {{ decodeSafe($meta->indicador_resultados ?? 'N/A') }}</p>
-                            <p><strong>Comentario:</strong> {{ decodeSafe($meta->comentario ?? 'N/A') }}</p>
-                            <p><strong>Fecha Inicio:</strong> {{ $meta->fecha_inicio }} |
-                                <strong>Fecha Fin:</strong> {{ $meta->fecha_fin }}
-                            </p>
+                                {{ decodeSafe($meta['resultados_esperados'] ?? 'N/A') }}</p>
+                            <p><strong>Indicador:</strong> {{ decodeSafe($meta['indicador_resultados'] ?? 'N/A') }}</p>
+                            <p><strong>Comentario:</strong> {{ decodeSafe($meta['comentario'] ?? 'N/A') }}</p>
+                            <p><strong>Periodo:</strong> {{ $meta['fecha_inicio'] ?? '' }} -
+                                {{ $meta['fecha_fin'] ?? '' }}</p>
 
                             <!-- Actividades -->
-                            @if (!empty($meta->actividades))
+                            @if (!empty($actividades))
                                 <div class="ml-4 mt-2 space-y-2">
-                                    @foreach ($meta->actividades as $actIndex => $actividad)
+                                    @foreach ($actividades as $actIndex => $actividad)
+                                        @php
+                                            $seguimientos = $actividad['seguimientos'] ?? [];
+                                            if (is_string($seguimientos)) {
+                                                $seguimientos = json_decode($seguimientos, true) ?? [];
+                                            }
+
+                                            $objetivos = $actividad['objetivos'] ?? [];
+                                            if (is_string($objetivos)) {
+                                                $objetivos = json_decode($objetivos, true) ?? [];
+                                            }
+
+                                            $evidencias = $actividad['evidencias'] ?? ($actividad['evidencia'] ?? []);
+                                            if (is_string($evidencias)) {
+                                                $evidencias = json_decode($evidencias, true) ?? [];
+                                            }
+                                        @endphp
+
                                         <div x-data="{ open: false }"
                                             class="border border-green-300 rounded-lg bg-green-50 shadow-sm">
                                             <button @click="open = !open"
                                                 class="w-full px-3 py-2 text-left font-medium text-green-800 hover:bg-green-100 rounded-t-lg">
-                                                Actividad/Líneas de acción {{ $actIndex + 1 }}:
-                                                {{ decodeSafe($actividad->nombre_actividad) }}
-                                                @if ($actividad->encargado)
-                                                    (Encargado: {{ decodeSafe($actividad->encargado) }})
+                                                Actividad {{ $actIndex + 1 }}:
+                                                {{ decodeSafe($actividad['nombre_actividad'] ?? '') }}
+                                                @if (!empty($actividad['encargado']))
+                                                    (Encargado: {{ decodeSafe($actividad['encargado']) }})
                                                 @endif
                                             </button>
 
                                             <div x-show="open" class="px-3 py-2 space-y-1">
-                                                <p><strong>Objetivos:</strong>
-                                                    {{ decodeSafe($actividad->objetivos ?? 'N/A') }}</p>
+                                                <p><strong>Objetivos:</strong></p>
+                                                <div class="ml-4">{!! formatearTextoEnumerado($objetivos) !!}</div>
+
                                                 <p><strong>Comentario:</strong>
-                                                    {{ decodeSafe($actividad->comentario ?? 'N/A') }}</p>
+                                                    {{ decodeSafe($actividad['comentario'] ?? 'N/A') }}</p>
                                                 <p><strong>Unidad Encargada:</strong>
-                                                    {{ decodeSafe($actividad->unidad_encargada ?? 'N/A') }}</p>
-                                                <p><strong>Fecha Inicio:</strong> {{ $actividad->fecha_inicio }} |
-                                                    <strong>Fecha Fin:</strong> {{ $actividad->fecha_fin }}
-                                                </p>
+                                                    {{ decodeSafe($actividad['unidad_encargada'] ?? 'N/A') }}</p>
+                                                <p><strong>Periodo:</strong> {{ $actividad['fecha_inicio'] ?? '' }} -
+                                                    {{ $actividad['fecha_fin'] ?? '' }}</p>
 
-                                                @php
-                                                    $evidencias = is_array($actividad->evidencia)
-                                                        ? $actividad->evidencia
-                                                        : json_decode($actividad->evidencia, true) ?? [];
-                                                @endphp
-
+                                                <!-- Evidencias -->
                                                 @if (!empty($evidencias))
                                                     <div class="mt-2">
-                                                        <strong>Evidencias:</strong>
+                                                        <strong>📎 Evidencias:</strong>
                                                         <div class="flex flex-wrap gap-2 mt-1">
                                                             @foreach ($evidencias as $archivo)
                                                                 @php $extension = pathinfo($archivo, PATHINFO_EXTENSION); @endphp
@@ -156,20 +206,54 @@
                                                 @endif
 
                                                 <!-- Seguimientos -->
-                                                @if (!empty($actividad->seguimientos))
-                                                    <div class="ml-4 mt-2 space-y-1">
-                                                        @foreach ($actividad->seguimientos as $segIndex => $seg)
+                                                @if (!empty($seguimientos))
+                                                    <div class="ml-4 mt-2 space-y-3">
+                                                        @foreach ($seguimientos as $segIndex => $seg)
+                                                            @php
+                                                                $evidenciasSeg =
+                                                                    $seg['evidencias'] ?? ($seg['evidencia'] ?? []);
+                                                                if (is_string($evidenciasSeg)) {
+                                                                    $evidenciasSeg =
+                                                                        json_decode($evidenciasSeg, true) ?? [];
+                                                                }
+                                                            @endphp
+
                                                             <div
-                                                                class="border-l-2 border-yellow-300 pl-3 py-1 bg-yellow-50 rounded-sm">
+                                                                class="border-l-2 border-yellow-300 pl-3 py-2 bg-yellow-50 rounded-sm">
                                                                 <p><strong>Seguimiento {{ $segIndex + 1 }}:</strong>
                                                                 </p>
-                                                                <p>Periodo: {{ decodeSafe($seg->periodo_consultar) }}
+                                                                <p><strong>Periodo:</strong>
+                                                                    {{ decodeSafe($seg['periodo_consultar'] ?? '') }}
                                                                 </p>
-                                                                <p>Observaciones: {{ decodeSafe($seg->observaciones) }}
-                                                                </p>
-                                                                <p>Estado: {{ decodeSafe($seg->estado) }}</p>
-                                                                <p>Documento:
-                                                                    {{ decodeSafe($seg->documento ?? 'N/A') }}</p>
+                                                                <p><strong>Observaciones:</strong>
+                                                                    {{ decodeSafe($seg['observaciones'] ?? '') }}</p>
+                                                                <p><strong>Estado:</strong>
+                                                                    {{ decodeSafe($seg['estado'] ?? '') }}</p>
+                                                                <p><strong>Documento:</strong>
+                                                                    {{ decodeSafe($seg['documento'] ?? 'N/A') }}</p>
+
+                                                                <!-- Evidencias del seguimiento -->
+                                                                @if (!empty($evidenciasSeg))
+                                                                    <div class="mt-2">
+                                                                        <strong>📎 Evidencias del seguimiento:</strong>
+                                                                        <div class="flex flex-wrap gap-2 mt-1">
+                                                                            @foreach ($evidenciasSeg as $archivoSeg)
+                                                                                @php $extensionSeg = pathinfo($archivoSeg, PATHINFO_EXTENSION); @endphp
+                                                                                @if (in_array(strtolower($extensionSeg), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
+                                                                                    <img src="{{ asset($archivoSeg) }}"
+                                                                                        alt="Evidencia"
+                                                                                        class="w-32 h-32 object-cover rounded shadow">
+                                                                                @else
+                                                                                    <a href="{{ asset($archivoSeg) }}"
+                                                                                        target="_blank"
+                                                                                        class="text-blue-600 underline block">
+                                                                                        📄 {{ basename($archivoSeg) }}
+                                                                                    </a>
+                                                                                @endif
+                                                                            @endforeach
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                         @endforeach
                                                     </div>

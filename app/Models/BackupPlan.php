@@ -20,11 +20,21 @@ class BackupPlan extends Model
         'fecha_fin',
         'indicador',
         'creado_por',
-        'nombre_departamento', // opcional: guardado directamente en backup
-        'nombre_responsable',  // opcional: guardado directamente en backup
+        'nombre_departamento',
+        'nombre_responsable',
     ];
 
-    // Relación opcional al plan original
+    /**
+     * Casting de campos JSON a arrays.
+     */
+    protected $casts = [
+        'metas'             => 'array',
+        'ejes_estrategicos' => 'array',
+        'objetivos'         => 'array',
+        'fecha_inicio'      => 'date',
+        'fecha_fin'         => 'date',
+    ];
+
     public function planOriginal()
     {
         return $this->belongsTo(PlanEstrategico::class, 'idPlanOriginal')->withDefault();

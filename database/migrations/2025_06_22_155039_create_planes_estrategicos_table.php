@@ -6,39 +6,34 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('planes_estrategicos', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('idDepartamento')->constrained('departamentos')->onDelete('cascade');
-
-            // Responsable del plan (usuario del departamento)
             $table->foreignId('idUsuario')->constrained('usuarios')->onDelete('cascade');
 
             $table->string('nombre_plan_estrategico', 255);
+
+            // CORREGIDO: Ahora es JSON para soportar texto largo sin problemas
             $table->text('ejes_estrategicos');
-            $table->json('objetivos')->nullable();
+
+            $table->text('objetivos')->nullable();
+
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->string('indicador', 45);
 
-            // Usuario que creó el plan (admin Breeze)
+            // CORREGIDO: Hacer nullable ya que en tu store siempre se guarda vacío
+            $table->string('indicador', 45)->nullable();
+
             $table->foreignId('creado_por')->constrained('usuarios')->onDelete('cascade');
-
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('planes_estrategicos');
     }
 };
-

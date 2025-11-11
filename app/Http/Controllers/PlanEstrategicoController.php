@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\BackupPlan;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class PlanEstrategicoController extends Controller
 {
@@ -71,37 +72,43 @@ class PlanEstrategicoController extends Controller
         return view('planes.index', ['planes' => $plan]);
     }
 
-
-
-
-    // Crear plan (solo admin y encargado_institucion)
     public function store(Request $request)
     {
         if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion'])) {
-            return redirect()->back()->with('error', 'No tienes permiso para crear planes.');
+            return redirect()->back()->with('error', 'No tienes permiso.');
         }
 
         $request->validate([
             'idDepartamento' => 'required|exists:departamentos,id',
             'nombre_plan_estrategico' => 'required|string|max:255',
-            'metas' => 'nullable|string|max:255',
-            'ejes_estrategicos' => 'required|array|min:1',
-            'ejes_estrategicos.*' => 'required|string|max:100',
-            'objetivos' => 'nullable|array',
-            'objetivos.*' => 'required|string|max:255',
+            'metas' => 'nullable|string|max:2000',
+            'ejes_estrategicos' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'indicador' => 'nullable|string|max:45',
             'responsable' => 'required|exists:usuarios,id',
         ]);
 
+        // ✅ Limpieza y normalización antes de guardar
+        $ejes = $request->ejes_estrategicos;
+
+        if (is_string($ejes)) {
+            $ejes = trim($ejes, "[]\"'");
+            $ejes = str_replace(['•', "\r", "\n"], "\n", $ejes);
+            $ejes = array_filter(array_map('trim', preg_split('/[\r\n]+/', $ejes)));
+        }
+
+        if (is_array($ejes)) {
+            $ejes = array_filter(array_map('trim', $ejes));
+        }
+
+        // ✅ Guardar solo el JSON limpio
         $plan = PlanEstrategico::create([
             'idDepartamento' => $request->idDepartamento,
             'idUsuario' => $request->responsable,
             'nombre_plan_estrategico' => $request->nombre_plan_estrategico,
             'metas' => $request->metas ?? '',
-            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
-            'objetivos' => $request->objetivos ? json_encode($request->objetivos) : json_encode([]),
+            'ejes_estrategicos' => json_encode(array_values($ejes), JSON_UNESCAPED_UNICODE),
+            'objetivos' => json_encode($request->objetivos ?? [], JSON_UNESCAPED_UNICODE),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'indicador' => '',
@@ -113,21 +120,16 @@ class PlanEstrategicoController extends Controller
         ])->with('success', 'Plan registrado correctamente.');
     }
 
-
-    // Actualizar
     public function update(Request $request, $id)
     {
         if (!in_array(Auth::user()->tipo_usuario, ['administrador', 'encargado_institucion'])) {
-            return redirect()->back()->with('error', 'No tienes permiso para editar planes.');
+            return redirect()->back()->with('error', 'No tienes permiso.');
         }
 
         $request->validate([
             'idDepartamento' => 'required|exists:departamentos,id',
             'nombre_plan_estrategico' => 'required|string|max:255',
-            'ejes_estrategicos' => 'required|array|min:1',
-            'ejes_estrategicos.*' => 'required|string|max:100',
-            'objetivos' => 'nullable|array',
-            'objetivos.*' => 'required|string|max:255',
+            'ejes_estrategicos' => 'required',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'responsable' => 'required|exists:usuarios,id',
@@ -135,22 +137,34 @@ class PlanEstrategicoController extends Controller
 
         $plan = PlanEstrategico::findOrFail($id);
 
+        // ✅ Limpieza y normalización antes de actualizar
+        $ejes = $request->ejes_estrategicos;
+
+        if (is_string($ejes)) {
+            $ejes = trim($ejes, "[]\"'");
+            $ejes = str_replace(['•', "\r", "\n"], "\n", $ejes);
+            $ejes = array_filter(array_map('trim', preg_split('/[\r\n]+/', $ejes)));
+        }
+
+        if (is_array($ejes)) {
+            $ejes = array_filter(array_map('trim', $ejes));
+        }
+
         $plan->update([
             'idDepartamento' => $request->idDepartamento,
             'nombre_plan_estrategico' => $request->nombre_plan_estrategico,
-            'ejes_estrategicos' => implode(',', $request->ejes_estrategicos),
-            'objetivos' => $request->objetivos ? json_encode($request->objetivos) : null,
+            'ejes_estrategicos' => json_encode(array_values($ejes), JSON_UNESCAPED_UNICODE),
+            'objetivos' => json_encode($request->objetivos ?? [], JSON_UNESCAPED_UNICODE),
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'idUsuario' => $request->responsable,
         ]);
 
-        $institucion_id = $plan->departamento->idInstitucion;
-
         return redirect()->route('institucion.planes', [
-            'id' => $institucion_id
+            'id' => $plan->departamento->idInstitucion
         ])->with('success', 'Plan actualizado correctamente.');
     }
+
 
     // Eliminar
     public function destroy($id)
@@ -211,17 +225,39 @@ class PlanEstrategicoController extends Controller
             return back()->with('error', 'Ya existe un backup de este plan.');
         }
 
+        // ✅ Decodificar y normalizar los ejes del plan
+        $ejesPlanRaw = json_decode($plan->ejes_estrategicos, true);
+        if (is_null($ejesPlanRaw)) {
+            $ejesPlanRaw = $plan->ejes_estrategicos; // por si no era JSON
+        }
+        $ejesPlan = $this->normalizarEjes($ejesPlanRaw);
+
+        // ✅ Procesar las metas
         $metasBackup = $plan->metas->map(function ($meta) {
+            // Decodificar y normalizar los ejes de la meta
+            $ejesMetaRaw = json_decode($meta->ejes_estrategicos, true);
+            if (is_null($ejesMetaRaw)) {
+                $ejesMetaRaw = $meta->ejes_estrategicos;
+            }
+            $ejesMeta = app(self::class)->normalizarEjes($ejesMetaRaw);
+
             return [
                 'id' => $meta->id,
                 'nombre' => $meta->nombre,
-                'ejes_estrategicos' => $meta->ejes_estrategicos,
+                'ejes_estrategicos' => json_encode($ejesMeta, JSON_UNESCAPED_UNICODE),
                 'responsable' => $meta->responsable ? $meta->responsable->nombre_usuario : null,
                 'resultados_esperados' => $meta->resultados_esperados,
                 'indicador_resultados' => $meta->indicador_resultados,
                 'fecha_inicio' => $meta->fecha_inicio,
                 'fecha_fin' => $meta->fecha_fin,
                 'comentario' => $meta->comentario,
+
+                // ✅ Evidencias de la meta (en array seguro)
+                'evidencias' => is_array($meta->evidencia)
+                    ? $meta->evidencia
+                    : json_decode($meta->evidencia, true) ?? ($meta->evidencia ? [$meta->evidencia] : []),
+
+                // ✅ Actividades
                 'actividades' => $meta->actividades->map(function ($actividad) {
                     return [
                         'id' => $actividad->id,
@@ -232,7 +268,13 @@ class PlanEstrategicoController extends Controller
                         'fecha_fin' => $actividad->fecha_fin,
                         'comentario' => $actividad->comentario,
                         'unidad_encargada' => $actividad->unidad_encargada,
-                        'evidencia' => $actividad->evidencia,
+
+                        // ✅ Evidencias (en array)
+                        'evidencias' => is_array($actividad->evidencia)
+                            ? $actividad->evidencia
+                            : json_decode($actividad->evidencia, true) ?? ($actividad->evidencia ? [$actividad->evidencia] : []),
+
+                        // ✅ Seguimientos
                         'seguimientos' => $actividad->seguimientos->map(function ($seguimiento) {
                             return [
                                 'id' => $seguimiento->id,
@@ -240,6 +282,11 @@ class PlanEstrategicoController extends Controller
                                 'observaciones' => $seguimiento->observaciones,
                                 'estado' => $seguimiento->estado,
                                 'documento' => $seguimiento->documento,
+
+                                // ✅ Evidencias de seguimiento
+                                'evidencias' => is_array($seguimiento->evidencia)
+                                    ? $seguimiento->evidencia
+                                    : json_decode($seguimiento->evidencia, true) ?? ($seguimiento->evidencia ? [$seguimiento->evidencia] : []),
                             ];
                         }),
                     ];
@@ -247,6 +294,7 @@ class PlanEstrategicoController extends Controller
             ];
         });
 
+        // ✅ Guardar el backup limpio (sin doble codificación)
         BackupPlan::create([
             'idPlanOriginal' => $plan->id,
             'idDepartamento' => $plan->idDepartamento,
@@ -254,8 +302,8 @@ class PlanEstrategicoController extends Controller
             'nombre_plan_estrategico' => $plan->nombre_plan_estrategico,
             'nombre_departamento' => $plan->departamento->departamento ?? null,
             'nombre_responsable' => $plan->responsable->nombre_usuario ?? null,
-            'metas' => json_encode($metasBackup),
-            'ejes_estrategicos' => $plan->ejes_estrategicos,
+            'metas' => json_encode($metasBackup, JSON_UNESCAPED_UNICODE),
+            'ejes_estrategicos' => json_encode($ejesPlan, JSON_UNESCAPED_UNICODE),
             'objetivos' => $plan->objetivos,
             'fecha_inicio' => $plan->fecha_inicio,
             'fecha_fin' => $plan->fecha_fin,
@@ -265,6 +313,59 @@ class PlanEstrategicoController extends Controller
 
         return back()->with('success', 'Backup completo creado correctamente.');
     }
+
+    private function normalizarEjes($valor)
+    {
+        if (empty($valor)) {
+            return [];
+        }
+
+        // Si ya es array
+        if (is_array($valor)) {
+            return array_values(array_filter(array_map(fn($v) => trim($v, "• \t\n\r\""), $valor)));
+        }
+
+        // Si viene doblemente codificado en JSON (caso actual)
+        $decoded = json_decode($valor, true);
+        if (is_string($decoded)) {
+            $decoded = json_decode($decoded, true);
+        }
+
+        if (is_array($decoded)) {
+            // Limpiar texto interno
+            return array_values(array_filter(array_map(fn($v) => trim($v, "• \t\n\r\""), $decoded)));
+        }
+
+        // Detectar formato enumerado tipo 1. "texto", 2. "texto"
+        if (preg_match_all('/\d+\.\s*"?([^"\n]+)"?/u', $valor, $matches)) {
+            return array_values(array_map('trim', $matches[1]));
+        }
+
+        // Detectar si el texto tiene bullets (•) y tratarlos como un solo eje
+        if (preg_match('/•/u', $valor)) {
+            // Reemplaza bullets por comas en un mismo texto
+            $valor = preg_replace('/\s*•\s*/u', ', ', $valor);
+            // Dividir solo si parece haber varios ejes grandes
+            if (preg_match('/\b(Gesti[oó]n\s+Urbana)\b/u', $valor)) {
+                [$eje1, $eje2] = explode('Gestión Urbana', $valor, 2);
+                return [
+                    trim($eje1, "•, \t\n\r\""),
+                    'Gestión Urbana'
+                ];
+            }
+            return [trim($valor, "•, \t\n\r\"")];
+        }
+
+        // Si hay saltos de línea, dividir por líneas
+        if (str_contains($valor, "\n")) {
+            $lineas = preg_split('/[\r\n]+/', $valor);
+            return array_values(array_filter(array_map(fn($l) => trim($l, "• \t\n\r\""), $lineas)));
+        }
+
+        // Fallback: devolver como único eje
+        return [trim($valor, "• \t\n\r\"")];
+    }
+
 
     // Ver backup
     public function verBackup($id)
@@ -318,17 +419,24 @@ class PlanEstrategicoController extends Controller
         return redirect()->route('institucion.planes', $institucionId)
             ->with('success', 'Plan eliminado correctamente.');
     }
-    // Descargar backup en PDF
+
     public function descargarBackup($id)
     {
         $backup = BackupPlan::findOrFail($id);
 
-        // Carga la vista que ya usas para mostrarlo, o una nueva adaptada a PDF
-        $pdf = Pdf::loadView('planes.ver_backup_pdf', compact('backup'));
+        // Decodificar solo metas al momento de render
+        $backup->metas = is_string($backup->metas)
+            ? json_decode($backup->metas, true) ?? []
+            : (is_array($backup->metas) ? $backup->metas : []);
 
-        // Nombre del archivo de salida
-        $nombreArchivo = 'Respaldo_' . preg_replace('/\s+/', '_', $backup->nombre_plan_estrategico) . '.pdf';
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('planes.ver_backup_pdf', compact('backup'))
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'chroot' => public_path(),
+            ])
+            ->setPaper('a4', 'portrait');
 
-        return $pdf->download($nombreArchivo);
+        return $pdf->download('Respaldo_' . \Illuminate\Support\Str::slug($backup->nombre_plan_estrategico) . '.pdf');
     }
 }

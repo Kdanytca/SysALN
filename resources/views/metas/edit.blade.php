@@ -1,7 +1,9 @@
-<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}" data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}" x-data="{ tipo: '{{ $meta->tipo ?? 'meta' }}' }">
+<form id="formEditarMeta" class="formMeta" method="POST" action="{{ $action }}"
+    data-fecha-inicio-plan="{{ $plan->fecha_inicio }}" data-fecha-fin-plan="{{ $plan->fecha_fin }}"
+    x-data="{ tipo: '{{ $meta->tipo ?? 'meta' }}' }">
     @csrf
-    @if($isEdit)
-    @method('PUT')
+    @if ($isEdit)
+        @method('PUT')
     @endif
 
     <div class="mb-4">
@@ -14,8 +16,7 @@
         <select name="idEncargadoMeta" class="w-full border rounded px-3 py-2" required>
             <option value="" disabled>Seleccione un usuario</option>
             @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->id }}"
-                    {{ $usuario->id == $meta->idEncargadoMeta ? 'selected' : '' }}>
+                <option value="{{ $usuario->id }}" {{ $usuario->id == $meta->idEncargadoMeta ? 'selected' : '' }}>
                     {{ $usuario->nombre_usuario }} ({{ $usuario->email }})
                 </option>
             @endforeach
@@ -23,8 +24,7 @@
 
         <p class="text-sm text-gray-600 mt-2">
             ¿No encuentras al encargado?
-            <button type="button"
-                @click="modalNuevoUsuario = true"
+            <button type="button" @click="modalNuevoUsuario = true"
                 class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 Agregar nuevo usuario
             </button>
@@ -48,10 +48,10 @@
 
     {{-- Campo dinámico según el tipo --}}
     <div class="mb-4">
-        <label class="block font-medium" 
-               x-text="tipo === 'meta' ? 'Nombre de la Meta' : 'Nombre de la Estrategia'">
+        <label class="block font-medium" x-text="tipo === 'meta' ? 'Nombre de la Meta' : 'Nombre de la Estrategia'">
         </label>
-        <input type="text" name="nombre" value="{{ $meta->nombre }}" class="w-full border rounded px-3 py-2" required>
+        <input type="text" name="nombre" value="{{ $meta->nombre }}" class="w-full border rounded px-3 py-2"
+            required>
     </div>
 
     @php
@@ -90,7 +90,7 @@
     <div class="mb-4">
         <label class="block font-medium">Objetivos de la Estrategia</label>
         <div id="contenedorObjetivosEditar">
-            @foreach(json_decode($meta->objetivos_estrategias, true) ?? $objetivos as $obj)
+            @foreach (json_decode($meta->objetivos_estrategias, true) ?? $objetivos as $obj)
                 <div class="input-con-x mb-2">
                     <input type="text" name="objetivos_estrategias[]" value="{{ trim($obj) }}"
                         class="border rounded px-3 py-2 w-full">
@@ -99,8 +99,7 @@
             @endforeach
         </div>
         <div class="flex items-center gap-4 mt-2">
-            <button type="button"
-                onclick="agregarCampo('contenedorObjetivosEditar', 'objetivos_estrategias[]')" 
+            <button type="button" onclick="agregarCampo('contenedorObjetivosEditar', 'objetivos_estrategias[]')"
                 class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 + Agregar otro objetivo
             </button>
@@ -111,33 +110,32 @@
         <label class="block font-medium mb-2">Ejes Estratégicos<i class="text-red-500"> (Minimo 1)</i></label>
         <div class="flex flex-wrap gap-2">
             @php
-                // Ejes disponibles desde el plan (string con comas)
-                $ejesPlan = array_map('trim', explode(',', $plan->ejes_estrategicos));
+                // ✅ LEER CORRECTAMENTE COMO JSON (igual que en create)
+                $ejesPlan = $plan->ejes_estrategicos ? json_decode($plan->ejes_estrategicos, true) : [];
+                $ejesPlan = is_array($ejesPlan) ? array_filter($ejesPlan) : [];
 
-                // Ejes seleccionados de old() o de la meta (decodificados de JSON)
+                // Ejes seleccionados: primero old() (si hay error de validación),
+                // luego los de la meta (decodificados de JSON)
                 $ejesSeleccionados = old('ejes_estrategicos', []);
 
-                if (empty($ejesSeleccionados)) {
-                    // Si no hay valores de old(), usamos los ejes de la base de datos (como JSON)
-                    $ejesSeleccionados = json_decode($meta->ejes_estrategicos, true) ?? [];
+                if (empty($ejesSeleccionados) && isset($meta)) {
+                    // Si no hay old(), usamos los ejes guardados en la meta
+                    $ejesMeta = json_decode($meta->ejes_estrategicos, true) ?? [];
+                    $ejesSeleccionados = is_array($ejesMeta) ? $ejesMeta : [];
                 }
-
-                // Asegurarnos de que los ejes seleccionados estén limpios (array sin espacios)
-                $ejesSeleccionados = array_map('trim', $ejesSeleccionados);
             @endphp
 
-            @foreach ($ejesPlan as $eje)
-                @php $eje = trim($eje); @endphp
-                <label class="flex items-center space-x-2 text-sm bg-gray-100 px-2 py-1 rounded">
-                    <input
-                        type="checkbox"
-                        name="ejes_estrategicos[]"
-                        value="{{ $eje }}"
-                        {{ in_array($eje, $ejesSeleccionados) ? 'checked' : '' }}
-                    >
-                    <span>{{ $eje }}</span>
-                </label>
-            @endforeach
+            @if (!empty($ejesPlan))
+                @foreach ($ejesPlan as $eje)
+                    <label class="flex items-center space-x-2 text-sm bg-gray-100 px-2 py-1 rounded">
+                        <input type="checkbox" name="ejes_estrategicos[]" value="{{ htmlspecialchars($eje) }}"
+                            {{ in_array($eje, $ejesSeleccionados) ? 'checked' : '' }}>
+                        <span>{{ htmlspecialchars($eje) }}</span>
+                    </label>
+                @endforeach
+            @else
+                <span class="text-sm text-gray-500">No hay ejes en el plan estratégico</span>
+            @endif
         </div>
     </div>
 
@@ -153,8 +151,7 @@
             @endforeach
         </div>
         <div class="flex items-center gap-4 mt-2">
-            <button type="button"
-                onclick="agregarCampo('contenedorActividadesEdit', 'nombre_actividades[]')"
+            <button type="button" onclick="agregarCampo('contenedorActividadesEdit', 'nombre_actividades[]')"
                 class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
                 + Agregar otra actividad
             </button>
@@ -179,7 +176,7 @@
             <input type="date" name="fecha_inicio" value="{{ $meta->fecha_inicio }}"
                 class="w-full border rounded px-3 py-2" required>
         </div>
-    
+
         <div class="w-1/2">
             <label class="block font-medium">Fecha de Fin<i class="text-red-500">*</i></label>
             <input type="date" name="fecha_fin" value="{{ $meta->fecha_fin }}"
@@ -189,8 +186,7 @@
 
     <div class="mb-4">
         <label class="block font-medium">Comentario</label>
-        <textarea name="comentario" placeholder="Opcional"
-            class="w-full border rounded px-3 py-2">{{ $meta->comentario }}</textarea>
+        <textarea name="comentario" placeholder="Opcional" class="w-full border rounded px-3 py-2">{{ $meta->comentario }}</textarea>
     </div>
 
     <div class="flex justify-end">
@@ -214,7 +210,8 @@
 
     .input-con-x input {
         width: 100%;
-        padding-right: 2rem; /* espacio para la 'x' */
+        padding-right: 2rem;
+        /* espacio para la 'x' */
     }
 
     .input-con-x button {

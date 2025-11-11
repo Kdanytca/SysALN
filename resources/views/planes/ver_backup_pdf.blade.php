@@ -5,113 +5,96 @@
     <meta charset="UTF-8">
     <title>Respaldo - {{ $backup->nombre_plan_estrategico }}</title>
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            color: #333;
-            margin: 20px;
+        @font-face {
+            font-family: 'DejaVu Sans';
+            src: url("{{ public_path('fonts/DejaVuSans.ttf') }}") format('truetype');
         }
 
-        h2,
-        h3 {
-            color: #1e3a8a;
-            margin-bottom: 8px;
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 13px;
+            color: #1f2937;
+            margin: 25px;
+            line-height: 1.4;
         }
 
         h2 {
-            font-size: 20px;
-            border-bottom: 2px solid #4f46e5;
-            padding-bottom: 4px;
-        }
-
-        h3 {
-            font-size: 16px;
-            margin-top: 15px;
-        }
-
-        .section {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            background: #f9fafb;
-        }
-
-        .subsection {
-            border: 1px solid #e0e7ff;
-            border-radius: 6px;
-            background: #eef2ff;
-            padding: 10px;
-            margin-top: 8px;
-        }
-
-        p,
-        li {
-            line-height: 1.5;
-        }
-
-        .meta-title {
-            background-color: #e0f2fe;
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: bold;
-            color: #0369a1;
-            margin-bottom: 6px;
-        }
-
-        ul {
-            padding-left: 20px;
-            margin-top: 5px;
+            font-size: 22px;
+            color: #1e3a8a;
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 6px;
             margin-bottom: 10px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        h3 {
+            font-size: 17px;
+            color: #1e40af;
+            margin-bottom: 6px;
+        }
+
+        h4 {
+            font-size: 15px;
+            color: #854d0e;
+            margin: 8px 0 5px;
+        }
+
+        .section {
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+        }
+
+        .subsection {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            border-radius: 6px;
+            padding: 8px 10px;
             margin-top: 8px;
+            page-break-inside: avoid;
         }
 
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 5px 8px;
-            text-align: left;
+        .meta-title {
+            background: #e0f2fe;
+            padding: 6px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 6px;
+            page-break-after: avoid;
         }
 
-        th {
-            background-color: #e8eaf6;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #ccc;
-            margin: 10px 0;
+        .seguimiento {
+            background: #fef9c3;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: 6px 8px;
+            margin-top: 5px;
+            page-break-inside: avoid;
         }
 
         .small {
             font-size: 11px;
-            color: #555;
+            color: #6b7280;
         }
 
-        .evidencia {
-            margin-top: 6px;
-            margin-left: 10px;
+        .italic {
+            font-style: italic;
         }
 
-        .evidencia img {
-            width: 90px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-right: 5px;
-            border: 1px solid #ccc;
+        * {
+            orphans: 3;
+            widows: 3;
         }
 
-        .evidencia a {
-            display: block;
-            color: #1d4ed8;
-            text-decoration: underline;
-            font-size: 12px;
+        div,
+        table,
+        tr,
+        td,
+        th {
+            page-break-inside: avoid;
         }
     </style>
 </head>
@@ -120,7 +103,6 @@
 
     <h2>📑 Respaldo del Plan: {{ $backup->nombre_plan_estrategico }}</h2>
 
-    <!-- Información General -->
     <div class="section">
         <h3>📋 Información General</h3>
         <table>
@@ -143,95 +125,137 @@
         </table>
     </div>
 
-    <!-- Ejes Estratégicos y Objetivos -->
-    <div class="section">
-        <h3>🎯 Ejes Estratégicos del Plan</h3>
-        <ul>
-            @foreach (explode(',', $backup->ejes_estrategicos) as $eje)
-                <li>{{ trim($eje) }}</li>
-            @endforeach
-        </ul>
+    @php
+        function safe_decode($data)
+        {
+            if (is_string($data)) {
+                $decoded = json_decode($data, true);
+                return json_last_error() === JSON_ERROR_NONE ? $decoded : [];
+            }
+            return is_array($data) ? $data : [];
+        }
 
-        <h3>📌 Objetivos</h3>
-        @if ($backup->objetivos)
-            <ul>
-                @foreach (json_decode($backup->objetivos) as $objetivo)
-                    <li>{{ $objetivo }}</li>
-                @endforeach
-            </ul>
-        @else
-            <p class="small"><em>Sin objetivos</em></p>
-        @endif
+        function listaCompactaPDF($valor)
+        {
+            $items = safe_decode($valor);
+            if (empty($items)) {
+                return '<p class="italic small">Sin información disponible</p>';
+            }
+            return '<div class="compact-list"><p>• ' .
+                implode('</p><p>• ', array_map(fn($i) => e($i), $items)) .
+                '</p></div>';
+        }
+
+        function evidenciasPDF($evidencias)
+        {
+            if (empty($evidencias)) {
+                return '';
+            }
+            $links = '';
+            foreach ($evidencias as $archivo) {
+                $links .= '<p>📄 <a href="' . asset($archivo) . '" target="_blank">' . basename($archivo) . '</a></p>';
+            }
+            return $links;
+        }
+    @endphp
+
+    <div class="section">
+        <h3>🎯 Ejes Estratégicos</h3>
+        {!! listaCompactaPDF($backup->ejes_estrategicos) !!}
     </div>
 
-    <!-- Metas -->
-    @if ($backup->metas)
+    <div class="section">
+        <h3>📌 Objetivos</h3>
+        {!! listaCompactaPDF($backup->objetivos) !!}
+    </div>
+
+    @if (!empty($backup->metas))
         <div class="section">
             <h3>🎯 Metas / Objetivos Estratégicos</h3>
 
-            @foreach (json_decode($backup->metas) as $index => $meta)
-                <div class="subsection">
-                    <div class="meta-title">Meta/Objetivo Estratégico {{ $index + 1 }}: {{ $meta->nombre }}</div>
+            @foreach (safe_decode($backup->metas) as $meta)
+                @php
+                    $meta = safe_decode($meta);
+                    $meta['ejes_estrategicos'] = safe_decode($meta['ejes_estrategicos']);
+                    $meta['evidencias'] = safe_decode($meta['evidencias']);
+                    $actividades = safe_decode($meta['actividades']);
+                @endphp
 
-                    <p><strong>Encargado:</strong> {{ $meta->responsable ?? 'N/A' }}</p>
-                    <p><strong>Ejes Estratégicos:</strong> {{ $meta->ejes_estrategicos }}</p>
-                    <p><strong>Resultados Esperados:</strong> {{ $meta->resultados_esperados ?? 'N/A' }}</p>
-                    <p><strong>Indicador:</strong> {{ $meta->indicador_resultados ?? 'N/A' }}</p>
-                    <p><strong>Comentario:</strong> {{ $meta->comentario ?? 'N/A' }}</p>
-                    <p><strong>Fecha Inicio:</strong> {{ $meta->fecha_inicio }} |
-                        <strong>Fecha Fin:</strong> {{ $meta->fecha_fin }}
+                <div class="subsection">
+                    <div class="meta-title">
+                        Meta: {{ $meta['nombre'] ?? '' }}
+                        @if (!empty($meta['responsable']))
+                            (Encargado: {{ $meta['responsable'] }})
+                        @endif
+                    </div>
+
+                    <p><strong>Ejes Estratégicos:</strong></p>
+                    {!! listaCompactaPDF($meta['ejes_estrategicos']) !!}
+
+                    <p><strong>Resultados Esperados:</strong> {{ $meta['resultados_esperados'] ?? 'N/A' }}</p>
+                    <p><strong>Indicador:</strong> {{ $meta['indicador_resultados'] ?? 'N/A' }}</p>
+                    <p><strong>Comentario:</strong> {{ $meta['comentario'] ?? 'N/A' }}</p>
+                    <p><strong>Periodo:</strong> {{ $meta['fecha_inicio'] ?? '' }} - {{ $meta['fecha_fin'] ?? '' }}
                     </p>
 
-                    <!-- Actividades -->
-                    @if (!empty($meta->actividades))
-                        <h4>📋 Actividades / Líneas de acción</h4>
-                        @foreach ($meta->actividades as $actIndex => $actividad)
-                            <div
-                                style="margin-left: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px; margin-top: 6px;">
-                                <p><strong>Actividad {{ $actIndex + 1 }}:</strong> {{ $actividad->nombre_actividad }}
-                                </p>
-                                <p><strong>Encargado:</strong> {{ $actividad->encargado ?? 'N/A' }}</p>
-                                <p><strong>Objetivos:</strong> {{ $actividad->objetivos ?? 'N/A' }}</p>
-                                <p><strong>Comentario:</strong> {{ $actividad->comentario ?? 'N/A' }}</p>
-                                <p><strong>Unidad Encargada:</strong> {{ $actividad->unidad_encargada ?? 'N/A' }}</p>
-                                <p><strong>Periodo:</strong> {{ $actividad->fecha_inicio }} -
-                                    {{ $actividad->fecha_fin }}</p>
+                    @if (!empty($meta['evidencias']))
+                        <div>
+                            <strong>📎 Evidencias:</strong>
+                            {!! evidenciasPDF($meta['evidencias']) !!}
+                        </div>
+                    @endif
 
-                                <!-- Evidencias -->
-                                @php
-                                    $evidencias = is_array($actividad->evidencia)
-                                        ? $actividad->evidencia
-                                        : json_decode($actividad->evidencia, true) ?? [];
-                                @endphp
+                    {{-- Actividades --}}
+                    @if (!empty($actividades))
+                        <h4>📋 Actividades</h4>
+                        @foreach ($actividades as $act)
+                            @php
+                                $act = safe_decode($act);
+                                $act['objetivos'] = safe_decode($act['objetivos']);
+                                $act['evidencias'] = safe_decode($act['evidencias']);
+                                $seguimientos = safe_decode($act['seguimientos']);
+                            @endphp
 
-                                @if (!empty($evidencias))
-                                    <div class="evidencia">
-                                        <strong>📎 Evidencias:</strong><br>
-                                        @foreach ($evidencias as $archivo)
-                                            @php
-                                                $extension = pathinfo($archivo, PATHINFO_EXTENSION);
-                                            @endphp
+                            <div class="subsection">
+                                <div class="meta-title">
+                                    Actividad: {{ $act['nombre_actividad'] ?? '' }}
+                                    @if (!empty($act['encargado']))
+                                        (Encargado: {{ $act['encargado'] }})
+                                    @endif
+                                </div>
 
-                                            @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                                                <img src="{{ public_path($archivo) }}" alt="Evidencia">
-                                            @else
-                                                <a href="{{ public_path($archivo) }}">{{ basename($archivo) }}</a>
-                                            @endif
-                                        @endforeach
+                                <p><strong>Objetivos:</strong></p>
+                                {!! listaCompactaPDF($act['objetivos']) !!}
+
+                                <p><strong>Comentario:</strong> {{ $act['comentario'] ?? 'N/A' }}</p>
+                                <p><strong>Unidad Encargada:</strong> {{ $act['unidad_encargada'] ?? 'N/A' }}</p>
+                                <p><strong>Periodo:</strong> {{ $act['fecha_inicio'] ?? '' }} -
+                                    {{ $act['fecha_fin'] ?? '' }}</p>
+
+                                @if (!empty($act['evidencias']))
+                                    <div>
+                                        <strong>📎 Evidencias:</strong>
+                                        {!! evidenciasPDF($act['evidencias']) !!}
                                     </div>
                                 @endif
 
-                                <!-- Seguimientos -->
-                                @if (!empty($actividad->seguimientos))
-                                    <h5 style="margin-top: 8px;">📊 Seguimientos</h5>
-                                    @foreach ($actividad->seguimientos as $segIndex => $seg)
-                                        <div
-                                            style="margin-left: 10px; background: #fef9c3; border-left: 3px solid #facc15; padding: 5px; border-radius: 4px; margin-bottom: 4px;">
-                                            <p><strong>Seguimiento {{ $segIndex + 1 }}:</strong></p>
-                                            <p>Periodo: {{ $seg->periodo_consultar }}</p>
-                                            <p>Observaciones: {{ $seg->observaciones }}</p>
-                                            <p>Estado: {{ $seg->estado }}</p>
-                                            <p>Documento: {{ $seg->documento ?? 'N/A' }}</p>
+                                {{-- Seguimientos --}}
+                                @if (!empty($seguimientos))
+                                    <h4>📅 Seguimientos</h4>
+                                    @foreach ($seguimientos as $seg)
+                                        @php $seg = safe_decode($seg); @endphp
+                                        <div class="seguimiento">
+                                            <p><strong>Periodo:</strong> {{ $seg['periodo_consultar'] ?? '' }}</p>
+                                            <p><strong>Observaciones:</strong> {{ $seg['observaciones'] ?? '' }}</p>
+                                            <p><strong>Estado:</strong> {{ $seg['estado'] ?? '' }}</p>
+                                            <p><strong>Documento:</strong> {{ $seg['documento'] ?? 'N/A' }}</p>
+
+                                            @if (!empty($seg['evidencias']))
+                                                <div>
+                                                    <strong>📎 Evidencias:</strong>
+                                                    {!! evidenciasPDF($seg['evidencias']) !!}
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 @endif
