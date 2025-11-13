@@ -60,7 +60,7 @@
 
         {{-- Objetivos --}}
         <div class="mb-4">
-            <label class="block font-medium">Objetivos</label>
+            <label class="block font-medium">Objetivos / Indicadores</label>
             <div id="contenedorObjetivosEdit">
                 @foreach (json_decode($actividad->objetivos, true) as $objetivo)
                     <div class="input-con-x mb-2">

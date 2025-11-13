@@ -19,13 +19,13 @@
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Tipo de Institucion</label>
+        <label class="block font-medium">Tipo de Institución</label>
         <input type="text" name="tipo_institucion"
             class="w-full border rounded px-3 py-2" required>
     </div>
 
     <div class="mb-4">
-        <label class="block font-medium">Encargado del Proyecto</label>
+        <label class="block font-medium">Encargado de la Institución</label>
 
         <select id="idEncargadoInstitucion" name="idEncargadoInstitucion" class="w-full border rounded px-3 py-2" required>
             <option value="">Seleccione un encargado</option>

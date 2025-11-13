@@ -63,7 +63,7 @@
         <label class="block font-medium">Objetivos de la Estrategia</label>
         <div id="contenedorObjetivos">
             <div class="input-con-x mb-2">
-                <input type="text" name="objetivos_estrategias[]" class="border rounded px-3 py-2">
+                <input type="text" name="objetivos_estrategias[]" class="border rounded px-3 py-2" placeholder="Opcional">
                 <button type="button" onclick="eliminarEsteCampo(this)">×</button>
             </div>
         </div>

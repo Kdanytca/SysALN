@@ -80,17 +80,17 @@
                             <th class="px-2 py-3 text-left w-[12%]"> <!-- Ancho fijo porcentual -->
                                 Usuario Responsable</th>
                             <th class="px-2 py-3 text-left w-[12%]">
-                                Nombre de la Meta</th>
+                                Nombre de la Meta/Estrategia</th>
                             <th class="px-2 py-3 text-left w-[10%]">
                                 Objetivos Estrategicos</th>
                             <th class="px-2 py-3 text-left w-[10%]">
                                 Ejes Estrategicos</th>
                             <th class="px-2 py-3 text-left w-[10%]">
-                                Actividades</th>
+                                Actividades / Lineas de Acción</th>
                             <th class="px-2 py-3 text-left w-[10%]">
-                                Resultados</th>
+                                Resultados Esperados</th>
                             <th class="px-2 py-3 text-left w-[10%]">
-                                Indicador</th>
+                                Indicador de Resultados</th>
                             <th class="px-2 py-3 text-left w-[8%]">
                                 Fechas</th>
                             <th class="px-2 py-3 text-left w-[8%]">
@@ -346,7 +346,7 @@
                                                             eliminación</h2>
                                                         <p class="text-gray-600 mb-6">¿Estás seguro de que deseas
                                                             eliminar
-                                                            esta Meta?</p>
+                                                            esta Meta / Estrategia?</p>
 
                                                         <div class="flex justify-end items-center gap-3 items-stretch">
                                                             <div>

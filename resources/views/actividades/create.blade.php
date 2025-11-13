@@ -41,7 +41,7 @@
 
         {{-- Objetivos --}}
         <div class="mb-4">
-            <label class="block font-medium">Objetivos</label>
+            <label class="block font-medium">Objetivos / Indicadores</label>
             <div id="contenedorObjetivos">
                 <div class="input-con-x mb-2">
                     <input type="text" name="objetivos[]" class="border rounded px-3 py-2" placeholder="Opcional">

@@ -91,10 +91,10 @@
                 <table class="min-w-full border border-gray-300 rounded-lg shadow text-sm text-gray-800">
                     <thead class="bg-indigo-50 text-indigo-700 uppercase text-xs font-semibold">
                         <tr>
-                            <th class="w-1/9 px-4 py-3 text-left">Usuario</th>
+                            <th class="w-1/9 px-4 py-3 text-left">Usuario<br>Responsable</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Actividad/<br>Linea de Acción
                             </th>
-                            <th class="w-1/9 px-4 py-3 text-left max-w-[200px] break-words">Objetivos</th>
+                            <th class="w-1/9 px-4 py-3 text-left max-w-[200px] break-words">Objetivos/<br>Indicadores</th>
                             <th class="w-1/9 px-4 py-3 text-left whitespace-nowrap">Fechas</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Comentario</th>
                             <th class="w-1/9 px-4 py-3 text-left max-w-xs break-words">Unidad Encargada</th>
@@ -429,6 +429,7 @@
                         multiple
                         accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
                         class="w-full border rounded px-3 py-2"
+                        onchange="previsualizarEvidencias(event)"
                     >
 
                     <p class="text-sm text-gray-600 mt-1">
