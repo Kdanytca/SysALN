@@ -118,24 +118,31 @@
                                     {{ $actividad->nombre_actividad }}</td>
                                 <td class="px-4 py-3 max-w-[200px] break-words">
                                     @php
-                                        $objetivos = json_decode($actividad->objetivos, true);
-                                        // Asegurarse de que sea un array antes de filtrar
-                                        $objetivos_filtrados = collect(is_array($objetivos) ? $objetivos : [])->filter(
-                                            function ($item) {
-                                                return !is_null($item) && trim($item) !== '';
-                                            },
-                                        );
+                                        // Detectar qué campo tiene datos
+                                        $valores = null;
+
+                                        if (!empty($actividad->objetivos)) {
+                                            $valores = json_decode($actividad->objetivos, true);
+                                        } elseif (!empty($actividad->indicadores)) {
+                                            $valores = json_decode($actividad->indicadores, true);
+                                        }
+
+                                        // Normalizar
+                                        $lista = collect(is_array($valores) ? $valores : [])->filter(function ($item) {
+                                            return !is_null($item) && trim($item) !== '';
+                                        });
                                     @endphp
 
-                                    @if ($objetivos_filtrados->isNotEmpty())
-                                        @foreach ($objetivos_filtrados as $objetivo)
+                                    {{-- Mostrar etiquetas --}}
+                                    @if ($lista->isNotEmpty())
+                                        @foreach ($lista as $item)
                                             <span
                                                 class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full mr-1 mb-1">
-                                                {{ trim($objetivo) }}
+                                                {{ trim($item) }}
                                             </span>
                                         @endforeach
                                     @else
-                                        <span class="text-sm text-red-500">Sin objetivos registrados</span>
+                                        <span class="text-sm text-red-500">Sin objetivos o indicadores</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
@@ -782,35 +789,91 @@
             input.files = dataTransfer.files;
         }
 
-        // Funciones para agregar/eliminar campos dinámicos (si se usan en el formulario)
-        function agregarCampo(contenedorId, name) {
-            const contenedor = document.getElementById(contenedorId);
+        /* -------------------------------------------
+   AGREGAR CAMPO DINÁMICO
+------------------------------------------- */
+function agregarCampo(contenedorId, name) {
+    const contenedor = document.getElementById(contenedorId);
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'input-con-x mb-2';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'input-con-x mb-2';
 
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.name = name;
-            input.required = true;
-            input.className = 'border rounded px-3 py-2 w-full';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = name;
+    input.className = 'border rounded px-3 py-2 w-full';
+    input.placeholder = "Opcional";
 
-            const botonEliminar = document.createElement('button');
-            botonEliminar.type = 'button';
-            botonEliminar.innerText = '×';
-            botonEliminar.onclick = function() {
-                eliminarEsteCampo(botonEliminar);
-            };
+    const botonEliminar = document.createElement('button');
+    botonEliminar.type = 'button';
+    botonEliminar.innerText = '×';
+    botonEliminar.onclick = function() {
+        eliminarEsteCampo(botonEliminar);
+    };
 
-            wrapper.appendChild(input);
-            wrapper.appendChild(botonEliminar);
-            contenedor.appendChild(wrapper);
-        }
+    wrapper.appendChild(input);
+    wrapper.appendChild(botonEliminar);
+    contenedor.appendChild(wrapper);
+}
 
-        function eliminarEsteCampo(boton) {
-            const wrapper = boton.parentElement;
-            wrapper.remove();
-        }
+/* -------------------------------------------
+   ELIMINAR CAMPO DINÁMICO
+------------------------------------------- */
+function eliminarEsteCampo(boton) {
+    boton.parentElement.remove();
+}
+
+/* -------------------------------------------
+   CAMBIAR ENTRE OBJETIVOS / INDICADORES (CREATE)
+------------------------------------------- */
+function cambiarTipoCampo(tipo) {
+    const titulo = document.getElementById('tituloCampo');
+    const contenedor = document.getElementById('contenedorCampos');
+    const btnAgregar = document.getElementById('btnAgregarCampo');
+
+    // Cambiar textos
+    if (tipo === 'objetivos') {
+        titulo.textContent = "Objetivos";
+        btnAgregar.textContent = "+ Agregar otro objetivo";
+        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'objetivos[]')");
+        convertirNameCampos('contenedorCampos', 'objetivos[]')
+    } else {
+        titulo.textContent = "Indicadores";
+        btnAgregar.textContent = "+ Agregar otro indicador";
+        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'indicadores[]')");
+        convertirNameCampos('contenedorCampos', 'indicadores[]')
+    }
+}
+
+/* -------------------------------------------
+   CAMBIAR ENTRE OBJETIVOS / INDICADORES (EDIT)
+------------------------------------------- */
+function cambiarTipoCampoEdit(tipo) {
+    const titulo = document.getElementById('tituloCampoEdit');
+    const contenedor = document.getElementById('contenedorCamposEdit');
+    const btnAgregar = document.getElementById('btnAgregarCampoEdit');
+
+    // Cambiar textos
+    if (tipo === 'objetivos') {
+        titulo.textContent = "Objetivos";
+        btnAgregar.textContent = "+ Agregar otro objetivo";
+        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'objetivos[]')");
+        convertirNameCampos('contenedorCamposEdit', 'objetivos[]')
+    } else {
+        titulo.textContent = "Indicadores";
+        btnAgregar.textContent = "+ Agregar otro indicador";
+        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'indicadores[]')");
+        convertirNameCampos('contenedorCamposEdit', 'indicadores[]')
+    }
+}
+
+/* -------------------------------------------
+   FUNCIÓN COMPARTIDA PARA CAMBIAR TODOS LOS name=""
+------------------------------------------- */
+function convertirNameCampos(contenedorId, nuevoName) {
+    const inputs = document.querySelectorAll(`#${contenedorId} input`);
+    inputs.forEach(i => i.name = nuevoName);
+}
 
         // Funcion para validacion de fechas
         document.addEventListener("submit", function(e) {

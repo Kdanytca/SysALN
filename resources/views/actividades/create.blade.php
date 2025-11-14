@@ -39,22 +39,40 @@
             </select>
         </div>
 
-        {{-- Objetivos --}}
+        {{-- Selector Objetivos / Indicadores --}}
         <div class="mb-4">
-            <label class="block font-medium">Objetivos / Indicadores</label>
-            <div id="contenedorObjetivos">
+            <label class="block font-medium mb-2">Tipo de Campo *</label>
+
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="tipo_campo" value="objetivos" checked onclick="cambiarTipoCampo('objetivos')">
+                    <span>Objetivos</span>
+                </label>
+
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="tipo_campo" value="indicadores" onclick="cambiarTipoCampo('indicadores')">
+                    <span>Indicadores</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Contenedor dinámico --}}
+        <div class="mb-4">
+            <label class="block font-medium" id="tituloCampo">Objetivos</label>
+
+            <div id="contenedorCampos">
                 <div class="input-con-x mb-2">
                     <input type="text" name="objetivos[]" class="border rounded px-3 py-2" placeholder="Opcional">
                     <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                 </div>
             </div>
-            <div class="flex items-center gap-4 mt-2">
-                <button type="button"
-                    onclick="agregarCampo('contenedorObjetivos', 'objetivos[]', 'btnEliminarObjetivo')"
-                    class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
-                    + Agregar otro objetivo
-                </button>
-            </div>
+
+            <button type="button"
+                id="btnAgregarCampo"
+                onclick="agregarCampo('contenedorCampos', 'objetivos[]')"
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50 mt-2">
+                + Agregar otro objetivo
+            </button>
         </div>
 
         {{-- Fechas --}}

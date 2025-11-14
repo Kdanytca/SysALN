@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('idMetas')->constrained('metas')->onDelete('cascade');
             $table->foreignId('idEncargadoActividad')->nullable()->constrained('usuarios')->nullOnDelete();
             $table->text('nombre_actividad');
+            $table->enum('tipo_campo', ['objetivo', 'indicador']);
             $table->json('objetivos')->nullable();
+            $table->json('indicadores')->nullable();
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->json('evidencia')->nullable()->onDelete('cascade');

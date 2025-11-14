@@ -58,24 +58,69 @@
             </select>
         </div>
 
-        {{-- Objetivos --}}
+        {{-- Objetivos / Indicadores --}}
+        @php
+            $tieneObjetivos = !empty($actividad->objetivos);
+            $tieneIndicadores = !empty($actividad->indicadores);
+
+            // Definir tipo seleccionado
+            $tipoCampo = $tieneIndicadores ? 'indicadores' : 'objetivos';
+
+            // Obtener arreglo de valores
+            $valores = $tieneIndicadores
+                        ? json_decode($actividad->indicadores, true)
+                        : json_decode($actividad->objetivos, true);
+
+            if (!is_array($valores)) $valores = [''];
+        @endphp
+
         <div class="mb-4">
-            <label class="block font-medium">Objetivos / Indicadores</label>
-            <div id="contenedorObjetivosEdit">
-                @foreach (json_decode($actividad->objetivos, true) as $objetivo)
+            <label class="block font-medium mb-2">Tipo de Campo *</label>
+
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="tipo_campo" value="objetivos"
+                        {{ $tipoCampo === 'objetivos' ? 'checked' : '' }}
+                        onclick="cambiarTipoCampoEdit('objetivos')">
+                    <span>Objetivos</span>
+                </label>
+
+                <label class="flex items-center gap-2">
+                    <input type="radio" name="tipo_campo" value="indicadores"
+                        {{ $tipoCampo === 'indicadores' ? 'checked' : '' }}
+                        onclick="cambiarTipoCampoEdit('indicadores')">
+                    <span>Indicadores</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Campos dinámicos --}}
+        <div class="mb-4">
+            <label class="block font-medium" id="tituloCampoEdit">
+                {{ $tipoCampo === 'objetivos' ? 'Objetivos' : 'Indicadores' }}
+            </label>
+
+            <div id="contenedorCamposEdit">
+
+                @foreach ($valores as $valor)
                     <div class="input-con-x mb-2">
-                        <input type="text" name="objetivos[]" value="{{ trim($objetivo) }}" class="border rounded px-3 py-2" placeholder="Opcional">
+                        <input type="text"
+                            name="{{ $tipoCampo }}[]"
+                            value="{{ trim($valor) }}"
+                            class="border rounded px-3 py-2"
+                            placeholder="Opcional">
                         <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                     </div>
                 @endforeach
+
             </div>
-            <div class="flex items-center gap-4 mt-2">
-                <button type="button"
-                    onclick="agregarCampo('contenedorObjetivosEdit', 'objetivos[]', 'btnEliminarObjetivoEdit')"
-                    class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50">
-                    + Agregar otro objetivo
-                </button>
-            </div>
+
+            <button type="button"
+                id="btnAgregarCampoEdit"
+                onclick="agregarCampo('contenedorCamposEdit', '{{ $tipoCampo }}[]')"
+                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50 mt-2">
+                + Agregar otro {{ $tipoCampo === 'objetivos' ? 'objetivo' : 'indicador' }}
+            </button>
         </div>
 
         {{-- Fechas --}}

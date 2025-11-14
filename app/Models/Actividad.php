@@ -14,6 +14,7 @@ class Actividad extends Model
         'idEncargadoActividad',
         'nombre_actividad',
         'objetivos',
+        'indicadores',
         'fecha_inicio',
         'fecha_fin',
         'evidencia',

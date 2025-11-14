@@ -134,8 +134,11 @@ class ActividadController extends Controller
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string',
+            'tipo_campo' => 'required|in:objetivos,indicadores',
             'objetivos' => 'nullable|array|min:1',
             'objetivos.*' => 'nullable|string',
+            'indicadores' => 'nullable|array',
+            'indicadores.*' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'evidencia.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,xls,ppt,pptx,zip,rar|max:5120',
@@ -183,11 +186,20 @@ class ActividadController extends Controller
             }
         }
 
+        $objetivos = $request->tipo_campo === 'objetivos' 
+            ? json_encode($request->objetivos)
+            : null;
+
+        $indicadores = $request->tipo_campo === 'indicadores' 
+            ? json_encode($request->indicadores)
+            : null;
+
         Actividad::create([
             'idMetas' => $request->idMetas,
             'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => json_encode($request->objetivos),
+            'objetivos' => $objetivos,
+            'indicadores' => $indicadores,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'evidencia' => json_encode($rutasEvidencia),
@@ -226,8 +238,11 @@ class ActividadController extends Controller
             'idMetas' => 'required|exists:metas,id',
             'idEncargadoActividad' => 'required|exists:usuarios,id',
             'nombre_actividad' => 'required|string',
+            'tipo_campo' => 'required|in:objetivos,indicadores',
             'objetivos' => 'nullable|array|min:1',
             'objetivos.*' => 'nullable|string',
+            'indicadores' => 'nullable|array',
+            'indicadores.*' => 'nullable|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after:fecha_inicio',
             'evidencia_nueva' => 'nullable|array',
@@ -293,12 +308,21 @@ class ActividadController extends Controller
 
         $actividad->evidencia = json_encode($evidenciaFinal);
 
+        $objetivos = $request->tipo_campo === 'objetivos'
+            ? json_encode($request->objetivos)
+            : null;
+
+        $indicadores = $request->tipo_campo === 'indicadores'
+            ? json_encode($request->indicadores)
+            : null;
+
         // Actualizar el resto de los campos
         $actividad->update([
             'idMetas' => $request->idMetas,
             'idEncargadoActividad' => $request->idEncargadoActividad,
             'nombre_actividad' => $request->nombre_actividad,
-            'objetivos' => json_encode($request->objetivos),
+            'objetivos' => $objetivos,
+            'indicadores' => $indicadores,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
             'evidencia' => $actividad->evidencia,
