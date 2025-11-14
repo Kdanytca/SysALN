@@ -211,7 +211,16 @@
                         @foreach ($actividades as $act)
                             @php
                                 $act = safe_decode($act);
-                                $act['objetivos'] = safe_decode($act['objetivos']);
+
+                                // NUEVO: obtener tipo de campo (objetivos o indicadores)
+                                $tipoCampo = $act['tipo_campo'] ?? 'objetivos';
+                                $lista = $act['contenido_campo'] ?? [];
+
+                                if (is_string($lista)) {
+                                    $lista = json_decode($lista, true) ?? [];
+                                }
+
+                                // Evidencias
                                 $act['evidencias'] = safe_decode($act['evidencias']);
                                 $seguimientos = safe_decode($act['seguimientos']);
                             @endphp
@@ -224,13 +233,12 @@
                                     @endif
                                 </div>
 
-                                <p><strong>Objetivos:</strong></p>
-                                {!! listaCompactaPDF($act['objetivos']) !!}
+                                <p><strong>{{ ucfirst($tipoCampo) }}:</strong></p>
+                                {!! listaCompactaPDF($lista) !!}
 
                                 <p><strong>Comentario:</strong> {{ $act['comentario'] ?? 'N/A' }}</p>
                                 <p><strong>Unidad Encargada:</strong> {{ $act['unidad_encargada'] ?? 'N/A' }}</p>
-                                <p><strong>Periodo:</strong> {{ $act['fecha_inicio'] ?? '' }} -
-                                    {{ $act['fecha_fin'] ?? '' }}</p>
+                                <p><strong>Periodo:</strong> {{ $act['fecha_inicio'] ?? '' }} - {{ $act['fecha_fin'] ?? '' }}</p>
 
                                 @if (!empty($act['evidencias']))
                                     <div>
@@ -244,6 +252,7 @@
                                     <h4>📅 Seguimientos</h4>
                                     @foreach ($seguimientos as $seg)
                                         @php $seg = safe_decode($seg); @endphp
+
                                         <div class="seguimiento">
                                             <p><strong>Periodo:</strong> {{ $seg['periodo_consultar'] ?? '' }}</p>
                                             <p><strong>Observaciones:</strong> {{ $seg['observaciones'] ?? '' }}</p>

@@ -151,9 +151,18 @@
                                                 $seguimientos = json_decode($seguimientos, true) ?? [];
                                             }
 
-                                            $objetivos = $actividad['objetivos'] ?? [];
-                                            if (is_string($objetivos)) {
-                                                $objetivos = json_decode($objetivos, true) ?? [];
+                                            // Detectar si la actividad tenía OBJETIVOS o INDICADORES al hacer el backup
+                                            $tipoCampo = $actividad['tipo_campo'] ?? 'objetivos'; // valor por defecto
+                                            $lista = $actividad['contenido_campo'] ?? [];
+
+                                            // Asegurar formato array
+                                            if (is_string($lista)) {
+                                                $lista = json_decode($lista, true) ?? [];
+                                            }
+
+                                            // Asegurar formato array
+                                            if (is_string($lista)) {
+                                                $lista = json_decode($lista, true) ?? [];
                                             }
 
                                             $evidencias = $actividad['evidencias'] ?? ($actividad['evidencia'] ?? []);
@@ -174,8 +183,9 @@
                                             </button>
 
                                             <div x-show="open" class="px-3 py-2 space-y-1">
-                                                <p><strong>Objetivos:</strong></p>
-                                                <div class="ml-4">{!! formatearTextoEnumerado($objetivos) !!}</div>
+                                                
+                                                <p><strong>{{ ucfirst($tipoCampo) }}:</strong></p>
+                                                <div class="ml-4">{!! formatearTextoEnumerado($lista) !!}</div>
 
                                                 <p><strong>Comentario:</strong>
                                                     {{ decodeSafe($actividad['comentario'] ?? 'N/A') }}</p>

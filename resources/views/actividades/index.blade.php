@@ -789,91 +789,119 @@
             input.files = dataTransfer.files;
         }
 
-        /* -------------------------------------------
-   AGREGAR CAMPO DINÁMICO
-------------------------------------------- */
-function agregarCampo(contenedorId, name) {
-    const contenedor = document.getElementById(contenedorId);
+        function agregarCampo(contenedorId, name) {
+            const contenedor = document.getElementById(contenedorId);
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'input-con-x mb-2';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-con-x mb-2';
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = name;
-    input.className = 'border rounded px-3 py-2 w-full';
-    input.placeholder = "Opcional";
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = name;
+            input.className = 'border rounded px-3 py-2 w-full';
+            input.placeholder = "Opcional";
 
-    const botonEliminar = document.createElement('button');
-    botonEliminar.type = 'button';
-    botonEliminar.innerText = '×';
-    botonEliminar.onclick = function() {
-        eliminarEsteCampo(botonEliminar);
-    };
+            const botonEliminar = document.createElement('button');
+            botonEliminar.type = 'button';
+            botonEliminar.innerText = '×';
+            botonEliminar.onclick = function() {
+                eliminarEsteCampo(botonEliminar);
+            };
 
-    wrapper.appendChild(input);
-    wrapper.appendChild(botonEliminar);
-    contenedor.appendChild(wrapper);
-}
+            wrapper.appendChild(input);
+            wrapper.appendChild(botonEliminar);
+            contenedor.appendChild(wrapper);
+        }
 
-/* -------------------------------------------
-   ELIMINAR CAMPO DINÁMICO
-------------------------------------------- */
-function eliminarEsteCampo(boton) {
-    boton.parentElement.remove();
-}
+        function eliminarEsteCampo(boton) {
+            boton.parentElement.remove();
+        }
 
-/* -------------------------------------------
-   CAMBIAR ENTRE OBJETIVOS / INDICADORES (CREATE)
-------------------------------------------- */
-function cambiarTipoCampo(tipo) {
-    const titulo = document.getElementById('tituloCampo');
-    const contenedor = document.getElementById('contenedorCampos');
-    const btnAgregar = document.getElementById('btnAgregarCampo');
+        function cambiarTipoCampo(tipo) {
+            const titulo = document.getElementById('tituloCampo');
+            const contenedor = document.getElementById('contenedorCampos');
+            const btnAgregar = document.getElementById('btnAgregarCampo');
 
-    // Cambiar textos
-    if (tipo === 'objetivos') {
-        titulo.textContent = "Objetivos";
-        btnAgregar.textContent = "+ Agregar otro objetivo";
-        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'objetivos[]')");
-        convertirNameCampos('contenedorCampos', 'objetivos[]')
-    } else {
-        titulo.textContent = "Indicadores";
-        btnAgregar.textContent = "+ Agregar otro indicador";
-        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'indicadores[]')");
-        convertirNameCampos('contenedorCampos', 'indicadores[]')
-    }
-}
+            // Cambiar textos
+            if (tipo === 'objetivos') {
+                titulo.textContent = "Objetivos";
+                btnAgregar.textContent = "+ Agregar otro objetivo";
+                btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'objetivos[]')");
+                convertirNameCampos('contenedorCampos', 'objetivos[]')
+            } else {
+                titulo.textContent = "Indicadores";
+                btnAgregar.textContent = "+ Agregar otro indicador";
+                btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCampos', 'indicadores[]')");
+                convertirNameCampos('contenedorCampos', 'indicadores[]')
+            }
+        }
 
-/* -------------------------------------------
-   CAMBIAR ENTRE OBJETIVOS / INDICADORES (EDIT)
-------------------------------------------- */
-function cambiarTipoCampoEdit(tipo) {
-    const titulo = document.getElementById('tituloCampoEdit');
-    const contenedor = document.getElementById('contenedorCamposEdit');
-    const btnAgregar = document.getElementById('btnAgregarCampoEdit');
+        function cambiarTipoCampoEdit(tipo) {
+            const titulo = document.getElementById('tituloCampoEdit');
+            const contenedor = document.getElementById('contenedorCamposEdit');
+            const btnAgregar = document.getElementById('btnAgregarCampoEdit');
 
-    // Cambiar textos
-    if (tipo === 'objetivos') {
-        titulo.textContent = "Objetivos";
-        btnAgregar.textContent = "+ Agregar otro objetivo";
-        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'objetivos[]')");
-        convertirNameCampos('contenedorCamposEdit', 'objetivos[]')
-    } else {
-        titulo.textContent = "Indicadores";
-        btnAgregar.textContent = "+ Agregar otro indicador";
-        btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'indicadores[]')");
-        convertirNameCampos('contenedorCamposEdit', 'indicadores[]')
-    }
-}
+            // Cambiar textos
+            if (tipo === 'objetivos') {
+                titulo.textContent = "Objetivos";
+                btnAgregar.textContent = "+ Agregar otro objetivo";
+                btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'objetivos[]')");
+                convertirNameCampos('contenedorCamposEdit', 'objetivos[]')
+            } else {
+                titulo.textContent = "Indicadores";
+                btnAgregar.textContent = "+ Agregar otro indicador";
+                btnAgregar.setAttribute("onclick", "agregarCampo('contenedorCamposEdit', 'indicadores[]')");
+                convertirNameCampos('contenedorCamposEdit', 'indicadores[]')
+            }
+        }
 
-/* -------------------------------------------
-   FUNCIÓN COMPARTIDA PARA CAMBIAR TODOS LOS name=""
-------------------------------------------- */
-function convertirNameCampos(contenedorId, nuevoName) {
-    const inputs = document.querySelectorAll(`#${contenedorId} input`);
-    inputs.forEach(i => i.name = nuevoName);
-}
+        function convertirNameCampos(contenedorId, nuevoName) {
+            const inputs = document.querySelectorAll(`#${contenedorId} input`);
+            inputs.forEach(i => i.name = nuevoName);
+        }
+
+        function agregarCampoEdit(button, name) {
+            const root = button.closest('.modalActividad');
+            const contenedor = root.querySelector('.contenedorCamposEdit');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-con-x mb-2';
+
+            wrapper.innerHTML = `
+                <input type="text" name="${name}" class="border rounded px-3 py-2 w-full" placeholder="Opcional">
+                <button type="button" onclick="eliminarEsteCampo(this)">×</button>
+            `;
+
+            contenedor.appendChild(wrapper);
+        }
+
+        function cambiarTipoCampoEdit(tipo) {
+            // El botón que llamó esta función:
+            const button = event.target;
+            const root = button.closest('.modalActividad');
+
+            const titulo = root.querySelector('.tituloCampoEdit');
+            const btnAgregar = root.querySelector('.btnAgregarCampoEdit');
+            const contenedor = root.querySelector('.contenedorCamposEdit');
+
+            if (tipo === 'objetivos') {
+                titulo.textContent = "Objetivos";
+                btnAgregar.textContent = "+ Agregar otro objetivo";
+                btnAgregar.setAttribute("onclick", "agregarCampoEdit(this, 'objetivos[]')");
+                convertirNameCamposEdit(root, 'objetivos[]');
+            } else {
+                titulo.textContent = "Indicadores";
+                btnAgregar.textContent = "+ Agregar otro indicador";
+                btnAgregar.setAttribute("onclick", "agregarCampoEdit(this, 'indicadores[]')");
+                convertirNameCamposEdit(root, 'indicadores[]');
+            }
+        }
+
+        function convertirNameCamposEdit(root, nuevoName) {
+            root.querySelectorAll('.contenedorCamposEdit input')
+                .forEach(input => input.name = nuevoName);
+        }
+
 
         // Funcion para validacion de fechas
         document.addEventListener("submit", function(e) {

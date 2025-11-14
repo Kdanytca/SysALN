@@ -259,10 +259,27 @@ class PlanEstrategicoController extends Controller
 
                 // ✅ Actividades
                 'actividades' => $meta->actividades->map(function ($actividad) {
+
+                    // Detectar OBJETIVOS o INDICADORES
+                    $objetivos = $actividad->objetivos;
+                    $indicadores = $actividad->indicadores;
+
+                    $tipoCampo = null;
+                    $contenidoCampo = [];
+
+                    if (!empty($objetivos)) {
+                        $tipoCampo = 'objetivos';
+                        $contenidoCampo = is_array($objetivos) ? $objetivos : json_decode($objetivos, true) ?? [];
+                    } elseif (!empty($indicadores)) {
+                        $tipoCampo = 'indicadores';
+                        $contenidoCampo = is_array($indicadores) ? $indicadores : json_decode($indicadores, true) ?? [];
+                    }
+
                     return [
                         'id' => $actividad->id,
                         'nombre_actividad' => $actividad->nombre_actividad,
-                        'objetivos' => $actividad->objetivos,
+                        'tipo_campo' => $tipoCampo,
+                        'contenido_campo' => $contenidoCampo,
                         'encargado' => $actividad->encargadoActividad ? $actividad->encargadoActividad->nombre_usuario : null,
                         'fecha_inicio' => $actividad->fecha_inicio,
                         'fecha_fin' => $actividad->fecha_fin,

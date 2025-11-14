@@ -95,13 +95,12 @@
         </div>
 
         {{-- Campos dinámicos --}}
-        <div class="mb-4">
-            <label class="block font-medium" id="tituloCampoEdit">
+        <div class="mb-4 modalActividad">  {{-- envoltorio para aislar el modal --}}
+            <label class="block font-medium tituloCampoEdit">
                 {{ $tipoCampo === 'objetivos' ? 'Objetivos' : 'Indicadores' }}
             </label>
 
-            <div id="contenedorCamposEdit">
-
+            <div class="contenedorCamposEdit">
                 @foreach ($valores as $valor)
                     <div class="input-con-x mb-2">
                         <input type="text"
@@ -112,13 +111,11 @@
                         <button type="button" onclick="eliminarEsteCampo(this)">×</button>
                     </div>
                 @endforeach
-
             </div>
 
             <button type="button"
-                id="btnAgregarCampoEdit"
-                onclick="agregarCampo('contenedorCamposEdit', '{{ $tipoCampo }}[]')"
-                class="inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50 mt-2">
+                class="btnAgregarCampoEdit inline-flex items-center border border-gray-300 text-gray-700 text-xs font-medium px-2.5 py-1 rounded hover:bg-gray-50 mt-2"
+                onclick="agregarCampoEdit(this, '{{ $tipoCampo }}[]')">
                 + Agregar otro {{ $tipoCampo === 'objetivos' ? 'objetivo' : 'indicador' }}
             </button>
         </div>
